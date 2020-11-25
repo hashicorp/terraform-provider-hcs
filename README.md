@@ -1,4 +1,4 @@
-Terraform Provider Scaffolding
+HashiCorp Consul Service (HCS) Terraform Provider
 ==================
 
 This repository is a *template* for a [Terraform](https://www.terraform.io) provider. It is intended as a starting point for creating Terraform providers, containing:

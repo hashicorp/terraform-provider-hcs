@@ -1,0 +1,2322 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "HashiCorp Consul Service (HCS)",
+    "description": "Azure Managed App API for HCS",
+    "version": "2020-11-06"
+  },
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/notifications/resource": {
+      "post": {
+        "summary": "ResourceNotification is an API endpoint called by Azure to deliver\nnotifications about changes on a managed app instance.",
+        "operationId": "ResourceNotification",
+        "responses": {
+          "200": {
+            "description": "Returned when the notification was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/google.protobuf.Empty"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ResourceNotificationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/billingInfo": {
+      "post": {
+        "summary": "GetBillingInfo is an API endpoint called by the Azure CLI Extension\nto fetch current billing settings and usage data about a HCS managed app.",
+        "operationId": "GetBillingInfo",
+        "responses": {
+          "200": {
+            "description": "Returned when settings and usage data could be obtained successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingInfoResponse"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "404": {
+            "description": "Returned when referenced Managed App is not known.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Managed App is\ndeployed to. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the managed resource group of the Managed App.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingInfoRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/billingReport": {
+      "post": {
+        "summary": "GetBillingReport is an API endpoint called by the Azure CLI Extension\nto fetch the billing report about a HCS managed app for a given month.",
+        "operationId": "GetBillingReport",
+        "responses": {
+          "200": {
+            "description": "Returned when the billing report could be obtained successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingReportResponse"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "404": {
+            "description": "Returned when referenced Managed App is not known.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Managed App is\ndeployed to. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the managed resource group of the Managed App.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingReportRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/config": {
+      "post": {
+        "summary": "GetConfig is an API endpoint called by the Azure CLI Extension\nto grab the Concul config and CA.",
+        "operationId": "GetConfig",
+        "responses": {
+          "200": {
+            "description": "Returned when the notification was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetConfigResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the new Consul\ncluster should be created in. This is the customer's subscription ID.\nPassed in the request path.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the new Consul cluster\nshould be created. This is the AMA instance's managed resource group.\nPassed in the request path.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetConfigRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/consulClusters": {
+      "get": {
+        "summary": "ListClusters is an API endpoint called by Azure to retrieve all Consul\nclusters in a managed app. This is one of the API endpoints required to\nimplement a custom resource provider.",
+        "description": "see https://docs.microsoft.com/en-us/azure/managed-applications/custom-providers-overview",
+        "operationId": "ListClusters",
+        "responses": {
+          "200": {
+            "description": "Returned when the clusters were retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ListClustersResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid client certificate.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "404": {
+            "description": "Returned when the requested managed app does not exist.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul clusters\nexist in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul clusters are\nrunning. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/consulClusters/{name}": {
+      "get": {
+        "summary": "GetCluster is an API endpoint called by Azure to retrieve the details of\na Consul cluster. This is one of the API endpoints required to implement\na custom resource provider.",
+        "description": "see https://docs.microsoft.com/en-us/azure/managed-applications/custom-providers-overview",
+        "operationId": "GetCluster",
+        "responses": {
+          "200": {
+            "description": "Returned when the cluster was retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterResponse"
+            }
+          },
+          "202": {
+            "description": "Returned when the cluster creation is still ongoing.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid client certificate.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "404": {
+            "description": "Returned when the requested managed app or cluster does not exist.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "description": "name is the resource name of the Consul cluster resource.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      },
+      "delete": {
+        "summary": "DeleteCluster is an API endpoint called by Azure to remove a Consul\ncluster. This is one of the API endpoints required to implement a custom\nresource provider.",
+        "description": "see https://docs.microsoft.com/en-us/azure/managed-applications/custom-providers-overview",
+        "operationId": "DeleteCluster",
+        "responses": {
+          "200": {
+            "description": "Returned when the cluster was deleted successfully.",
+            "schema": {
+              "$ref": "#/definitions/google.protobuf.Empty"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid client certificate.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "404": {
+            "description": "Returned when the requested managed app or cluster does not exist.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "description": "name is the resource name of the Consul cluster resource.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      },
+      "put": {
+        "summary": "CreateCluster is an API endpoint called when there is a PUT request to\nAzure Resource Manager on one of the custom resources of type\n\"consulClusters\". This is one of the API endpoints required to implement\na custom resource provider.",
+        "description": "see https://docs.microsoft.com/en-us/azure/managed-applications/custom-providers-overview",
+        "operationId": "CreateCluster",
+        "responses": {
+          "200": {
+            "description": "Returned when the cluster creation was completed.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterResponse"
+            }
+          },
+          "202": {
+            "description": "Returned when the cluster creation was initiated.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid client certificate.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the new Consul\ncluster should be created in. This is the customer's subscription ID.\nPassed in the request path.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the new Consul cluster\nshould be created. This is the AMA instance's managed resource group.\nPassed in the request path.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "description": "name is the resource name of the new Consul cluster resource.\nPassed in the request path and in the request body.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.CreateClusterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/createFederationToken": {
+      "post": {
+        "summary": "CreateFederationToken is used to create a federation Token",
+        "operationId": "CreateFederationToken",
+        "responses": {
+          "200": {
+            "description": "Returned when the notification was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.CreateFederationTokenResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.CreateFederationTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/createSnapshot": {
+      "post": {
+        "summary": "CreateSnapshot is used to create a snapshot for a Consul cluster",
+        "operationId": "CreateSnapshot",
+        "responses": {
+          "200": {
+            "description": "Returned when the create request was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.CreateSnapshotResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the new Consul\nsnapshot should be created in. This is the customer's subscription ID.\nPassed in the request path.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the new Consul snapshot\nshould be created. This is the AMA instance's managed resource group.\nPassed in the request path.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.CreateSnapshotRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/createToken": {
+      "post": {
+        "summary": "CreateToken is used to create Tokens on a cluster (such as a master token)",
+        "operationId": "CreateToken",
+        "responses": {
+          "200": {
+            "description": "Returned when the notification was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.CreateTokenResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.CreateTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/deleteSnapshot": {
+      "post": {
+        "summary": "DeleteSnapshot is used to delete a snapshot for a Consul cluster",
+        "operationId": "DeleteSnapshot",
+        "responses": {
+          "200": {
+            "description": "Returned when the delete request was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.DeleteSnapshotResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul snapshot exists.\nThis is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.DeleteSnapshotRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/getFederation": {
+      "post": {
+        "summary": "GetFederation is used to get a federation",
+        "operationId": "GetFederation",
+        "responses": {
+          "200": {
+            "description": "Returned when the notification was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetFederationResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication .",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetFederationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/getSnapshot": {
+      "post": {
+        "summary": "GetSnapshot is used to get a snapshot for a Consul cluster",
+        "operationId": "GetSnapshot",
+        "responses": {
+          "200": {
+            "description": "Returned when the get request was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetSnapshotResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul snapshot exists\nin. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetSnapshotRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/listConsulUpgradeVersions": {
+      "post": {
+        "summary": "ListConsulUpgradeVersions is an API endpoint called by the hcs Azure CLI extension\nto retrieve the versions supported by the cluser in an upgrade scenario.",
+        "operationId": "ListConsulUpgradeVersions",
+        "responses": {
+          "200": {
+            "description": "Returned when made against a valid cluster.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ListConsulUpgradeVersionsResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid client certificate.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ListConsulUpgradeVersionsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/listSnapshots": {
+      "post": {
+        "summary": "ListSnapshots is used to list snapshots for a Consul cluster",
+        "operationId": "ListSnapshots",
+        "responses": {
+          "200": {
+            "description": "Returned when the list request was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ListSnapshotsResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul snapshots\nexist in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul snapshots are\npersisted. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ListSnapshotsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/operation": {
+      "post": {
+        "summary": "GetConfig is an API endpoint called by the Azure CLI Extension\nto query the status of an operation associated with the given cluster.",
+        "operationId": "GetOperation",
+        "responses": {
+          "200": {
+            "description": "Returned when the operation was retrieved successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetOperationResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid client certificate.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "404": {
+            "description": "Returned when the requested managed app, cluster, or operation does not exist.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetOperationRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/renameSnapshot": {
+      "post": {
+        "summary": "RenameSnapshot is used to rename a snapshot for a Consul cluster",
+        "operationId": "RenameSnapshot",
+        "responses": {
+          "200": {
+            "description": "Returned when the rename request was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.RenameSnapshotResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul snapshot exists.\nThis is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.RenameSnapshotRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/restoreSnapshot": {
+      "post": {
+        "summary": "RestoreSnapshot is used to restore a snapshot for a Consul cluster",
+        "operationId": "RestoreSnapshot",
+        "responses": {
+          "200": {
+            "description": "Returned when the restore request was handled successfully.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.RestoreSnapshotResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid authentication token.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul snapshot exists.\nThis is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.RestoreSnapshotRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/update": {
+      "post": {
+        "summary": "UpdateCluster is an API endpoint called by the hcs Azure CLI extension\nto modify the state of a running Consul cluster. Currently this is only\nused to upgrade the Consul version of the cluster.",
+        "operationId": "UpdateCluster",
+        "responses": {
+          "200": {
+            "description": "Returned when the cluster update was completed.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.UpdateClusterResponse"
+            }
+          },
+          "202": {
+            "description": "Returned when the cluster update was initiated.",
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.UpdateClusterResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when the request contained invalid data.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "401": {
+            "description": "Returned when the request did not contain a valid client certificate.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "500": {
+            "description": "Returned when there was an internal error.",
+            "schema": {
+              "$ref": "#/definitions/google.rpc.Status"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "resourceGroup",
+            "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/hashicorp.cloud.consulama.ama.UpdateClusterRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsulAMAService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "google.protobuf.Any": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string",
+          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        },
+        "value": {
+          "type": "string",
+          "format": "byte",
+          "description": "Must be a valid serialized protocol buffer of the above specified type."
+        }
+      },
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(&foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\n Example 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\n Example 4: Pack and unpack a message in Go\n\n     foo := &pb.Foo{...}\n     any, err := ptypes.MarshalAny(foo)\n     ...\n     foo := &pb.Foo{}\n     if err := ptypes.UnmarshalAny(any, foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n====\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": <string>,\n      \"lastName\": <string>\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    },
+    "google.protobuf.Empty": {
+      "type": "object",
+      "description": "service Foo {\n      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n    }\n\nThe JSON representation for `Empty` is empty JSON object `{}`.",
+      "title": "A generic empty message that you can re-use to avoid defining duplicated\nempty messages in your APIs. A typical example is to use it as the request\nor the response type of an API method. For instance:"
+    },
+    "google.rpc.Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The status code, which should be an enum value of\n[google.rpc.Code][google.rpc.Code]."
+        },
+        "message": {
+          "type": "string",
+          "description": "A developer-facing error message, which should be in English. Any\nuser-facing error message should be localized and sent in the\n[google.rpc.Status.details][google.rpc.Status.details] field, or localized\nby the client."
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/google.protobuf.Any"
+          },
+          "description": "A list of messages that carry the error details.  There is a common set of\nmessage types for APIs to use."
+        }
+      },
+      "description": "- Simple to use and understand for most users\n- Flexible enough to meet unexpected needs\n\n# Overview\n\nThe `Status` message contains three pieces of data: error code, error\nmessage, and error details. The error code should be an enum value of\n[google.rpc.Code][google.rpc.Code], but it may accept additional error codes\nif needed.  The error message should be a developer-facing English message\nthat helps developers *understand* and *resolve* the error. If a localized\nuser-facing error message is needed, put the localized message in the error\ndetails or localize it in the client. The optional error details may contain\narbitrary information about the error. There is a predefined set of error\ndetail types in the package `google.rpc` that can be used for common error\nconditions.\n\n# Language mapping\n\nThe `Status` message is the logical representation of the error model, but it\nis not necessarily the actual wire format. When the `Status` message is\nexposed in different client libraries and different wire protocols, it can be\nmapped differently. For example, it will likely be mapped to some exceptions\nin Java, but more likely mapped to some error codes in C.\n\n# Other uses\n\nThe error model and the `Status` message can be used in a variety of\nenvironments, either with or without APIs, to provide a\nconsistent developer experience across different environments.\n\nExample uses of this error model include:\n\n- Partial errors. If a service needs to return partial errors to the client,\n    it may embed the `Status` in the normal response to indicate the partial\n    errors.\n\n- Workflow errors. A typical workflow has multiple steps. Each step may\n    have a `Status` message for error reporting.\n\n- Batch operations. If a client uses batch request and batch response, the\n    `Status` message should be used directly inside batch response, one for\n    each error sub-response.\n\n- Asynchronous operations. If an API call embeds asynchronous operation\n    results in its response, the status of those operations should be\n    represented directly using the `Status` message.\n\n- Logging. If some API errors are stored in logs, the message `Status` could\n    be used directly after any stripping needed for security/privacy reasons.",
+      "title": "The `Status` type defines a logical error model that is suitable for\ndifferent programming environments, including REST APIs and RPC APIs. It is\nused by [gRPC](https://github.com/grpc). The error model is designed to be:"
+    },
+    "hashicorp.cloud.consulama.ama.ACLToken": {
+      "type": "object",
+      "properties": {
+        "accessorId": {
+          "type": "string"
+        },
+        "secretId": {
+          "type": "string"
+        }
+      },
+      "description": "ACLToken represents the Consul 1.4+ ACL token we just created."
+    },
+    "hashicorp.cloud.consulama.ama.BilledUsage": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "description": "start is the start time of the time frame."
+        },
+        "end": {
+          "type": "string",
+          "description": "end is the end time of the time frame."
+        },
+        "cost": {
+          "type": "number",
+          "format": "double",
+          "description": "cost is the total cost billed for the time frame."
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.BilledUsage.PlanUsage"
+          },
+          "description": "details contains usage by plan. Because there can be multiple settings\napplied to one time frame, this needs to be a list."
+        }
+      },
+      "description": "BilledUsage describes the usage that was recorded and billed for a specific\ntime frame."
+    },
+    "hashicorp.cloud.consulama.ama.BilledUsage.PlanUsage": {
+      "type": "object",
+      "properties": {
+        "plan": {
+          "type": "string",
+          "description": "plan is the name of the billing plan."
+        },
+        "hours": {
+          "type": "number",
+          "format": "double",
+          "description": "hours describes how many hours were consumed on this plan."
+        }
+      },
+      "description": "PlanUsage describes the usage billed based on a single plan."
+    },
+    "hashicorp.cloud.consulama.ama.BillingSettings": {
+      "type": "object",
+      "properties": {
+        "plan": {
+          "type": "string",
+          "title": "plan is the name of the billing plan. This is a simplified version of the\ninternal plan identifier:\n   e.g. \"annual\" instead of \"production-annual-through-hc\""
+        },
+        "activeSince": {
+          "type": "string",
+          "description": "active_since is the time since when the billing settings are active."
+        },
+        "prices": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.BillingSettings.Prices",
+          "description": "prices represents the prices of the current plan."
+        }
+      },
+      "description": "BillingSettings is the representation of the billing settings of a managed\napp that is exposed to users."
+    },
+    "hashicorp.cloud.consulama.ama.BillingSettings.Prices": {
+      "type": "object",
+      "properties": {
+        "hourly": {
+          "type": "number",
+          "format": "double",
+          "description": "hourly is the flat hourly fee billed for the usage of this plan\nindependent of other billing dimensions."
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.BillingSettings.Prices.PriceDimension"
+          },
+          "description": "dimensions contains all dimensions and their prices that are applied\nto apps on this billing plan."
+        }
+      },
+      "description": "Prices represents prices of a billing plan."
+    },
+    "hashicorp.cloud.consulama.ama.BillingSettings.Prices.PriceDimension": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "type": "integer",
+          "format": "int32",
+          "description": "minimum is the minimum number of billed units of this dimension."
+        },
+        "name": {
+          "type": "string",
+          "description": "name is the dimension's name."
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.BillingSettings.Prices.PriceDimension.Tier"
+          },
+          "description": "tiers is the list of tiers to use for progressive discounting.\n\nExample:\n    label: 1-50,     unit_price: 0.022\n    label: 51-250,   unit_price: 0.018\n    label: 250-∞,    unit_price: 0.014"
+        }
+      },
+      "description": "PriceDimension represents the prices of one billing dimension."
+    },
+    "hashicorp.cloud.consulama.ama.BillingSettings.Prices.PriceDimension.Tier": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "label is a string description of this pricing tier."
+        },
+        "unitPrice": {
+          "type": "number",
+          "format": "double",
+          "description": "unit_price is the price per unit billed based on this tier."
+        }
+      },
+      "description": "Tier represents one billing tier of a price dimension."
+    },
+    "hashicorp.cloud.consulama.ama.Boolean": {
+      "type": "string",
+      "enum": [
+        "FALSE",
+        "TRUE"
+      ],
+      "default": "FALSE",
+      "title": "Boolean is an enum for handling true/false values as Azure swagger validation doesn't\nlike bools:\nhttps://github.com/Azure/azure-rest-api-specs/blob/master/documentation/openapi-authoring-automated-guidelines.md#r3018"
+    },
+    "hashicorp.cloud.consulama.ama.ClusterMode": {
+      "type": "string",
+      "enum": [
+        "PRODUCTION",
+        "DEVELOPMENT"
+      ],
+      "default": "PRODUCTION",
+      "description": "ClusterMode defines what type of cluster is going to be deployed.\nSome modes will have different billing and options than others.\nPRODUCTION is the default value for this property, that's why it's\nset to be value 0 of the enum."
+    },
+    "hashicorp.cloud.consulama.ama.ClusterProperties": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterState",
+          "description": "state is the cluster's current state.\nThis is used in HTTP responses to Azure, but when this pb message is used\nto persist cluster data in the DB, this attribute is either ignored or\nstored with its default value of UNSET."
+        },
+        "storageAccountName": {
+          "type": "string",
+          "description": "storage_account_name is the storage account to use to upload the Consul\nconfiguration and certificates to."
+        },
+        "blobContainerName": {
+          "type": "string",
+          "description": "blob_container_name is the blob container to use to upload the Consul\nconfiguration and certificates to."
+        },
+        "storageAccountResourceGroup": {
+          "type": "string",
+          "description": "storage_account_resource_group is the resource group of the storage account\nto use to upload the Consul configuration and certificates to."
+        },
+        "location": {
+          "type": "string",
+          "description": "location is the Azure region the Consul cluster is being launched into."
+        },
+        "consulInitialVersion": {
+          "type": "string",
+          "description": "consul_initial_version is the initial Consul version to launch the cluster\nwith."
+        },
+        "consulCurrentVersion": {
+          "type": "string",
+          "description": "consul_current_version is the Consul version currently running in the\ncluster."
+        },
+        "consulDatacenter": {
+          "type": "string",
+          "title": "consul_datacenter is the datacenter name to configure the Consul cluster\nas.\nSee: https://www.consul.io/docs/agent/options.html#_datacenter"
+        },
+        "consulNumServers": {
+          "type": "string",
+          "description": "consul_num_servers is the number of Consul servers to provision."
+        },
+        "consulAutomaticUpgrades": {
+          "type": "string",
+          "description": "consul_automatic_upgrades are either 'enabled' or 'disabled'."
+        },
+        "consulExternalEndpoint": {
+          "type": "string",
+          "description": "consul_external_endpoint can be 'enabled' or 'disabled'."
+        },
+        "consulSnapshotInterval": {
+          "type": "string",
+          "description": "consul_snapshot_interval is the interval in which to take snapshots."
+        },
+        "consulSnapshotRetention": {
+          "type": "string",
+          "description": "consul_snapshot_retention is the interval for how long to keep snapshots."
+        },
+        "consulExternalEndpointUrl": {
+          "type": "string",
+          "description": "consul_external_endpoint_url is the URL under which the Consul UI and API\nare exposed."
+        },
+        "managedAppId": {
+          "type": "string",
+          "description": "managed_app_id is the Azure Resource Manager ID of the managed app\ninstance. This ID is required to identified managed apps."
+        },
+        "consulConfigFile": {
+          "type": "string",
+          "description": "consul_config_file is a base64-encoded JSON config file for a Consul\nagent running in client mode."
+        },
+        "consulCaFile": {
+          "type": "string",
+          "title": "consul_ca_file is a base64-encoded ca chain file in PEM format that\nshould be used by the client agent to verify the authenticity of the\nserver"
+        },
+        "consulConnect": {
+          "type": "string",
+          "title": "consul_connect toggles the Consul Connect feature"
+        },
+        "consulVnetCidr": {
+          "type": "string",
+          "title": "consul_vnet_cidr contains the Consul Cluster's VNet CIDR"
+        },
+        "consulClusterMode": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterMode",
+          "description": "ClusterMode defines the purpose of the cluster, it can override\nother cluster definitions (e.g. development will always have 1 node only)."
+        },
+        "consulPrivateEndpointUrl": {
+          "type": "string",
+          "description": "consul_private_endpoint_url is the URL under which the Consul UI and API\nare exposed on a private network. This is only accessible from a VNET\nthat is peered to the managed app's VNET."
+        },
+        "consulClusterId": {
+          "type": "string",
+          "description": "consul_cluster_id is the HCS-internal ID of the Consul cluster."
+        },
+        "email": {
+          "type": "string",
+          "title": "email is the customer's email address"
+        },
+        "federationToken": {
+          "type": "string",
+          "description": "federation_token is the token of the primary consul cluster in a federation.\nIt is only provided when federation is being requested."
+        },
+        "vnetName": {
+          "type": "string",
+          "description": "vnet_name is the name of the Azure Virtual Network the consul cluster\nis deployed in."
+        }
+      },
+      "description": "ClusterProperties contains properties the user selected when creating the\nmanaged app instance."
+    },
+    "hashicorp.cloud.consulama.ama.ClusterResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "id is the complete resource ID.",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "description": "name is the resource name as given by Azure in the GetClusterRequest.",
+          "readOnly": true
+        },
+        "type": {
+          "type": "string",
+          "description": "type is the resource type as given by Azure in the GetClusterRequest.",
+          "readOnly": true
+        },
+        "properties": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterProperties",
+          "description": "properties are the properties of the cluster."
+        }
+      },
+      "description": "See ConsulAMAService.GetCluster, ConsulAMAService.CreateCluster.",
+      "x-ms-azure-resource": true
+    },
+    "hashicorp.cloud.consulama.ama.ClusterState": {
+      "type": "string",
+      "enum": [
+        "UNSET",
+        "PENDING",
+        "CREATING",
+        "RUNNING",
+        "FAILED",
+        "DELETING"
+      ],
+      "default": "UNSET",
+      "description": "ClusterState describes the current state a cluster is in. There is no DELETED\nstate because after deletion clusters do not exist anymore and requests to\nretrieve them are responded to with not-found errors.\n\nThese values are specific to our comminication with Azure, and they're not backed\nby our persistence layer. When the consul-ama service has to produce a cluster\nstate to respond to a request from Azure, it reads the state from the consul-service\nand then translates the state value to one compatible with this enum."
+    },
+    "hashicorp.cloud.consulama.ama.ClusterUpdate": {
+      "type": "object",
+      "properties": {
+        "consulVersion": {
+          "type": "string",
+          "description": "consul_version is the Consul version to upgrade the cluster to."
+        }
+      },
+      "description": "ClusterUpdate contains the details of the cluster which are requested\nto be updated."
+    },
+    "hashicorp.cloud.consulama.ama.CreateClusterRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the new Consul\ncluster should be created in. This is the customer's subscription ID.\nPassed in the request path."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the new Consul cluster\nshould be created. This is the AMA instance's managed resource group.\nPassed in the request path."
+        },
+        "name": {
+          "type": "string",
+          "description": "name is the resource name of the new Consul cluster resource.\nPassed in the request path and in the request body."
+        },
+        "properties": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterProperties",
+          "description": "properties are the properties of the new cluster.\nPassed in the request body."
+        },
+        "id": {
+          "type": "string",
+          "description": "id is the Azure resource ID of the new cluster.\nPassed in the request body."
+        },
+        "type": {
+          "type": "string",
+          "description": "type is the Azure resource type of the new cluster.\nPassed in the request body."
+        }
+      },
+      "title": "See ConsulAMAService.CreateCluster"
+    },
+    "hashicorp.cloud.consulama.ama.CreateFederationTokenRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string"
+        },
+        "resourceGroup": {
+          "type": "string"
+        }
+      },
+      "description": "CreateFederationTokenRequest creates a federation token for the sole cluster found using this subscription ID and managed resource group."
+    },
+    "hashicorp.cloud.consulama.ama.CreateFederationTokenResponse": {
+      "type": "object",
+      "properties": {
+        "federationToken": {
+          "type": "string"
+        }
+      },
+      "description": "CreateFederationTokenResponse contains the new Consul Federation Token."
+    },
+    "hashicorp.cloud.consulama.ama.CreateSnapshotRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the new Consul\nsnapshot should be created in. This is the customer's subscription ID.\nPassed in the request path."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the new Consul snapshot\nshould be created. This is the AMA instance's managed resource group.\nPassed in the request path."
+        },
+        "name": {
+          "type": "string",
+          "description": "name is the resource name of the new Consul snapshot resource.\nPassed in the request path."
+        }
+      },
+      "title": "See ConsulAMAService.CreateSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.CreateSnapshotResponse": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Operation",
+          "title": "operation used to track the progress of the snapshot create"
+        },
+        "snapshotId": {
+          "type": "string",
+          "description": "snapshot_id is the ID of the Consul snapshot to create."
+        }
+      },
+      "title": "See ConsulAMAService.CreateSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.CreateTokenRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string"
+        },
+        "resourceGroup": {
+          "type": "string"
+        }
+      },
+      "description": "CreateTokenRequest creates a token for the sole cluster found using this subscription ID and managed resource group."
+    },
+    "hashicorp.cloud.consulama.ama.CreateTokenResponse": {
+      "type": "object",
+      "properties": {
+        "masterToken": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ACLToken"
+        }
+      },
+      "description": "CreateTokenResponse contains the new Consul Master Token."
+    },
+    "hashicorp.cloud.consulama.ama.DeleteSnapshotRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul snapshot exists.\nThis is the AMA instance's managed resource group."
+        },
+        "snapshotId": {
+          "type": "string",
+          "description": "snapshot_id is the ID of the Consul snapshot to delete:."
+        }
+      },
+      "title": "See ConsulAMAService.DeleteSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.DeleteSnapshotResponse": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Operation",
+          "title": "operation used to track the progress of the snapshot delete"
+        }
+      },
+      "title": "See ConsulAMAService.DeleteSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.FederatedClusterResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "subscriptionId": {
+          "type": "string"
+        },
+        "resourceGroup": {
+          "type": "string"
+        }
+      },
+      "description": "FederatedClusterResponse contains minimal cluster information for identifying\na cluster in a federation."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingInfoRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Managed App is\ndeployed to. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the managed resource group of the Managed App."
+        }
+      },
+      "description": "See ConsulAMAService.GetBillingInfo."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingInfoResponse": {
+      "type": "object",
+      "properties": {
+        "currentSettings": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.BillingSettings",
+          "description": "current_settings represents the currently active billing settings of the\napp."
+        },
+        "usage": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingInfoResponse.CurrentUsage",
+          "description": "usage represents the billed usage of the current time period."
+        }
+      },
+      "description": "See ConsulAMAService.GetBillingInfo."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingInfoResponse.CurrentUsage": {
+      "type": "object",
+      "properties": {
+        "timePeriod": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingInfoResponse.CurrentUsagePeriods",
+          "description": "time_period has usage data for multiple time frames."
+        }
+      },
+      "description": "CurrentUsage describes what has been billed for a managed app in the current\ntime period(s)."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingInfoResponse.CurrentUsagePeriods": {
+      "type": "object",
+      "properties": {
+        "today": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.BilledUsage",
+          "description": "today describes usage billed to the current day."
+        },
+        "thisMonth": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.BilledUsage",
+          "description": "this_moneth describes usage billed to the current month."
+        }
+      },
+      "description": "CurrentUsagePeriods contains usage data for several time periods."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingReportRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Managed App is\ndeployed to. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the managed resource group of the Managed App."
+        },
+        "month": {
+          "type": "string",
+          "title": "month indicates from which month to fetch usage information.\nFormat: 2020/07"
+        }
+      },
+      "description": "See ConsulAMAService.GetBillingReport."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingReportResponse": {
+      "type": "object",
+      "properties": {
+        "usage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem"
+          },
+          "description": "usage contains the usage that was recorded for the requested month.\nThere is one entry in this list per applied plan per hour."
+        }
+      },
+      "description": "See ConsulAMAService.GetBillingReport."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "description": "start is the start time of the time frame."
+        },
+        "end": {
+          "type": "string",
+          "description": "end is the end time of the time frame."
+        },
+        "plan": {
+          "type": "string",
+          "description": "plan is the name of the billing plan applied to the time frame."
+        },
+        "cost": {
+          "type": "number",
+          "format": "double",
+          "description": "cost is the total cost billed for the time frame."
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem.Dimension"
+          },
+          "description": "dimensions details what billing dimensions caused the cost."
+        }
+      },
+      "description": "BilledItem represents one time frame for which a specific billing plan\nwas applied to the managed app."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem.Dimension": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "name is the name of the billing dimension."
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem.Dimension.Tier"
+          },
+          "description": "tiers is the usage per tier in this dimension."
+        }
+      },
+      "description": "Dimension represents a billing dimension."
+    },
+    "hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem.Dimension.Tier": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "label is a string description of this tier."
+        },
+        "units": {
+          "type": "integer",
+          "format": "int32",
+          "description": "units is the number of consumed units in this tier."
+        }
+      },
+      "description": "Tier represents the usage that is billed according to one tier."
+    },
+    "hashicorp.cloud.consulama.ama.GetConfigRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the new Consul\ncluster should be created in. This is the customer's subscription ID.\nPassed in the request path."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the new Consul cluster\nshould be created. This is the AMA instance's managed resource group.\nPassed in the request path."
+        }
+      }
+    },
+    "hashicorp.cloud.consulama.ama.GetConfigResponse": {
+      "type": "object",
+      "properties": {
+        "caFile": {
+          "type": "string"
+        },
+        "clientConfig": {
+          "type": "string"
+        }
+      }
+    },
+    "hashicorp.cloud.consulama.ama.GetFederationRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string"
+        },
+        "resourceGroup": {
+          "type": "string"
+        }
+      },
+      "description": "GetFederationRequest gets a complete federation view for the sole\ncluster found using the subscription ID and managed resource group. This can\ntarget a primary or secondary clusters."
+    },
+    "hashicorp.cloud.consulama.ama.GetFederationResponse": {
+      "type": "object",
+      "properties": {
+        "primaryDatacenter": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.FederatedClusterResponse",
+          "description": "primary_datacenter is the primary datacenter of a federation."
+        },
+        "secondaryDatacenters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.FederatedClusterResponse"
+          },
+          "description": "secondary_datacenters are a list of all secondary datacenters of a federation."
+        },
+        "state": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.GetFederationResponse.FederationState",
+          "description": "state is the state of the federation. See FederationState for possible values."
+        }
+      },
+      "description": "GetFederationResponse contains the primary cluster and all secondary\nclusters."
+    },
+    "hashicorp.cloud.consulama.ama.GetFederationResponse.FederationState": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "RUNNING",
+        "PRIMARY_DATACENTER_MISSING"
+      ],
+      "default": "UNKNOWN",
+      "description": "FederationState describes the current state of a federation.\n\n - UNKNOWN: UNKNOWN is the default value; it indicates that the value is not set.\n - RUNNING: RUNNING means the federation is in a healthy state.\n - PRIMARY_DATACENTER_MISSING: PRIMARY_DATACENTER_MISSING means the federation's primary cluster has been deleted.\nAny remaining secondary clusters can still communicate, but new clusters cannot be added to the federation."
+    },
+    "hashicorp.cloud.consulama.ama.GetOperationRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group."
+        },
+        "operationId": {
+          "type": "string",
+          "title": "operation_id is the ID of the operation to fetch"
+        }
+      },
+      "title": "See ConsulAMAService.GetOperation"
+    },
+    "hashicorp.cloud.consulama.ama.GetOperationResponse": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Operation"
+        }
+      },
+      "title": "See ConsulAMAService.GetOperation"
+    },
+    "hashicorp.cloud.consulama.ama.GetSnapshotRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul snapshot exists\nin. This is the AMA instance's managed resource group."
+        },
+        "snapshotId": {
+          "type": "string",
+          "description": "snapshot_id is the ID of the Consul snapshot to fetch."
+        }
+      },
+      "title": "See ConsulAMAService.GetSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.GetSnapshotResponse": {
+      "type": "object",
+      "properties": {
+        "snapshot": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.SnapshotProperties",
+          "description": "snapshot contains the properties of the snapshot."
+        }
+      },
+      "title": "See ConsulAMAService.GetSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.ListClustersResponse": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterResponse"
+          },
+          "description": "value is the list of cluster in the format of ClusterResponses."
+        }
+      },
+      "title": "See ConsulAMAService.ListCluster"
+    },
+    "hashicorp.cloud.consulama.ama.ListConsulUpgradeVersionsRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group."
+        }
+      },
+      "title": "See ConsulAMAService.ListUpdateVersion"
+    },
+    "hashicorp.cloud.consulama.ama.ListConsulUpgradeVersionsResponse": {
+      "type": "object",
+      "properties": {
+        "versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Version"
+          }
+        }
+      }
+    },
+    "hashicorp.cloud.consulama.ama.ListSnapshotsRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul snapshots\nexist in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul snapshots are\npersisted. This is the AMA instance's managed resource group."
+        }
+      },
+      "title": "See ConsulAMAService.ListSnapshots"
+    },
+    "hashicorp.cloud.consulama.ama.ListSnapshotsResponse": {
+      "type": "object",
+      "properties": {
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hashicorp.cloud.consulama.ama.SnapshotProperties"
+          },
+          "description": "snapshots is the list of snapshots in the format of SnapshotResponses."
+        }
+      },
+      "title": "See ConsulAMAService.ListSnapshots"
+    },
+    "hashicorp.cloud.consulama.ama.Operation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "id is the unique ID for this operation. This is only unique within the\ncontext of a single managed app."
+        },
+        "state": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Operation.State",
+          "description": "state is the current state of the operation. This is a simple tri-state:\nPENDING means the operation is created but not yet started, RUNNING means\nthe operation is currently running (though it may be very long-running),\nand DONE means the operation is complete whether successfully or not."
+        },
+        "error": {
+          "$ref": "#/definitions/google.rpc.Status",
+          "description": "error is the error that occurred in the operation."
+        },
+        "response": {
+          "$ref": "#/definitions/google.protobuf.Any",
+          "description": "response is the result of the operation. See the documentation for the API\ncall creating the operation to understand what the value of this is."
+        }
+      },
+      "description": "Operation represents a single operation."
+    },
+    "hashicorp.cloud.consulama.ama.Operation.State": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "RUNNING",
+        "DONE"
+      ],
+      "default": "PENDING",
+      "description": "State is one of the states that an Operation can be in.\n\nThe states are purposely coarse grained to make it easy to understand the operation\nstate machine: pending => running => done. No other state transitions are possible. \nSuccess/failure can be determined based on the result oneof."
+    },
+    "hashicorp.cloud.consulama.ama.RenameSnapshotRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul snapshot exists.\nThis is the AMA instance's managed resource group."
+        },
+        "snapshotId": {
+          "type": "string",
+          "description": "snapshot_id is the ID of the Consul snapshot to rename."
+        },
+        "name": {
+          "type": "string",
+          "description": "name is the name that the snapshot will be renamed to."
+        }
+      },
+      "title": "See ConsulAMAService.RenameSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.RenameSnapshotResponse": {
+      "type": "object",
+      "properties": {
+        "snapshot": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.SnapshotProperties",
+          "description": "snapshot is contains all relevant fields/properties of the snapshot."
+        }
+      },
+      "title": "See ConsulAMAService.RenameSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.ResourceNotificationRequest": {
+      "type": "object",
+      "properties": {
+        "eventType": {
+          "type": "string",
+          "description": "event_type is the request type that lead to the notification. Can be\n\"PUT\", \"PATCH\" (not observed yet), or \"DELETE\"."
+        },
+        "applicationId": {
+          "type": "string",
+          "description": "application_id is the AMA instance's complete ARM ID."
+        },
+        "eventTime": {
+          "type": "string",
+          "title": "event_time is the time at which the event occurred.\nFormat: 2006-01-02T15:04:05.999999999Z"
+        },
+        "provisioningState": {
+          "type": "string",
+          "description": "provisioning_state is the state in which the AMA instance is. Can be\n\"Accepted\",  \"Succeeded\", \"Failed\", \"Deleting\", or \"Deleted\"."
+        },
+        "applicationDefinitionId": {
+          "type": "string",
+          "description": "application_definition_id is the complete ARM ID of the AMA instance's\napplication definition."
+        },
+        "error": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ResourceNotificationRequest.Error",
+          "description": "error is added in case provosioning_state is \"Failed\" and describes the\nerror that lead to this condition."
+        },
+        "billingDetails": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ResourceNotificationRequest.BillingDetails",
+          "description": "billing_details contains billing related information about a managed app\nthat is being provisioned."
+        },
+        "plan": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ResourceNotificationRequest.Plan",
+          "description": "plan is information about the Azure Marketplace plan select before\nprovisioning the managed app."
+        }
+      },
+      "title": "See ConsulAMAService.ResourceNotification"
+    },
+    "hashicorp.cloud.consulama.ama.ResourceNotificationRequest.BillingDetails": {
+      "type": "object",
+      "properties": {
+        "resourceUsageId": {
+          "type": "string",
+          "description": "resource_usage_id is the id used identify the managed app when\nemitting metered billing events to azure."
+        }
+      },
+      "description": "BillingDetails contains billing related information about a managed app."
+    },
+    "hashicorp.cloud.consulama.ama.ResourceNotificationRequest.Error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "code is the error code of the failed operation, e.g.\n\"ResourceGroupDeletionBlocked\""
+        },
+        "message": {
+          "type": "string",
+          "description": "message is a human-readable description of the error."
+        }
+      },
+      "description": "Error represents an error that happened in Azure when\ninteracting with a managed app instance. It is optionally included in a\nResourceNotificationRequest."
+    },
+    "hashicorp.cloud.consulama.ama.ResourceNotificationRequest.Plan": {
+      "type": "object",
+      "properties": {
+        "publisher": {
+          "type": "string",
+          "description": "publisher is the plan's publisher organization."
+        },
+        "product": {
+          "type": "string",
+          "description": "product is the name of the Marketplace offer."
+        },
+        "name": {
+          "type": "string",
+          "description": "name is the name of the Marketplace plan."
+        },
+        "version": {
+          "type": "string",
+          "description": "version is the version of the Marketplace plan."
+        }
+      },
+      "description": "Plan represents an Azure Marketplace plan."
+    },
+    "hashicorp.cloud.consulama.ama.RestoreSnapshotRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul snapshot\nexists in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul snapshot exists.\nThis is the AMA instance's managed resource group."
+        },
+        "snapshotId": {
+          "type": "string",
+          "description": "snapshot_id is the ID of the Consul snapshot to restore."
+        },
+        "takeSnapshot": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Boolean",
+          "description": "take_snapshot determines if a snapshot should be taken before performing a restore."
+        }
+      },
+      "title": "See ConsulAMAService.RestoreSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.RestoreSnapshotResponse": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Operation",
+          "title": "operation used to track the progress of the snapshot restore"
+        }
+      },
+      "title": "See ConsulAMAService.RestoreSnapshot"
+    },
+    "hashicorp.cloud.consulama.ama.SnapshotProperties": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "id is the id of the snapshot."
+        },
+        "name": {
+          "type": "string",
+          "description": "name is the name of the snapshot."
+        },
+        "type": {
+          "type": "string",
+          "title": "type is the type of snapshot; MANUAL or AUTOMATIC"
+        },
+        "state": {
+          "type": "string",
+          "description": "state is the current state of the snapshot."
+        },
+        "size": {
+          "type": "string",
+          "format": "int64",
+          "description": "size is the size of the snapshot in bytes."
+        },
+        "productVersion": {
+          "type": "string",
+          "description": "product_version is the version of the product of the cluster at creation."
+        },
+        "restoredAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "restored_at notes the time that this snapshot was restored."
+        },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "requested_at notes the time that this snapshot was requested."
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "finished_at notes the time that this snapshot was finished."
+        }
+      },
+      "title": "SnapshotProperties contains properties of the Consul snapshot"
+    },
+    "hashicorp.cloud.consulama.ama.UpdateClusterRequest": {
+      "type": "object",
+      "properties": {
+        "subscriptionId": {
+          "type": "string",
+          "description": "subscription_id is the ID of the Azure subscription the Consul cluster\nexists in. This is the customer's subscription ID."
+        },
+        "resourceGroup": {
+          "type": "string",
+          "description": "resource_group is the resource group in which the Consul cluster is\nrunning. This is the AMA instance's managed resource group."
+        },
+        "update": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterUpdate",
+          "description": "update contains the details of the Consul cluster to be updated."
+        }
+      },
+      "title": "See ConsulAMAService.UpdateCluster"
+    },
+    "hashicorp.cloud.consulama.ama.UpdateClusterResponse": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Operation",
+          "title": "operation used to track the progress of the cluster update"
+        }
+      },
+      "title": "See ConsulAMAService.UpdateCluster"
+    },
+    "hashicorp.cloud.consulama.ama.Version": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "version is the string representation of the Consul version."
+        },
+        "status": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Version.Status",
+          "description": "status defines the version availability."
+        }
+      },
+      "description": "Version is a consul cluster version used in upgrade scenarios."
+    },
+    "hashicorp.cloud.consulama.ama.Version.Status": {
+      "type": "string",
+      "enum": [
+        "AVAILABLE",
+        "RECOMMENDED",
+        "PREVIEW"
+      ],
+      "default": "AVAILABLE",
+      "description": "Status defines the version availability metadata.\n\n - AVAILABLE: AVAILABLE represents a version that is generally available\nbut no longer the preferred/recommended version.\n - RECOMMENDED: RECOMMENDED represents a version that is generally available\nand recommended by HashiCorp.\n - PREVIEW: PREVIEW represents a version that is not generally available."
+    }
+  }
+}

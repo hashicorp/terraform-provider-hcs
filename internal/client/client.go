@@ -25,9 +25,11 @@ type Client struct {
 	Account *AzureResourceManagerAccount
 
 	ManagedApplication *managedapplications.ApplicationsClient
+
+	CustomProvider *CustomProviderClient
 }
 
-func NewClient(ctx context.Context, options Options) (*Client, error) {
+func Build(ctx context.Context, options Options) (*Client, error) {
 	client := Client{
 		StopContext: ctx,
 	}
@@ -60,8 +62,11 @@ func NewClient(ctx context.Context, options Options) (*Client, error) {
 	autorest.Count429AsRetry = false
 	managedAppClient := managedapplications.NewApplicationsClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
 	configureAutoRestClient(&managedAppClient.Client, auth, options.ProviderUserAgent)
+	client.ManagedApplication = &managedAppClient
 
-	// TODO: Wire up a management client to make Custom Resource Provider requests
+	customProviderClient := NewCustomProviderClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
+	configureAutoRestClient(&customProviderClient.Client, auth, options.ProviderUserAgent)
+	client.CustomProvider = &customProviderClient
 
 	return &client, nil
 }

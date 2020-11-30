@@ -130,7 +130,7 @@ func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (
 			AzureAuthConfig:   authConfig,
 		}
 
-		c, err := client.NewClient(ctx, clientOptions)
+		c, err := client.Build(ctx, clientOptions)
 		if err != nil {
 			return nil, diag.FromErr(fmt.Errorf("error creating HCS client: %s", err))
 		}

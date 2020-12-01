@@ -12,23 +12,37 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
 )
 
+var (
+	// senderProviderName is the friendly name of the provider and is output in Autorest sender request/response logs.
+	senderProviderName = "HashicorpConsulService"
+)
+
+// Options are the options passed to the client.
 type Options struct {
+	// ProviderUserAgent is the User Agent used for HTTP requests which contains the provider name and version.
 	ProviderUserAgent string
 
 	AzureAuthConfig *authentication.Config
 }
 
+// Client is used by the provider to make authenticated HTTP requests to Azure.
 type Client struct {
 	// StopContext is used for propagating control from Terraform Core (e.g. Ctrl/Cmd+C)
 	StopContext context.Context
 
+	// Account contains Azure RM account information.
 	Account *AzureResourceManagerAccount
 
+	// ManagedApplication is the client used for Azure Managed Application CRUD.
 	ManagedApplication *managedapplications.ApplicationsClient
 
+	// CustomResourceProvider is the client used for HCS Custom Resource Provider actions.
 	CustomResourceProvider *CustomResourceProviderClient
 }
 
+// Build constructs a Client which is used by the provider to make authenticated HTTP requests to Azure.
+// Adapted from the azurerm provider's clients.Build
+// https://github.com/terraform-providers/terraform-provider-azurerm/blob/8f32ad645888ee00a24ad7c739a8703222e13913/azurerm/internal/clients/builder.go#L38
 func Build(ctx context.Context, options Options) (*Client, error) {
 	client := Client{
 		StopContext: ctx,
@@ -53,12 +67,13 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 		return nil, fmt.Errorf("unable to configure OAuthConfig for tenant %s", options.AzureAuthConfig.TenantID)
 	}
 
-	send := sender.BuildSender("HCS")
+	send := sender.BuildSender(senderProviderName)
 	auth, err := options.AzureAuthConfig.GetAuthorizationToken(send, oauthConfig, env.TokenAudience)
 	if err != nil {
 		return nil, err
 	}
 
+	// Prevent rate limited requests to be counted against the request retry count.
 	autorest.Count429AsRetry = false
 	managedAppClient := managedapplications.NewApplicationsClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
 	configureAutoRestClient(&managedAppClient.Client, auth, options.ProviderUserAgent)
@@ -75,6 +90,6 @@ func configureAutoRestClient(c *autorest.Client, authorizer autorest.Authorizer,
 	c.UserAgent = strings.TrimSpace(fmt.Sprintf("%s %s", c.UserAgent, providerUserAgent))
 
 	c.Authorizer = authorizer
-	c.Sender = sender.BuildSender("HCS")
+	c.Sender = sender.BuildSender(senderProviderName)
 	c.RequestInspector = withCorrelationRequestID(correlationRequestID())
 }

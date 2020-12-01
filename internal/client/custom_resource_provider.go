@@ -10,12 +10,18 @@ import (
 	"github.com/hashicorp/terraform-provider-hcs/internal/client/hcs-ama-api-spec/models"
 )
 
+// CustomResourceProviderClient is used to make authenticated requests to the HCS Azure Custom Resource Provider.
 type CustomResourceProviderClient struct {
+	// Client is the Autorest client responsible for making HTTP requests to Azure.
 	autorest.Client
-	BaseURI        string
+	// BaseURI is the base URI for the Azure Management API.
+	BaseURI string
+	// SubscriptionID is the Azure subscription id for the current authenticated user.
 	SubscriptionID string
 }
 
+// NewCustomResourceProviderClientWithBaseURI constructs a CustomResourceProviderClient using the provided
+// base URI and subscription id.
 func NewCustomResourceProviderClientWithBaseURI(baseURI string, subscriptionID string) CustomResourceProviderClient {
 	return CustomResourceProviderClient{
 		Client:         autorest.NewClientWithUserAgent("hcs-custom-resource-provider"),

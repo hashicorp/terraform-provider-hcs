@@ -26,7 +26,7 @@ type Client struct {
 
 	ManagedApplication *managedapplications.ApplicationsClient
 
-	CustomProvider *CustomProviderClient
+	CustomResourceProvider *CustomResourceProviderClient
 }
 
 func Build(ctx context.Context, options Options) (*Client, error) {
@@ -64,9 +64,9 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 	configureAutoRestClient(&managedAppClient.Client, auth, options.ProviderUserAgent)
 	client.ManagedApplication = &managedAppClient
 
-	customProviderClient := NewCustomProviderClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
-	configureAutoRestClient(&customProviderClient.Client, auth, options.ProviderUserAgent)
-	client.CustomProvider = &customProviderClient
+	customResourceProviderClient := NewCustomResourceProviderClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
+	configureAutoRestClient(&customResourceProviderClient.Client, auth, options.ProviderUserAgent)
+	client.CustomResourceProvider = &customResourceProviderClient
 
 	return &client, nil
 }

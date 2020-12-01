@@ -47,10 +47,13 @@ func (client CustomResourceProviderClient) customActionPreparer(ctx context.Cont
 }
 
 // CreateRootToken invokes the createToken Custom Resource Action.
-func (client CustomResourceProviderClient) CreateRootToken(ctx context.Context, managedResourceGroupId string, body models.HashicorpCloudConsulamaAmaCreateTokenRequest) (models.HashicorpCloudConsulamaAmaCreateTokenResponse, error) {
+func (client CustomResourceProviderClient) CreateRootToken(ctx context.Context, managedResourceGroupId string) (models.HashicorpCloudConsulamaAmaCreateTokenResponse, error) {
 	var rootToken models.HashicorpCloudConsulamaAmaCreateTokenResponse
 
-	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "createToken", body)
+	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "createToken", models.HashicorpCloudConsulamaAmaCreateTokenRequest{
+		ResourceGroup:  managedResourceGroupId,
+		SubscriptionID: client.SubscriptionID,
+	})
 	if err != nil {
 		return rootToken, err
 	}

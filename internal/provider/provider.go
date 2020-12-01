@@ -17,7 +17,7 @@ func New() func() *schema.Provider {
 				"scaffolding_data_source": dataSourceScaffolding(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"scaffolding_resource": resourceScaffolding(),
+				"hcs_cluster": resourceCluster(),
 			},
 			Schema: map[string]*schema.Schema{
 				// We must support the same optional fields found in the azurerm provider schema

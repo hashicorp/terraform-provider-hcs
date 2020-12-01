@@ -9,6 +9,7 @@ import (
 )
 
 // Correlation request id implementation from the azurerm provider
+// https://github.com/terraform-providers/terraform-provider-azurerm/blob/8f32ad645888ee00a24ad7c739a8703222e13913/azurerm/internal/common/correlation_id.go
 
 const (
 	// HeaderCorrelationRequestID is the Azure extension header to set a user-specified correlation request ID.
@@ -16,8 +17,10 @@ const (
 )
 
 var (
+	// msCorrelationRequestIDOnce is used to maintain the same correlation id throughout all Azure requests.
 	msCorrelationRequestIDOnce sync.Once
-	msCorrelationRequestID     string
+	// msCorrelationRequestID the correlation id to use throughout all Azure requests.
+	msCorrelationRequestID string
 )
 
 // withCorrelationRequestID returns a PrepareDecorator that adds an HTTP extension header of

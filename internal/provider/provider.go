@@ -94,6 +94,7 @@ func New() func() *schema.Provider {
 	}
 }
 
+// configure returns a func that builds an authenticated Client which is used for all provider resource CRUD.
 func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	return func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		builder := &authentication.Builder{

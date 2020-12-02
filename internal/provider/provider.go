@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/go-azure-helpers/authentication"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-hcs/internal/client"
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
 )
 
 func New() func() *schema.Provider {
@@ -126,12 +126,12 @@ func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (
 		}
 
 		//TODO: pass provider version to user agent
-		clientOptions := client.Options{
+		clientOptions := clients.Options{
 			ProviderUserAgent: p.UserAgent("terraform-provider-hcs", ""),
 			AzureAuthConfig:   authConfig,
 		}
 
-		c, err := client.Build(ctx, clientOptions)
+		c, err := clients.Build(ctx, clientOptions)
 		if err != nil {
 			return nil, diag.FromErr(fmt.Errorf("error creating HCS client: %s", err))
 		}

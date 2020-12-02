@@ -1,4 +1,4 @@
-package client
+package clients
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 
 	"github.com/Azure/go-autorest/autorest"
-	"github.com/hashicorp/terraform-provider-hcs/internal/client/hcs-ama-api-spec/models"
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
 )
 
 // CustomResourceProviderClient is used to make authenticated requests to the HCS Azure Custom Resource Provider.

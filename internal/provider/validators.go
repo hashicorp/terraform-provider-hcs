@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"net"
 	"regexp"
 	"strings"
 
@@ -13,19 +14,7 @@ import (
 func validateStringNotEmpty(v interface{}, path cty.Path) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
 
-	value, ok := v.(string)
-	if !ok {
-		msg := "must be of type: string"
-		diagnostics = append(diagnostics, diag.Diagnostic{
-			Severity:      diag.Error,
-			Summary:       msg,
-			Detail:        msg,
-			AttributePath: path,
-		})
-		return diagnostics
-	}
-
-	if value == "" {
+	if v.(string) == "" {
 		msg := "cannot be empty"
 		diagnostics = append(diagnostics, diag.Diagnostic{
 			Severity:      diag.Error,
@@ -43,18 +32,7 @@ func validateStringNotEmpty(v interface{}, path cty.Path) diag.Diagnostics {
 func validateResourceGroupName(v interface{}, path cty.Path) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
 
-	value, ok := v.(string)
-	if !ok {
-		msg := "must be of type: string"
-		diagnostics = append(diagnostics, diag.Diagnostic{
-			Severity:      diag.Error,
-			Summary:       msg,
-			Detail:        msg,
-			AttributePath: path,
-		})
-		return diagnostics
-	}
-
+	value := v.(string)
 	if len(value) > 90 {
 		msg := "may not exceed 90 characters in length"
 		diagnostics = append(diagnostics, diag.Diagnostic{
@@ -89,25 +67,15 @@ func validateResourceGroupName(v interface{}, path cty.Path) diag.Diagnostics {
 	return diagnostics
 }
 
-func validateManagedAppName(v interface{}, path cty.Path) diag.Diagnostics {
+// validateSlugID validates that the string value matches the HCS requirements for
+// a user-settable slug, as well as the Azure requirements for a Managed Application name.
+func validateSlugID(v interface{}, path cty.Path) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
-
-	value, ok := v.(string)
-	if !ok {
-		msg := "must be of type: string"
-		diagnostics = append(diagnostics, diag.Diagnostic{
-			Severity:      diag.Error,
-			Summary:       msg,
-			Detail:        msg,
-			AttributePath: path,
-		})
-		return diagnostics
-	}
 
 	// HCS supports a max of 36 chars for the cluster name which is defaulted to
 	// the value of of the Managed App name so we must enforce a max of 36 even though
 	// Azure supports a max of 64 chars for the Managed App name
-	if !regexp.MustCompile(`^[-\da-zA-Z]{3,36}$`).MatchString(value) {
+	if !regexp.MustCompile(`^[-\da-zA-Z]{3,36}$`).MatchString(v.(string)) {
 		msg := "must be between 3 and 36 characters in length and contains only letters, numbers or hyphens"
 		diagnostics = append(diagnostics, diag.Diagnostic{
 			Severity:      diag.Error,
@@ -120,23 +88,15 @@ func validateManagedAppName(v interface{}, path cty.Path) diag.Diagnostics {
 	return diagnostics
 }
 
+// validateStringInSlice returns a func which ensures the string value is a contained in the given slice.
+// If ignoreCase is set the strings will be compared as lowercase.
 // Adapted from terraform-plugin-sdk validate.StringInSlice
 // https://github.com/hashicorp/terraform-plugin-sdk/blob/98ba036fe5895876219331532140d3d8cf239594/helper/validation/strings.go#L132
 func validateStringInSlice(valid []string, ignoreCase bool) schema.SchemaValidateDiagFunc {
 	return func(v interface{}, path cty.Path) diag.Diagnostics {
 		var diagnostics diag.Diagnostics
 
-		value, ok := v.(string)
-		if !ok {
-			msg := "must be of type: string"
-			diagnostics = append(diagnostics, diag.Diagnostic{
-				Severity:      diag.Error,
-				Summary:       msg,
-				Detail:        msg,
-				AttributePath: path,
-			})
-			return diagnostics
-		}
+		value := v.(string)
 
 		for _, validString := range valid {
 			if v == validString || (ignoreCase && strings.ToLower(value) == strings.ToLower(validString)) {
@@ -153,4 +113,37 @@ func validateStringInSlice(valid []string, ignoreCase bool) schema.SchemaValidat
 		})
 		return diagnostics
 	}
+}
+
+// validateCIDR ensures that the provided value is a string and a valid CIDR.
+func validateCIDR(v interface{}, path cty.Path) diag.Diagnostics {
+	var diagnostics diag.Diagnostics
+
+	if _, _, err := net.ParseCIDR(v.(string)); err != nil {
+		msg := "expected a valid CIDR"
+		diagnostics = append(diagnostics, diag.Diagnostic{
+			Severity:      diag.Error,
+			Summary:       msg,
+			Detail:        msg,
+			AttributePath: path,
+		})
+	}
+
+	return diagnostics
+}
+
+func validateConsulVersion(v interface{}, path cty.Path) diag.Diagnostics {
+	var diagnostics diag.Diagnostics
+
+	if !regexp.MustCompile(`^v?\d+.\d+.\d+$`).MatchString(v.(string)) {
+		msg := "must be a valid semver"
+		diagnostics = append(diagnostics, diag.Diagnostic{
+			Severity:      diag.Error,
+			Summary:       msg,
+			Detail:        msg,
+			AttributePath: path,
+		})
+	}
+
+	return diagnostics
 }

@@ -22,6 +22,7 @@ type Options struct {
 	// ProviderUserAgent is the User Agent used for HTTP requests which contains the provider name and version.
 	ProviderUserAgent string
 
+	// AzureAuthConfig is the configuration used to create an authenticated Azure client.
 	AzureAuthConfig *authentication.Config
 }
 
@@ -86,6 +87,8 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 	return &client, nil
 }
 
+// configureAutoRestClient is used to configure an Azure Autorest client with the appropriate User Agent,
+// authorizer, and correlation id etc.
 func configureAutoRestClient(c *autorest.Client, authorizer autorest.Authorizer, providerUserAgent string) {
 	c.UserAgent = strings.TrimSpace(fmt.Sprintf("%s %s", c.UserAgent, providerUserAgent))
 

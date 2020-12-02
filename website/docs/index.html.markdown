@@ -1,6 +1,6 @@
 ---
 layout: "scaffolding"
-page_title: "Provider: Scaffolding"
+page_title: "Provider: HCS"
 sidebar_current: "docs-scaffolding-index"
 description: |-
   Terraform provider scaffolding.

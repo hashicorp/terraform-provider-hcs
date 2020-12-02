@@ -1,4 +1,4 @@
-Terraform Provider Scaffolding
+HashiCorp Consul Service (HCS) Terraform Provider
 ==================
 
 This repository is a *template* for a [Terraform](https://www.terraform.io) provider. It is intended as a starting point for creating Terraform providers, containing:
@@ -16,7 +16,7 @@ Requirements
 ------------
 
 -	[Terraform](https://www.terraform.io/downloads.html) >= 0.12.x
--	[Go](https://golang.org/doc/install) >= 1.12
+-	[Go](https://golang.org/doc/install) >= 1.14
 
 Building The Provider
 ---------------------
@@ -56,6 +56,11 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 
 To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
+To generate the latest models for the HCS Custom Resource Provider actions, run:
+```
+make generate-hcs-ama-api-spec-models
+```
+
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
@@ -63,3 +68,4 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 ```sh
 $ make testacc
 ```
+ 

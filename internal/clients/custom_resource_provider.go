@@ -33,8 +33,9 @@ func NewCustomResourceProviderClientWithBaseURI(baseURI string, subscriptionID s
 // customActionPreparer prepares the Custom Resource Action request.
 func (client CustomResourceProviderClient) customActionPreparer(ctx context.Context, managedResourceGroupId string, action string, body interface{}) (*http.Request, error) {
 	pathParams := map[string]interface{}{
-		"resourceGroup": autorest.Encode("path", managedResourceGroupId),
-		"action":        autorest.Encode("path", action),
+		"resourceGroup":  autorest.Encode("path", managedResourceGroupId),
+		"action":         autorest.Encode("path", action),
+		"subscriptionId": autorest.Encode("path", client.SubscriptionID),
 	}
 
 	const APIVersion = "2018-09-01-preview"
@@ -46,7 +47,7 @@ func (client CustomResourceProviderClient) customActionPreparer(ctx context.Cont
 		autorest.AsContentType("application/json; charset=utf-8"),
 		autorest.AsPost(),
 		autorest.WithBaseURL(client.BaseURI),
-		autorest.WithPathParameters("/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/{action}", pathParams),
+		autorest.WithPathParameters("/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/{action}", pathParams),
 		autorest.WithJSON(body),
 		autorest.WithQueryParameters(queryParams))
 	return preparer.Prepare((&http.Request{}).WithContext(ctx))

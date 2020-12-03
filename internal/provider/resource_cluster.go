@@ -2,17 +2,23 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-hcs/internal/timeouts"
-
-	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
-
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/timeouts"
+	"github.com/hashicorp/terraform-provider-hcs/utils"
 )
 
 var createUpdateDeleteTimeoutDuration = time.Minute * 25
+
+type managedAppParamValue struct {
+	Value interface{} `json:"value"`
+}
 
 func resourceCluster() *schema.Resource {
 	return &schema.Resource{
@@ -26,6 +32,7 @@ func resourceCluster() *schema.Resource {
 			Delete: &createUpdateDeleteTimeoutDuration,
 		},
 		Schema: map[string]*schema.Schema{
+			// Required inputs
 			"resource_group_name": {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -53,6 +60,7 @@ func resourceCluster() *schema.Resource {
 					"Production",
 				}, true),
 			},
+			// Optional inputs
 			"cluster_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -77,7 +85,6 @@ func resourceCluster() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							ValidateDiagFunc: validateConsulVersion,
-							Computed:         true,
 						},
 						"datacenter": {
 							Type:             schema.TypeString,
@@ -115,6 +122,80 @@ func resourceCluster() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			// Computed outputs
+			"state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"storage_account_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"blob_container_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"managed_application_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"storage_account_resource_group": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_version": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_datacenter": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_automatic_upgrades": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"consul_snapshot_interval": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_snapshot_retention": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_config_file": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_ca_file": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_connect": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"consul_external_endpoint_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_private_endpoint_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_cluster_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_root_token_accessor_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"consul_root_token_secret_id": {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
+			},
 		},
 	}
 }
@@ -126,81 +207,137 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	managedAppName := d.Get("managed_application_name").(string)
 	resourceGroupName := d.Get("resource_group_name").(string)
 
-	_, _ = meta.(*clients.Client).CustomResourceProvider.CreateRootToken(ctx, "INSERT_MRG_HERE")
-
 	managedAppClient := meta.(*clients.Client).ManagedApplication
-	existing, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+
+	// Ensure a managed app with the same name does not exist in this resource group
+	existingCluster, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if existing.Response.StatusCode != 404 {
-			return diag.Errorf("failed to check for present of existing Managed Application Name %q (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		if existingCluster.Response.StatusCode != 404 {
+			return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
 		}
 	}
-	if existing.ID != nil && *existing.ID != "" {
-		msg := "a resource with the ID %q already exists - to be managed via Terraform this resource needs to be imported into the State. Please see the resource documentation for hcs_cluster for more information"
-		return diag.Errorf(msg, *existing.ID)
+	if existingCluster.ID != nil && *existingCluster.ID != "" {
+		return diag.Errorf("a resource with the ID %q already exists - to be managed via Terraform this resource needs to be imported into the State. Please see the resource documentation for hcs_cluster for more information", *existingCluster.ID)
+	}
+
+	// Fetch resource group
+	resourceGroup, err := meta.(*clients.Client).ResourceGroup.Get(ctx, resourceGroupName)
+	if err != nil {
+		return diag.Errorf("failed to fetch resource group (Resource Group %q):  %+v", resourceGroupName, err)
+	}
+
+	location := resourceGroup.Location
+	v, ok := d.GetOk("location")
+	if ok {
+		// TODO: normalize location like azurerm does
+		location = utils.String(v.(string))
 	}
 
 	// TODO: set defaults for values that are dependent on side effects / other schema values
-	//  consul_version, datacenter, plan_name, managed_resource_group_name, location
-	//clusterName := managedAppName
-	//v, ok := d.GetOk("cluster_name")
-	//if ok {
-	//	clusterName = v.(string)
-	//}
-	//
-	//managedResourceGroupName := managedAppName
-	//v, ok = d.GetOk("cluster_name")
-	//if ok {
-	//	clusterName = v.(string)
-	//}
-	//
-	//// TODO set consul defaults
-	//datacenter := managedAppName
-	//v, ok = d.GetOk("datacenter")
-	//if ok {
-	//	datacenter = v.(string)
-	//}
-	//// TODO fetch plan defaults
-	//params := managedapplications.Application{
-	//	ApplicationProperties: nil,
-	//	Plan:                  nil,
-	//	Kind:                  nil,
-	//	Identity:              nil,
-	//	ManagedBy:             nil,
-	//	Sku:                   nil,
-	//	ID:                    nil,
-	//	Name:                  nil,
-	//	Type:                  nil,
-	//	Location:              nil,
-	//	Tags:                  nil,
-	//}
-	//future, err := managedAppClient.CreateOrUpdate(ctx, resourceGroupName, managedAppName, params)
-	//if err != nil {
-	//	return diag.Errorf("failed to create HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
-	//}
-	//if err = future.WaitForCompletionRef(ctx, managedAppClient.Client); err != nil {
-	//	return diag.Errorf("failed to wait for creation of HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
-	//}
-	//
-	//app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
-	//if err != nil {
-	//	return diag.Errorf("failed to retrieve HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
-	//}
-	//if app.ID == nil || *app.ID == "" {
-	//	return diag.Errorf("cannot read HCS Cluster (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
-	//}
-	//
-	//// Create a token
-	//crpClient := meta.(*clients.Client).CustomResourceProvider
-	//rootTokenResp, err := crpClient.CreateRootToken(ctx, *app.ApplicationProperties.ManagedResourceGroupID)
-	//if err != nil {
-	//	return diag.Errorf("failed to create HCS Cluster root token (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
-	//}
-	//
-	//d.SetId(*app.ID)
-	//d.Set("outputs")
+	//  consul_version, datacenter, plan_name, location
+	clusterName := managedAppName
+	v, ok = d.GetOk("cluster_name")
+	if ok {
+		clusterName = v.(string)
+	}
 
-	return diag.Errorf("not implemented")
+	managedResourceGroupId := *resourceGroup.ID + "-mrg-" + managedAppName
+	v, ok = d.GetOk("managed_resource_group_name")
+	if ok {
+		managedResourceGroupId = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", meta.(*clients.Client).Account.SubscriptionId, v.(string))
+	}
+
+	// TODO set consul defaults
+	dataCenter := managedAppName
+	v, ok = d.GetOk("datacenter")
+	if ok {
+		dataCenter = v.(string)
+	}
+
+	externalEndpoint := "disabled"
+	consulVersion := "v1.8.4"
+	var federationToken string
+
+	// TODO fetch plan defaults
+	var plan managedapplications.Plan
+	//{
+	//Name:      nil,
+	//	Publisher: nil,
+	//	Product:   nil,
+	//	Version:   nil,
+	//}
+
+	hcsAMAParams := map[string]managedAppParamValue{
+		"clusterName": {
+			Value: clusterName,
+		},
+		"consulDataCenter": {
+			Value: dataCenter,
+		},
+		"consulVnetCidr": {
+			Value: d.Get("vnet_cidr").(string),
+		},
+		"email": {
+			Value: d.Get("email").(string),
+		},
+		"externalEndpoint": {
+			Value: externalEndpoint,
+		},
+		"initialConsulVersion": {
+			Value: consulVersion,
+		},
+	}
+
+	if federationToken != "" {
+		hcsAMAParams["federationToken"] = managedAppParamValue{
+			Value: federationToken,
+		}
+	}
+
+	params := managedapplications.Application{
+		ApplicationProperties: &managedapplications.ApplicationProperties{
+			ManagedResourceGroupID: utils.String(managedResourceGroupId),
+			Parameters:             hcsAMAParams,
+		},
+		Plan:     &plan,
+		Kind:     utils.String("MarketPlace"),
+		Location: location,
+	}
+	future, err := managedAppClient.CreateOrUpdate(ctx, resourceGroupName, managedAppName, params)
+	if err != nil {
+		return diag.Errorf("failed to create HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if err = future.WaitForCompletionRef(ctx, managedAppClient.Client); err != nil {
+		return diag.Errorf("failed to wait for creation of HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+
+	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	if err != nil {
+		return diag.Errorf("failed to retrieve HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if app.ID == nil || *app.ID == "" {
+		return diag.Errorf("cannot read HCS Cluster (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
+	}
+	d.SetId(*app.ID)
+
+	// Create a token
+	crpClient := meta.(*clients.Client).CustomResourceProvider
+	rootTokenResp, err := crpClient.CreateRootToken(ctx, *app.ApplicationProperties.ManagedResourceGroupID)
+	if err != nil {
+		return diag.Errorf("failed to create HCS Cluster root token (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
+	}
+
+	// Only set root token keys after create
+	err = d.Set("consul_root_token_accessor_id", rootTokenResp.MasterToken.AccessorID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("consul_root_token_secret_id", rootTokenResp.MasterToken.SecretID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return setClusterResourceData(d, app)
 }
 
 func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -221,5 +358,9 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	// use the meta value to retrieve your client from the provider configure method
 	// client := meta.(*apiClient)
 
+	return diag.Errorf("not implemented")
+}
+
+func setClusterResourceData(d *schema.ResourceData, managedApp managedapplications.Application) diag.Diagnostics {
 	return diag.Errorf("not implemented")
 }

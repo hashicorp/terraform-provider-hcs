@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-azure-helpers/sender"
 
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2020-06-01/resources"
 )
 
 var (
@@ -33,6 +34,9 @@ type Client struct {
 
 	// ManagedApplication is the client used for Azure Managed Application CRUD.
 	ManagedApplication *managedapplications.ApplicationsClient
+
+	// ResourceGroup is the client used for Azure Resource Group CRUD
+	ResourceGroup *resources.GroupsClient
 
 	// CustomResourceProvider is the client used for HCS Custom Resource Provider actions.
 	CustomResourceProvider *CustomResourceProviderClient
@@ -72,9 +76,14 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 
 	// Prevent rate limited requests to be counted against the request retry count.
 	autorest.Count429AsRetry = false
+
 	managedAppClient := managedapplications.NewApplicationsClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
 	configureAutoRestClient(&managedAppClient.Client, auth, options.ProviderUserAgent)
 	client.ManagedApplication = &managedAppClient
+
+	resourceGroupClient := resources.NewGroupsClient(options.AzureAuthConfig.SubscriptionID)
+	configureAutoRestClient(&resourceGroupClient.Client, auth, options.ProviderUserAgent)
+	client.ResourceGroup = &resourceGroupClient
 
 	customResourceProviderClient := NewCustomResourceProviderClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
 	configureAutoRestClient(&customResourceProviderClient.Client, auth, options.ProviderUserAgent)

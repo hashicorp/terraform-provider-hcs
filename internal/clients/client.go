@@ -28,9 +28,6 @@ type Options struct {
 
 // Client is used by the provider to make authenticated HTTP requests to Azure.
 type Client struct {
-	// StopContext is used for propagating control from Terraform Core (e.g. Ctrl/Cmd+C)
-	StopContext context.Context
-
 	// Account contains Azure RM account information.
 	Account *AzureResourceManagerAccount
 
@@ -45,10 +42,6 @@ type Client struct {
 // Adapted from the azurerm provider's clients.Build
 // https://github.com/terraform-providers/terraform-provider-azurerm/blob/8f32ad645888ee00a24ad7c739a8703222e13913/azurerm/internal/clients/builder.go#L38
 func Build(ctx context.Context, options Options) (*Client, error) {
-	client := Client{
-		StopContext: ctx,
-	}
-
 	env, err := authentication.AzureEnvironmentByNameFromEndpoint(ctx, options.AzureAuthConfig.MetadataHost, options.AzureAuthConfig.Environment)
 	if err != nil {
 		return nil, err
@@ -58,7 +51,10 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error building account: %+v", err)
 	}
-	client.Account = account
+
+	client := Client{
+		Account: account,
+	}
 
 	oauthConfig, err := options.AzureAuthConfig.BuildOAuthConfig(env.ActiveDirectoryEndpoint)
 	if err != nil {

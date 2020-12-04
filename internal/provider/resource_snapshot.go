@@ -2,9 +2,20 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/timeouts"
+)
+
+const (
+	// defaultRestoredAt is the default string returned when a snapshot has not been restored
+	defaultRestoredAt = "0001-01-01T00:00:00.000Z"
 )
 
 // resourceSnapshot defines the snapshot resource schema and CRUD contexts.
@@ -57,20 +68,92 @@ func resourceSnapshot() *schema.Resource {
 }
 
 func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	ctx, cancel := timeouts.ForCreateUpdate(ctx, d)
+	defer cancel()
 
-	idFromAPI := "my-id"
-	d.SetId(idFromAPI)
+	resourceGroupName := d.Get("resource_group_name").(string)
+	managedAppName := d.Get("managed_application_name").(string)
 
-	return diag.Errorf("not implemented")
+	managedAppClient := meta.(*clients.Client).ManagedApplication
+	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	// TODO handle 404 not found
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed to fetch managed app: %s", err))
+	}
+
+	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
+	snapshotName := d.Get("snapshot_name").(string)
+
+	crpClient := meta.(*clients.Client).CustomResourceProvider
+	resp, err := crpClient.CreateSnapshot(ctx, managedAppManagedResourceGroupID,
+		resourceGroupName, snapshotName)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed to create snapshot for managed app: %s", err))
+	}
+
+	d.SetId(resp.SnapshotID)
+
+	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
+
+	if err != nil {
+		log.Printf("[ERROR] - error polling operation!")
+		return []diag.Diagnostic{
+			{
+				Severity:      0,
+				Summary:       err.Error(),
+				Detail:        resp.Operation.ID,
+				AttributePath: nil,
+			},
+		}
+	}
+
+	return resourceSnapshotRead(ctx, d, meta)
 }
 
 func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	ctx, cancel := timeouts.ForRead(ctx, d)
+	defer cancel()
 
-	return diag.Errorf("not implemented")
+	resourceGroupName := d.Get("resource_group_name").(string)
+	managedAppName := d.Get("managed_application_name").(string)
+
+	managedAppClient := meta.(*clients.Client).ManagedApplication
+	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	// TODO handle 404 not found
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed to fetch managed app: %s", err))
+	}
+
+	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
+	snapshotID := d.Id()
+
+	crpClient := meta.(*clients.Client).CustomResourceProvider
+	resp, err := crpClient.GetSnapshot(ctx, managedAppManagedResourceGroupID,
+		resourceGroupName, snapshotID)
+
+	// TODO check if we get a 404 here and if so set ID to "" to delete from tfstate
+	// TODO present error message to user to remove from their tf file
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed to get snapshot for managed app: %s", err))
+	}
+
+	snapshot := resp.Snapshot
+	d.Set("state", snapshot.State)
+	d.Set("requested_at", snapshot.RequestedAt.String())
+	d.Set("finished_at", snapshot.FinishedAt.String())
+
+	var size = 0
+	size, err = strconv.Atoi(snapshot.Size)
+	if err != nil {
+		log.Printf("[ERROR] Error converting string to int: %v", err)
+	}
+	d.Set("size", size)
+
+	if snapshot.RestoredAt.String() != defaultRestoredAt {
+		d.Set("restored_at", snapshot.RestoredAt.String())
+	}
+
+	return nil
 }
 
 func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

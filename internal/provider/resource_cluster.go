@@ -3,7 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
 
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -75,36 +80,28 @@ func resourceCluster() *schema.Resource {
 				Default:          "172.25.16.0/24",
 				ValidateDiagFunc: validateCIDR,
 			},
-			"consul": {
-				Type:     schema.TypeList,
+			"consul_version": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateDiagFunc: validateConsulVersion,
+			},
+			"consul_datacenter": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validateSlugID,
+				ForceNew:         true,
+			},
+			"consul_federation_token": {
+				Type:     schema.TypeString,
 				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"version": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							ValidateDiagFunc: validateConsulVersion,
-						},
-						"datacenter": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							ValidateDiagFunc: validateSlugID,
-							ForceNew:         true,
-						},
-						"federation_token": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-						"external_endpoint": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-							ForceNew: true,
-						},
-					},
-				},
+				ForceNew: true,
+			},
+			"consul_external_endpoint": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
 			},
 			"location": {
 				Type:     schema.TypeString,
@@ -140,14 +137,6 @@ func resourceCluster() *schema.Resource {
 				Computed: true,
 			},
 			"storage_account_resource_group": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"consul_version": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"consul_datacenter": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -229,12 +218,9 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	location := resourceGroup.Location
 	v, ok := d.GetOk("location")
 	if ok {
-		// TODO: normalize location like azurerm does
-		location = utils.String(v.(string))
+		location = utils.String(strings.ReplaceAll(strings.ToLower(v.(string)), " ", ""))
 	}
 
-	// TODO: set defaults for values that are dependent on side effects / other schema values
-	//  consul_version, datacenter, plan_name, location
 	clusterName := managedAppName
 	v, ok = d.GetOk("cluster_name")
 	if ok {
@@ -247,25 +233,55 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		managedResourceGroupId = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", meta.(*clients.Client).Account.SubscriptionId, v.(string))
 	}
 
-	// TODO set consul defaults
+	// Consul defaults
 	dataCenter := managedAppName
-	v, ok = d.GetOk("datacenter")
+	v, ok = d.GetOk("consul_datacenter")
 	if ok {
 		dataCenter = v.(string)
 	}
 
 	externalEndpoint := "disabled"
-	consulVersion := "v1.8.4"
-	var federationToken string
+	if d.Get("consul_external_endpoint").(bool) {
+		externalEndpoint = "enabled"
+	}
 
-	// TODO fetch plan defaults
-	var plan managedapplications.Plan
-	//{
-	//Name:      nil,
-	//	Publisher: nil,
-	//	Product:   nil,
-	//	Version:   nil,
-	//}
+	availableConsulVersions, err := consul.GetAvailableHCPConsulVersions(ctx, meta.(*clients.Client).Config.HCPApiDomain)
+	if err != nil || availableConsulVersions == nil {
+		return diag.Errorf("failed to get available HCP Consul versions: %+v", err)
+	}
+	consulVersion := consul.RecommendedVersion(availableConsulVersions)
+	v, ok = d.GetOk("consul_version")
+	if ok {
+		consulVersion = consul.NormalizeVersion(v.(string))
+	}
+	if !consul.IsValidVersion(consulVersion, availableConsulVersions) {
+		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", availableConsulVersions)
+	}
+
+	var federationToken string
+	v, ok = d.GetOk("consul_federation_token")
+	if ok {
+		federationToken = v.(string)
+	}
+
+	// Azure Marketplace Plan
+	planDefaults, err := hcsmeta.GetPlanDefaults(ctx)
+	if err != nil {
+		return diag.Errorf("unable to retrieve HCS Azure Marketplace plan defaults: %+v", err)
+	}
+
+	planName := planDefaults.Name
+	v, ok = d.GetOk("plan_name")
+	if ok {
+		planName = v.(string)
+	}
+
+	plan := managedapplications.Plan{
+		Name:      utils.String(planName),
+		Version:   utils.String(planDefaults.Version),
+		Product:   utils.String(meta.(*clients.Client).Config.MarketPlaceProductName),
+		Publisher: utils.String("hashicorp-4665790"),
+	}
 
 	hcsAMAParams := map[string]managedAppParamValue{
 		"clusterName": {

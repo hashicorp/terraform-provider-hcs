@@ -173,10 +173,45 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	ctx, cancel := timeouts.ForDelete(ctx, d)
+	defer cancel()
 
-	return diag.Errorf("not implemented")
+	resourceGroupName := d.Get("resource_group_name").(string)
+	managedAppName := d.Get("managed_application_name").(string)
+
+	managedAppClient := meta.(*clients.Client).ManagedApplication
+	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	// TODO handle a 404 not found properly
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed to fetch managed app: %s", err))
+	}
+
+	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
+	snapshotID := d.Id()
+
+	crpClient := meta.(*clients.Client).CustomResourceProvider
+	resp, err := crpClient.DeleteSnapshot(ctx, managedAppManagedResourceGroupID,
+		resourceGroupName, snapshotID)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("failed to delete snapshot for managed app: %s", err))
+	}
+
+	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
+
+	if err != nil {
+		log.Printf("[ERROR] - error polling operation!")
+		return []diag.Diagnostic{
+			{
+				Severity:      0,
+				Summary:       err.Error(),
+				Detail:        resp.Operation.ID,
+				AttributePath: nil,
+			},
+		}
+	}
+
+	d.SetId("")
+	return nil
 }
 
 func populateSnapshotState(d *schema.ResourceData, snapshot *models.HashicorpCloudConsulamaAmaSnapshotProperties) {

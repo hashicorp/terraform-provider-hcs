@@ -220,6 +220,13 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	if ok {
 		location = utils.String(strings.ReplaceAll(strings.ToLower(v.(string)), " ", ""))
 	}
+	supportedRegions, err := hcsmeta.GetSupportedRegions(ctx)
+	if err != nil {
+		return diag.Errorf("unable to retrieve supported HCS regions: %+v", err)
+	}
+	if !hcsmeta.RegionIsSupported(*location, supportedRegions) {
+		return diag.Errorf("unsupported location: %s; expected location to be one of %+v", *location, supportedRegions)
+	}
 
 	clusterName := managedAppName
 	v, ok = d.GetOk("cluster_name")
@@ -255,7 +262,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		consulVersion = consul.NormalizeVersion(v.(string))
 	}
 	if !consul.IsValidVersion(consulVersion, availableConsulVersions) {
-		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", availableConsulVersions)
+		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", consulVersion, availableConsulVersions)
 	}
 
 	var federationToken string

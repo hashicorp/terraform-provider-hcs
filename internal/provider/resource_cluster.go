@@ -3,8 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
 
@@ -341,11 +344,13 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	if app.ID == nil || *app.ID == "" {
 		return diag.Errorf("cannot read HCS Cluster (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
 	}
+
+	// We need to set the cluster name to be able to fetch the cluster on read
+	err = d.Set("cluster_name", clusterName)
+
 	d.SetId(*app.ID)
 
-	// Create a token
-	crpClient := meta.(*clients.Client).CustomResourceProvider
-	rootTokenResp, err := crpClient.CreateRootToken(ctx, *app.ApplicationProperties.ManagedResourceGroupID)
+	rootTokenResp, err := meta.(*clients.Client).CustomResourceProvider.CreateRootToken(ctx, *app.ApplicationProperties.ManagedResourceGroupID)
 	if err != nil {
 		return diag.Errorf("failed to create HCS Cluster root token (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
 	}
@@ -360,14 +365,39 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.FromErr(err)
 	}
 
-	return setClusterResourceData(d, app)
+	return resourceClusterRead(ctx, d, meta)
 }
 
 func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	ctx, cancel := timeouts.ForRead(ctx, d)
+	defer cancel()
 
-	return diag.Errorf("not implemented")
+	// Fetch the managed app
+	managedAppID := d.Id()
+	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
+	if err != nil {
+		if managedApp.Response.StatusCode == 404 {
+			log.Printf("[INFO] HCS Cluster %q does not exist - removing from state", d.Id())
+			d.SetId("")
+			return nil
+		}
+
+		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) : %+v", managedAppID, err)
+	}
+
+	clusterName := *managedApp.Name
+	v, ok := d.GetOk("cluster_name")
+	if ok {
+		clusterName = v.(string)
+	}
+
+	// Fetch the cluster managed resource
+	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
+	if err != nil {
+		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q): %+v", managedAppID, clusterName, err)
+	}
+
+	return setClusterResourceData(d, managedApp, cluster)
 }
 
 func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -384,6 +414,146 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return diag.Errorf("not implemented")
 }
 
-func setClusterResourceData(d *schema.ResourceData, managedApp managedapplications.Application) diag.Diagnostics {
-	return diag.Errorf("not implemented")
+// setClusterResourceData sets the KV pairs of the cluster resource schema.
+// We do not set consul_root_token_accessor_id and consul_root_token_secret_id here since
+// the original root token is only available during cluster creation.
+func setClusterResourceData(d *schema.ResourceData, managedApp managedapplications.Application, cluster models.HashicorpCloudConsulamaAmaClusterResponse) diag.Diagnostics {
+	// TODO: Parse the resource group from the ID
+	//err := d.Set("resource_group_name", *managedApp.ID)
+	//if err != nil {
+	//	return diag.FromErr(err)
+	//}
+
+	err := d.Set("managed_application_name", *managedApp.Name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("email", cluster.Properties.Email)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("cluster_mode", cluster.Properties.ConsulClusterMode)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("cluster_name", cluster.Name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("vnet_cidr", cluster.Properties.ConsulVnetCidr)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_version", cluster.Properties.ConsulCurrentVersion)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_datacenter", cluster.Properties.ConsulDatacenter)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_federation_token", cluster.Properties.FederationToken)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_external_endpoint", strings.ToLower(cluster.Properties.ConsulExternalEndpoint) == "enabled")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("location", cluster.Properties.Location)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("plan_name", *managedApp.Plan.Name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// TODO: When we parse the Managed App ID we can probably just use the MRG from that
+	err = d.Set("managed_resource_group_name", cluster.Properties.StorageAccountResourceGroup)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("state", cluster.Properties.State)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("storage_account_name", cluster.Properties.StorageAccountName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("blob_container_name", cluster.Properties.BlobContainerName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("managed_application_id", cluster.Properties.ManagedAppID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("storage_account_resource_group", cluster.Properties.StorageAccountResourceGroup)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_automatic_upgrades", strings.ToLower(cluster.Properties.ConsulAutomaticUpgrades) == "enabled")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_snapshot_interval", cluster.Properties.ConsulSnapshotInterval)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_snapshot_retention", cluster.Properties.ConsulSnapshotRetention)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_config_file", cluster.Properties.ConsulConfigFile)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_ca_file", cluster.Properties.ConsulCaFile)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_connect", strings.ToLower(cluster.Properties.ConsulConnect) == "enabled")
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_external_endpoint_url", cluster.Properties.ConsulExternalEndpointURL)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_private_endpoint_url", cluster.Properties.ConsulPrivateEndpointURL)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("consul_cluster_id", cluster.Properties.ConsulClusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }

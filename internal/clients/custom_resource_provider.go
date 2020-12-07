@@ -295,8 +295,7 @@ func (client CustomResourceProviderClient) PollOperation(ctx context.Context, op
 		select {
 		case <-ctx.Done():
 			return fmt.Errorf("context cancelled")
-		case t := <-ticker.C:
-			fmt.Println("Tick at", t)
+		case <-ticker.C:
 			resp, err := client.GetOperation(ctx, managedResourceGroupID, managedAppName, operationID)
 			if err != nil {
 				return err

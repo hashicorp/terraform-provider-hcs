@@ -434,7 +434,14 @@ func setClusterResourceData(d *schema.ResourceData, managedApp managedapplicatio
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("cluster_mode", cluster.Properties.ConsulClusterMode)
+	// Set cluster mode based on numServers
+	// TODO: cluster.Properties.ConsulClusterMode should be relied on when the value is populated on the fetch response
+	clusterMode := "PRODUCTION"
+	if cluster.Properties.ConsulNumServers == "1" {
+		clusterMode = "DEVELOPMENT"
+	}
+
+	err = d.Set("cluster_mode", clusterMode)
 	if err != nil {
 		return diag.FromErr(err)
 	}

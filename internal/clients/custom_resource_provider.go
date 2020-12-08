@@ -2,7 +2,6 @@ package clients
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -84,10 +83,24 @@ func (client CustomResourceProviderClient) CreateRootToken(ctx context.Context, 
 func (client CustomResourceProviderClient) FetchConsulCluster(ctx context.Context, managedResourceGroupId string, clusterName string) (models.HashicorpCloudConsulamaAmaClusterResponse, error) {
 	var cluster models.HashicorpCloudConsulamaAmaClusterResponse
 
-	req, err := client.customActionPreparer(ctx, managedResourceGroupId, fmt.Sprintf("consulClusters/%s", clusterName), models.HashicorpCloudConsulamaAmaCreateTokenRequest{
-		ResourceGroup:  managedResourceGroupId,
-		SubscriptionID: client.SubscriptionID,
-	})
+	pathParams := map[string]interface{}{
+		"resourceGroup": autorest.Encode("path", managedResourceGroupId),
+		"clusterName":   autorest.Encode("path", clusterName),
+	}
+
+	const APIVersion = "2018-09-01-preview"
+	queryParams := map[string]interface{}{
+		"api-version": APIVersion,
+	}
+
+	preparer := autorest.CreatePreparer(
+		autorest.AsContentType("application/json; charset=utf-8"),
+		autorest.AsGet(),
+		autorest.WithBaseURL(client.BaseURI),
+		autorest.WithPathParameters("/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/consulClusters/{clusterName}", pathParams),
+		autorest.WithQueryParameters(queryParams))
+
+	req, err := preparer.Prepare((&http.Request{}).WithContext(ctx))
 	if err != nil {
 		return cluster, err
 	}

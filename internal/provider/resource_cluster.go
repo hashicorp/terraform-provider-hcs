@@ -418,10 +418,23 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	ctx, cancel := timeouts.ForDelete(ctx, d)
+	defer cancel()
 
-	return diag.Errorf("not implemented")
+	// Delete the managed app (the cluster custom resource will be deleted as well).
+	managedAppID := d.Id()
+	managedAppClient := meta.(*clients.Client).ManagedApplication
+	future, err := managedAppClient.DeleteByID(ctx, managedAppID)
+	if err != nil {
+		return diag.Errorf("failed to delete HCS Cluster (Managed Application ID %q): %+v", managedAppID, err)
+	}
+
+	err = future.WaitForCompletionRef(ctx, managedAppClient.Client)
+	if err != nil {
+		return diag.Errorf("failed to wait for deleting HCS Cluster (Managed Application ID %q): %+v", managedAppID, err)
+	}
+
+	return nil
 }
 
 // setClusterResourceData sets the KV pairs of the cluster resource schema.

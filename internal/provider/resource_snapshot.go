@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -140,12 +141,19 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	resp, err := crpClient.GetSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotID)
 
-	// TODO check if we get a 404 here and if so set ID to "" to delete from tfstate
-	// TODO present error message to user to remove from their tf file
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to get snapshot for managed app: %s", err))
-	}
+		azErr, ok := err.(*azure.RequestError)
+		if !ok {
+			return diag.FromErr(fmt.Errorf("failed to get snapshot for managed app: %s", err))
+		}
 
+		if azErr.StatusCode == 404 {
+			return diag.FromErr(fmt.Errorf(
+				"snapshot not found. the retention policy for snapshots is 30 days and " +
+					"this snapshot may have been deleted, if you leave the snapshot resource " +
+					"in your plan, a new snapshot will be created"))
+		}
+	}
 	populateSnapshotState(d, resp.Snapshot)
 
 	return nil

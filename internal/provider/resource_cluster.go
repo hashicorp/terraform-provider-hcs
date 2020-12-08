@@ -89,7 +89,7 @@ func resourceCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				ValidateDiagFunc: validateConsulVersion,
+				ValidateDiagFunc: validateSemVer,
 			},
 			"consul_datacenter": {
 				Type:             schema.TypeString,

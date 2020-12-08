@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// validateStringNotEmpty ensures a given string is non-empty.
 func validateStringNotEmpty(v interface{}, path cty.Path) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
 
@@ -27,6 +28,7 @@ func validateStringNotEmpty(v interface{}, path cty.Path) diag.Diagnostics {
 	return diagnostics
 }
 
+// validateResourceGroupName validates a resource group name string.
 // Adapted from the azurerm provider
 // https://github.com/terraform-providers/terraform-provider-azurerm/blob/8f32ad645888ee00a24ad7c739a8703222e13913/azurerm/helpers/azure/resource_group.go#L77
 func validateResourceGroupName(v interface{}, path cty.Path) diag.Diagnostics {
@@ -115,7 +117,7 @@ func validateStringInSlice(valid []string, ignoreCase bool) schema.SchemaValidat
 	}
 }
 
-// validateCIDR ensures that the provided value is a string and a valid CIDR.
+// validateCIDR ensures that the provided string is a valid CIDR.
 func validateCIDR(v interface{}, path cty.Path) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
 
@@ -132,7 +134,8 @@ func validateCIDR(v interface{}, path cty.Path) diag.Diagnostics {
 	return diagnostics
 }
 
-func validateConsulVersion(v interface{}, path cty.Path) diag.Diagnostics {
+// validateSemVer ensures a specified string is a SemVer.
+func validateSemVer(v interface{}, path cty.Path) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
 
 	if !regexp.MustCompile(`^v?\d+.\d+.\d+$`).MatchString(v.(string)) {

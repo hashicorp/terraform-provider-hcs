@@ -244,7 +244,6 @@ func populateSnapshotState(d *schema.ResourceData, snapshot *models.HashicorpClo
 	d.Set("requested_at", snapshot.RequestedAt.String())
 	d.Set("finished_at", snapshot.FinishedAt.String())
 
-	var size = 0
 	size, err := strconv.Atoi(snapshot.Size)
 	if err != nil {
 		log.Printf("[ERROR] Error converting string to int: %v", err)

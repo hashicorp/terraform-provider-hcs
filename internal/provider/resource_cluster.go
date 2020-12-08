@@ -244,7 +244,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		clusterName = v.(string)
 	}
 
-	managedResourceGroupId := *resourceGroup.ID + "-mrg-" + managedAppName
+	managedResourceGroupId := fmt.Sprintf("%s-mrg-%s", *resourceGroup.ID, managedAppName)
 	v, ok = d.GetOk("managed_resource_group_name")
 	if ok {
 		managedResourceGroupId = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", meta.(*clients.Client).Account.SubscriptionId, v.(string))

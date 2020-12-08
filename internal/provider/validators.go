@@ -106,7 +106,7 @@ func validateStringInSlice(valid []string, ignoreCase bool) schema.SchemaValidat
 			}
 		}
 
-		msg := fmt.Sprintf("expected %s to not be any of %v", value, valid)
+		msg := fmt.Sprintf("expected %s to be one of %v", value, valid)
 		diagnostics = append(diagnostics, diag.Diagnostic{
 			Severity:      diag.Error,
 			Summary:       msg,

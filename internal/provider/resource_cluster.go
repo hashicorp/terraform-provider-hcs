@@ -67,13 +67,16 @@ func resourceCluster() *schema.Resource {
 					"Development",
 					"Production",
 				}, true),
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					return strings.ToLower(old) == strings.ToLower(new)
+				},
 			},
 			// Optional inputs
 			"cluster_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				// TODO: can we validate optional fields
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Computed:         true,
 				ValidateDiagFunc: validateSlugID,
 			},
 			"vnet_cidr": {
@@ -94,6 +97,7 @@ func resourceCluster() *schema.Resource {
 				Optional:         true,
 				ValidateDiagFunc: validateSlugID,
 				ForceNew:         true,
+				Computed:         true,
 			},
 			"consul_federation_token": {
 				Type:     schema.TypeString,
@@ -110,17 +114,20 @@ func resourceCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 				// TODO: validate location the same way azurerm does
 			},
 			"plan_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			"managed_resource_group_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			// Computed outputs
 			"state": {

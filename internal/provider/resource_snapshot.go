@@ -77,9 +77,13 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
-	// TODO handle 404 not found
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to fetch managed app: %s", err))
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if app.Response.StatusCode == 404 {
+		// No managed application exists, so this snapshot should be removed from state
+		d.SetId("")
+		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -120,9 +124,13 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
-	// TODO handle 404 not found
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to fetch managed app: %s", err))
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if app.Response.StatusCode == 404 {
+		// No managed application exists, so this snapshot should be removed from state
+		d.SetId("")
+		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -152,9 +160,13 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
-	// TODO handle 404 not found
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to fetch managed app: %s", err))
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if app.Response.StatusCode == 404 {
+		// No managed application exists, so this snapshot should be removed from state
+		d.SetId("")
+		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 	}
 
 	managedResourceGroupID := *app.ManagedResourceGroupID
@@ -181,9 +193,13 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
-	// TODO handle a 404 not found properly
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to fetch managed app: %s", err))
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if app.Response.StatusCode == 404 {
+		// No managed application exists, so this snapshot should be removed from state
+		d.SetId("")
+		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID

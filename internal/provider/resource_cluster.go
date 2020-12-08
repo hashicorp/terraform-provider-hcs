@@ -8,10 +8,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
+	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
-
-	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
 
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -122,6 +121,10 @@ func resourceCluster() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+				ValidateDiagFunc: validateStringInSlice([]string{
+					"on-demand-v2",
+					"annual",
+				}, false),
 			},
 			"managed_resource_group_name": {
 				Type:     schema.TypeString,
@@ -238,6 +241,38 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("unsupported location: %s; expected location to be one of %+v", *location, supportedRegions)
 	}
 
+	availableConsulVersions, err := consul.GetAvailableHCPConsulVersions(ctx, meta.(*clients.Client).Config.HCPApiDomain)
+	if err != nil || availableConsulVersions == nil {
+		return diag.Errorf("failed to get available HCP Consul versions: %+v", err)
+	}
+	consulVersion := consul.RecommendedVersion(availableConsulVersions)
+	v, ok = d.GetOk("consul_version")
+	if ok {
+		consulVersion = consul.NormalizeVersion(v.(string))
+	}
+	if !consul.IsValidVersion(consulVersion, availableConsulVersions) {
+		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", consulVersion, availableConsulVersions)
+	}
+
+	// Azure Marketplace Plan
+	planDefaults, err := hcsmeta.GetPlanDefaults(ctx)
+	if err != nil {
+		return diag.Errorf("unable to retrieve HCS Azure Marketplace plan defaults: %+v", err)
+	}
+
+	planName := planDefaults.Name
+	v, ok = d.GetOk("plan_name")
+	if ok {
+		planName = v.(string)
+	}
+
+	plan := managedapplications.Plan{
+		Name:      utils.String(planName),
+		Version:   utils.String(planDefaults.Version),
+		Product:   utils.String(meta.(*clients.Client).Config.MarketPlaceProductName),
+		Publisher: utils.String("hashicorp-4665790"),
+	}
+
 	clusterName := managedAppName
 	v, ok = d.GetOk("cluster_name")
 	if ok {
@@ -262,42 +297,10 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		externalEndpoint = "enabled"
 	}
 
-	availableConsulVersions, err := consul.GetAvailableHCPConsulVersions(ctx, meta.(*clients.Client).Config.HCPApiDomain)
-	if err != nil || availableConsulVersions == nil {
-		return diag.Errorf("failed to get available HCP Consul versions: %+v", err)
-	}
-	consulVersion := consul.RecommendedVersion(availableConsulVersions)
-	v, ok = d.GetOk("consul_version")
-	if ok {
-		consulVersion = consul.NormalizeVersion(v.(string))
-	}
-	if !consul.IsValidVersion(consulVersion, availableConsulVersions) {
-		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", consulVersion, availableConsulVersions)
-	}
-
 	var federationToken string
 	v, ok = d.GetOk("consul_federation_token")
 	if ok {
 		federationToken = v.(string)
-	}
-
-	// Azure Marketplace Plan
-	planDefaults, err := hcsmeta.GetPlanDefaults(ctx)
-	if err != nil {
-		return diag.Errorf("unable to retrieve HCS Azure Marketplace plan defaults: %+v", err)
-	}
-
-	planName := planDefaults.Name
-	v, ok = d.GetOk("plan_name")
-	if ok {
-		planName = v.(string)
-	}
-
-	plan := managedapplications.Plan{
-		Name:      utils.String(planName),
-		Version:   utils.String(planDefaults.Version),
-		Product:   utils.String(meta.(*clients.Client).Config.MarketPlaceProductName),
-		Publisher: utils.String("hashicorp-4665790"),
 	}
 
 	hcsAMAParams := map[string]managedAppParamValue{

@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const HCPConsulAPIVersion = "2020-08-26"
+
 type Version struct {
 	Version string `json:"version"`
 
@@ -22,7 +24,7 @@ func GetAvailableHCPConsulVersions(ctx context.Context, hcpApiDomain string) ([]
 	apiDomain := strings.TrimPrefix(hcpApiDomain, "https://")
 	apiDomain = strings.TrimSuffix(hcpApiDomain, "/")
 
-	url := fmt.Sprintf("https://%s/consul/2020-08-26/versions", apiDomain)
+	url := fmt.Sprintf("https://%s/consul/%s/versions", apiDomain, HCPConsulAPIVersion)
 	client := http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,

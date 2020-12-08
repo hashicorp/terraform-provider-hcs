@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+const MetaURLPrefix = "https://raw.githubusercontent.com/hashicorp/cloud-hcs-meta/master"
+
 type PlanDefaults struct {
 	Name string `json:"name"`
 
@@ -28,7 +30,7 @@ type supportedRegionsResponse struct {
 func GetPlanDefaults(ctx context.Context) (PlanDefaults, error) {
 	var planDefaults PlanDefaults
 
-	url := "https://raw.githubusercontent.com/hashicorp/cloud-hcs-meta/master/ama-plans/defaults.json"
+	url := MetaURLPrefix + "/ama-plans/defaults.json"
 	client := http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
@@ -51,7 +53,7 @@ func GetPlanDefaults(ctx context.Context) (PlanDefaults, error) {
 }
 
 func GetSupportedRegions(ctx context.Context) ([]SupportedRegion, error) {
-	url := "https://raw.githubusercontent.com/hashicorp/cloud-hcs-meta/master/regions/regions.json"
+	url := MetaURLPrefix + "/regions/regions.json"
 	client := http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,

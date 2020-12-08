@@ -148,6 +148,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if azErr.StatusCode == 404 {
+			d.SetId("")
 			return diag.FromErr(fmt.Errorf(
 				"snapshot not found. the retention policy for snapshots is 30 days and " +
 					"this snapshot may have been deleted, if you leave the snapshot resource " +

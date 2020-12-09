@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -12,13 +13,16 @@ import (
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
-	"github.com/hashicorp/terraform-provider-hcs/internal/timeouts"
 )
 
 const (
 	// defaultRestoredAt is the default string returned when a snapshot has not been restored
 	defaultRestoredAt = "0001-01-01T00:00:00.000Z"
 )
+
+// snapshotCreateUpdateDeleteTimeoutDuration is the amount of time that can elapse
+// before a snapshot operation should timeout.
+var snapshotCreateUpdateDeleteTimeoutDuration = time.Minute * 15
 
 // resourceSnapshot defines the snapshot resource schema and CRUD contexts.
 func resourceSnapshot() *schema.Resource {
@@ -27,6 +31,11 @@ func resourceSnapshot() *schema.Resource {
 		ReadContext:   resourceSnapshotRead,
 		UpdateContext: resourceSnapshotUpdate,
 		DeleteContext: resourceSnapshotDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: &snapshotCreateUpdateDeleteTimeoutDuration,
+			Update: &snapshotCreateUpdateDeleteTimeoutDuration,
+			Delete: &snapshotCreateUpdateDeleteTimeoutDuration,
+		},
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
@@ -70,9 +79,6 @@ func resourceSnapshot() *schema.Resource {
 }
 
 func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ctx, cancel := timeouts.ForCreateUpdate(ctx, d)
-	defer cancel()
-
 	resourceGroupName := d.Get("resource_group_name").(string)
 	managedAppName := d.Get("managed_application_name").(string)
 
@@ -117,9 +123,6 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ctx, cancel := timeouts.ForRead(ctx, d)
-	defer cancel()
-
 	resourceGroupName := d.Get("resource_group_name").(string)
 	managedAppName := d.Get("managed_application_name").(string)
 
@@ -167,9 +170,6 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 }
 
 func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ctx, cancel := timeouts.ForUpdate(ctx, d)
-	defer cancel()
-
 	resourceGroupName := d.Get("resource_group_name").(string)
 	managedAppName := d.Get("managed_application_name").(string)
 
@@ -200,9 +200,6 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ctx, cancel := timeouts.ForDelete(ctx, d)
-	defer cancel()
-
 	resourceGroupName := d.Get("resource_group_name").(string)
 	managedAppName := d.Get("managed_application_name").(string)
 

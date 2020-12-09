@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -90,8 +91,9 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
+		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 		d.SetId("")
-		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
+		return nil
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -126,8 +128,9 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
+		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 		d.SetId("")
-		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
+		return nil
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -144,17 +147,11 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		if azErr.StatusCode == 404 {
-			d.SetId("")
-			s := "snapshot not found. the retention policy for snapshots is 30 days and " +
+			log.Printf("[ERROR] snapshot not found. the retention policy for snapshots is 30 days and " +
 				"this snapshot may have been deleted, if you leave the snapshot resource " +
-				"in your plan, a new snapshot will be created"
-			return []diag.Diagnostic{
-				{
-					Severity: diag.Warning,
-					Summary:  s,
-					Detail:   s,
-				},
-			}
+				"in your plan, a new snapshot will be created")
+			d.SetId("")
+			return nil
 		}
 	}
 
@@ -176,8 +173,9 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
+		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 		d.SetId("")
-		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
+		return nil
 	}
 
 	managedResourceGroupID := *app.ManagedResourceGroupID
@@ -208,8 +206,9 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
+		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 		d.SetId("")
-		return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
+		return nil
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID

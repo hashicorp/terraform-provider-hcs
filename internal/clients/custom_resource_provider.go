@@ -33,9 +33,8 @@ func NewCustomResourceProviderClientWithBaseURI(baseURI string, subscriptionID s
 // customActionPreparer prepares the Custom Resource Action request.
 func (client CustomResourceProviderClient) customActionPreparer(ctx context.Context, managedResourceGroupId string, action string, body interface{}) (*http.Request, error) {
 	pathParams := map[string]interface{}{
-		"resourceGroup":  autorest.Encode("path", managedResourceGroupId),
-		"action":         autorest.Encode("path", action),
-		"subscriptionId": autorest.Encode("path", client.SubscriptionID),
+		"resourceGroup": autorest.Encode("path", managedResourceGroupId),
+		"action":        autorest.Encode("path", action),
 	}
 
 	const APIVersion = "2018-09-01-preview"
@@ -47,7 +46,7 @@ func (client CustomResourceProviderClient) customActionPreparer(ctx context.Cont
 		autorest.AsContentType("application/json; charset=utf-8"),
 		autorest.AsPost(),
 		autorest.WithBaseURL(client.BaseURI),
-		autorest.WithPathParameters("/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/{action}", pathParams),
+		autorest.WithPathParameters("/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/{action}", pathParams),
 		autorest.WithJSON(body),
 		autorest.WithQueryParameters(queryParams))
 	return preparer.Prepare((&http.Request{}).WithContext(ctx))
@@ -78,6 +77,47 @@ func (client CustomResourceProviderClient) CreateRootToken(ctx context.Context, 
 		autorest.ByClosing())
 
 	return rootToken, err
+}
+
+// FetchConsulCluster invokes the consulCluster Custom Resource Action.
+func (client CustomResourceProviderClient) FetchConsulCluster(ctx context.Context, managedResourceGroupId string, clusterName string) (models.HashicorpCloudConsulamaAmaClusterResponse, error) {
+	var cluster models.HashicorpCloudConsulamaAmaClusterResponse
+
+	pathParams := map[string]interface{}{
+		"resourceGroup": autorest.Encode("path", managedResourceGroupId),
+		"clusterName":   autorest.Encode("path", clusterName),
+	}
+
+	const APIVersion = "2018-09-01-preview"
+	queryParams := map[string]interface{}{
+		"api-version": APIVersion,
+	}
+
+	preparer := autorest.CreatePreparer(
+		autorest.AsContentType("application/json; charset=utf-8"),
+		autorest.AsGet(),
+		autorest.WithBaseURL(client.BaseURI),
+		autorest.WithPathParameters("/{resourceGroup}/providers/Microsoft.CustomProviders/resourceProviders/public/consulClusters/{clusterName}", pathParams),
+		autorest.WithQueryParameters(queryParams))
+
+	req, err := preparer.Prepare((&http.Request{}).WithContext(ctx))
+	if err != nil {
+		return cluster, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return cluster, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&cluster),
+		autorest.ByClosing())
+
+	return cluster, err
 }
 
 // TODO: Add more custom actions when needed by provider resources

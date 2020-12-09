@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/go-azure-helpers/authentication"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -17,9 +16,21 @@ func New() func() *schema.Provider {
 				"scaffolding_data_source": dataSourceScaffolding(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"scaffolding_resource": resourceScaffolding(),
+				"hcs_cluster": resourceCluster(),
 			},
 			Schema: map[string]*schema.Schema{
+				"hcp_api_domain": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("HCP_DOMAIN_OVERRIDE", "api.cloud.hashicorp.com"),
+					Description: "The HashiCorp Cloud Platform API domain.",
+				},
+				"hcs_marketplace_product_name": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("HCP_PLAN", "hcs-production"),
+					Description: "The HashiCorp Consul Service product name on the Azure marketplace.",
+				},
 				// We must support the same optional fields found in the azurerm provider schema
 				// that are used for authentication to Azure. They are prefixed with azure_ below.
 				"azure_subscription_id": {
@@ -122,18 +133,22 @@ func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (
 
 		authConfig, err := builder.Build()
 		if err != nil {
-			return nil, diag.FromErr(fmt.Errorf("error building Azure authentication config: %s", err))
+			return nil, diag.Errorf("unable to build Azure authentication config: %+v", err)
 		}
 
 		//TODO: pass provider version to user agent
 		clientOptions := clients.Options{
 			ProviderUserAgent: p.UserAgent("terraform-provider-hcs", ""),
 			AzureAuthConfig:   authConfig,
+			Config: clients.Config{
+				HCPApiDomain:           d.Get("hcp_api_domain").(string),
+				MarketPlaceProductName: d.Get("hcs_marketplace_product_name").(string),
+			},
 		}
 
 		c, err := clients.Build(ctx, clientOptions)
 		if err != nil {
-			return nil, diag.FromErr(fmt.Errorf("error creating HCS client: %s", err))
+			return nil, diag.Errorf("unable to create HCS client: %+v", err)
 		}
 
 		return c, nil

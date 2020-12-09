@@ -7,17 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
-
-	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
-	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
-	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
-
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
+	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
+	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 	"github.com/hashicorp/terraform-provider-hcs/utils"
 )
 

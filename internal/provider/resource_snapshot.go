@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -102,7 +101,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.CreateSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotName)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to create snapshot for managed app: %s", err))
+		return diag.Errorf("failed to create snapshot for managed app: %+v", err)
 	}
 
 	d.SetId(resp.SnapshotID)
@@ -110,15 +109,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
 
 	if err != nil {
-		log.Printf("[ERROR] - error polling operation: %+v", err)
-		return []diag.Diagnostic{
-			{
-				Severity:      0,
-				Summary:       err.Error(),
-				Detail:        resp.Operation.ID,
-				AttributePath: nil,
-			},
-		}
+		return diag.FromErr(fmt.Errorf("error polling operation: %+v", err))
 	}
 
 	return resourceSnapshotRead(ctx, d, meta)
@@ -149,7 +140,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		azErr, ok := err.(*azure.RequestError)
 		if !ok {
-			return diag.FromErr(fmt.Errorf("failed to get snapshot for managed app: %s", err))
+			return diag.Errorf("failed to get snapshot for managed app: %+v", err)
 		}
 
 		if azErr.StatusCode == 404 {
@@ -166,7 +157,10 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 			}
 		}
 	}
-	populateSnapshotState(d, resp.Snapshot)
+
+	if diag := populateSnapshotState(d, resp.Snapshot); diag != nil {
+		return diag
+	}
 
 	return nil
 }
@@ -196,7 +190,9 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(fmt.Errorf("failed to rename snapshot for managed app: %s", err))
 	}
 
-	populateSnapshotState(d, resp.Snapshot)
+	if diag := populateSnapshotState(d, resp.Snapshot); diag != nil {
+		return diag
+	}
 
 	return nil
 }
@@ -229,33 +225,27 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
 
 	if err != nil {
-		log.Printf("[ERROR] - error polling operation: %+v", err)
-		return []diag.Diagnostic{
-			{
-				Severity:      0,
-				Summary:       err.Error(),
-				Detail:        resp.Operation.ID,
-				AttributePath: nil,
-			},
-		}
+		return diag.FromErr(fmt.Errorf("error polling operation: %+v", err))
 	}
 
 	d.SetId("")
 	return nil
 }
 
-func populateSnapshotState(d *schema.ResourceData, snapshot *models.HashicorpCloudConsulamaAmaSnapshotProperties) {
+func populateSnapshotState(d *schema.ResourceData, snapshot *models.HashicorpCloudConsulamaAmaSnapshotProperties) diag.Diagnostics {
 	d.Set("state", snapshot.State)
 	d.Set("requested_at", snapshot.RequestedAt.String())
 	d.Set("finished_at", snapshot.FinishedAt.String())
 
 	size, err := strconv.Atoi(snapshot.Size)
 	if err != nil {
-		log.Printf("[ERROR] Error converting string to int: %v", err)
+		return diag.FromErr(fmt.Errorf("[ERROR] Error converting string to int: %+v", err))
 	}
 	d.Set("size", size)
 
 	if snapshot.RestoredAt.String() != defaultRestoredAt {
 		d.Set("restored_at", snapshot.RestoredAt.String())
 	}
+
+	return nil
 }

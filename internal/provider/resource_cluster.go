@@ -16,16 +16,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
-	"github.com/hashicorp/terraform-provider-hcs/internal/timeouts"
 	"github.com/hashicorp/terraform-provider-hcs/utils"
 )
 
 var createUpdateDeleteTimeoutDuration = time.Minute * 25
 
+// managedAppParamValue is the container struct for passing AMA values on creation/update.
 type managedAppParamValue struct {
+	// Value is the value of the AMA param
 	Value interface{} `json:"value"`
 }
 
+// resourceCluster represents an HCS Cluster resource.
+// Most of the CRUD involves the Azure Managed Application and Custom Resource Provider actions.
 func resourceCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceClusterCreate,
@@ -202,9 +205,6 @@ func resourceCluster() *schema.Resource {
 }
 
 func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ctx, cancel := timeouts.ForCreateUpdate(ctx, d)
-	defer cancel()
-
 	managedAppName := d.Get("managed_application_name").(string)
 	resourceGroupName := d.Get("resource_group_name").(string)
 
@@ -378,9 +378,6 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ctx, cancel := timeouts.ForRead(ctx, d)
-	defer cancel()
-
 	// Fetch the managed app
 	managedAppID := d.Id()
 	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
@@ -410,16 +407,12 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	// TODO: Implement version upgrade in HCS-1470
 
 	return diag.Errorf("not implemented")
 }
 
 func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	ctx, cancel := timeouts.ForDelete(ctx, d)
-	defer cancel()
-
 	// Delete the managed app (the cluster custom resource will be deleted as well).
 	managedAppID := d.Id()
 	managedAppClient := meta.(*clients.Client).ManagedApplication

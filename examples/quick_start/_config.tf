@@ -1,6 +1,7 @@
 terraform {
   required_providers {
     hcs = {
+      // TODO: Update this to hashicorp/hcs when the provider is available on the registry
       source  = "unreleased.hashicorp.com/hashicorp/hcs"
       version = "0.0.1"
     }

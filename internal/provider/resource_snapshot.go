@@ -110,7 +110,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
 
 	if err != nil {
-		log.Printf("[ERROR] - error polling operation!")
+		log.Printf("[ERROR] - error polling operation: %+v", err)
 		return []diag.Diagnostic{
 			{
 				Severity:      0,
@@ -229,7 +229,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
 
 	if err != nil {
-		log.Printf("[ERROR] - error polling operation!")
+		log.Printf("[ERROR] - error polling operation: %+v", err)
 		return []diag.Diagnostic{
 			{
 				Severity:      0,

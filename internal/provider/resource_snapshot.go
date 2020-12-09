@@ -42,11 +42,13 @@ func resourceSnapshot() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateResourceGroupName,
+				ForceNew:         true,
 			},
 			"managed_application_name": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateManagedAppName,
+				ForceNew:         true,
 			},
 			"snapshot_name": {
 				Type:             schema.TypeString,

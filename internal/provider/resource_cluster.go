@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
+
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
 	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
 	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
@@ -433,13 +435,16 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 // We do not set consul_root_token_accessor_id and consul_root_token_secret_id here since
 // the original root token is only available during cluster creation.
 func setClusterResourceData(d *schema.ResourceData, managedApp managedapplications.Application, cluster models.HashicorpCloudConsulamaAmaClusterResponse) diag.Diagnostics {
-	// TODO: Parse the resource group from the ID
-	//err := d.Set("resource_group_name", *managedApp.ID)
-	//if err != nil {
-	//	return diag.FromErr(err)
-	//}
+	resourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("resource_group_name", resourceGroupName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	err := d.Set("managed_application_name", *managedApp.Name)
+	err = d.Set("managed_application_name", *managedApp.Name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -501,8 +506,11 @@ func setClusterResourceData(d *schema.ResourceData, managedApp managedapplicatio
 		return diag.FromErr(err)
 	}
 
-	// TODO: When we parse the Managed App ID we can probably just use the MRG from that
-	err = d.Set("managed_resource_group_name", cluster.Properties.StorageAccountResourceGroup)
+	managedResourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ManagedResourceGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	err = d.Set("managed_resource_group_name", managedResourceGroupName)
 	if err != nil {
 		return diag.FromErr(err)
 	}

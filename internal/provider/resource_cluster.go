@@ -92,6 +92,9 @@ func resourceCluster() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ValidateDiagFunc: validateSemVer,
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					return consul.NormalizeVersion(old) == consul.NormalizeVersion(new)
+				},
 			},
 			"consul_datacenter": {
 				Type:             schema.TypeString,
@@ -426,7 +429,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("error retrieving upgrade versions for HCS Cluster (Managed Application ID %q): %+v", managedAppID, err)
 	}
 
-	newConsulVersion := d.Get("consul_version").(string)
+	newConsulVersion := consul.NormalizeVersion(d.Get("consul_version").(string))
 
 	if upgradeVersionsResponse.Versions == nil {
 		msg := "no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS"
@@ -448,8 +451,10 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("error updating HCS Cluster (Managed Application ID %q) (Consul Version %s): %+v", managedAppID, newConsulVersion, err)
 	}
 
-	// TODO: Poll operation once that func lands in main
-	log.Print(updateResponse.Operation.ID)
+	err = meta.(*clients.Client).CustomResourceProvider.PollOperation(ctx, updateResponse.Operation.ID, *managedApp.ManagedResourceGroupID, *managedApp.Name, 10)
+	if err != nil {
+		return diag.Errorf("error while polling operation (update cluster): %+v", err)
+	}
 
 	return resourceClusterRead(ctx, d, meta)
 }

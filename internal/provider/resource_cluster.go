@@ -432,14 +432,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	newConsulVersion := consul.NormalizeVersion(d.Get("consul_version").(string))
 
 	if upgradeVersionsResponse.Versions == nil {
-		msg := "no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS"
-		return diag.Diagnostics{
-			diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary:  msg,
-				Detail:   msg,
-			},
-		}
+		return diag.Errorf("no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS")
 	}
 
 	if !consul.IsValidVersion(newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions)) {

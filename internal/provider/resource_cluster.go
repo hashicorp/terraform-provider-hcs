@@ -406,7 +406,7 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q): %+v", managedAppID, clusterName, err)
 	}
 
-	return setClusterResourceData(d, managedApp, cluster)
+	return setClusterData(d, managedApp, cluster)
 }
 
 func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -469,10 +469,10 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-// setClusterResourceData sets the KV pairs of the cluster resource schema.
+// setClusterData sets the KV pairs of the cluster resource schema.
 // We do not set consul_root_token_accessor_id and consul_root_token_secret_id here since
 // the original root token is only available during cluster creation.
-func setClusterResourceData(d *schema.ResourceData, managedApp managedapplications.Application, cluster models.HashicorpCloudConsulamaAmaClusterResponse) diag.Diagnostics {
+func setClusterData(d *schema.ResourceData, managedApp managedapplications.Application, cluster models.HashicorpCloudConsulamaAmaClusterResponse) diag.Diagnostics {
 	resourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ID)
 	if err != nil {
 		return diag.FromErr(err)

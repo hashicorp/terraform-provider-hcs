@@ -10,6 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+// dataSourceCluster is the data source for an HCS Cluster.
+// It has the same schema as the cluster resource, with the exception of
+// consul_root_token_accessor_id and consul_root_token_secret_id.
 func dataSourceCluster() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceClusterRead,

@@ -407,9 +407,51 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 }
 
 func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// TODO: Implement version upgrade in HCS-1470
+	// Fetch the managed app
+	managedAppID := d.Id()
+	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
+	if err != nil {
+		if managedApp.Response.StatusCode == 404 {
+			log.Printf("[INFO] HCS Cluster %q does not exist - removing from state", d.Id())
+			d.SetId("")
+			return nil
+		}
 
-	return diag.Errorf("not implemented")
+		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) : %+v", managedAppID, err)
+	}
+
+	// Retrieve the valid upgrade versions
+	upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
+	if err != nil {
+		return diag.Errorf("error retrieving upgrade versions for HCS Cluster (Managed Application ID %q): %+v", managedAppID, err)
+	}
+
+	newConsulVersion := d.Get("consul_version").(string)
+
+	if upgradeVersionsResponse.Versions == nil {
+		msg := "no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS"
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  msg,
+				Detail:   msg,
+			},
+		}
+	}
+
+	if !consul.IsValidVersion(newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions)) {
+		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", newConsulVersion, upgradeVersionsResponse.Versions)
+	}
+
+	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, newConsulVersion)
+	if err != nil {
+		return diag.Errorf("error updating HCS Cluster (Managed Application ID %q) (Consul Version %s): %+v", managedAppID, newConsulVersion, err)
+	}
+
+	// TODO: Poll operation once that func lands in main
+	log.Print(updateResponse.Operation.ID)
+
+	return resourceClusterRead(ctx, d, meta)
 }
 
 func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

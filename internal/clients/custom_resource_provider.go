@@ -120,6 +120,59 @@ func (client CustomResourceProviderClient) FetchConsulCluster(ctx context.Contex
 	return cluster, err
 }
 
-// TODO: Add more custom actions when needed by provider resources
+// ListUpgradeVersions invokes the listConsulUpgradeVersions Custom Resource Provider Action.
+func (client CustomResourceProviderClient) ListUpgradeVersions(ctx context.Context, managedResourceGroupId string) (models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsResponse, error) {
+	var upgradeVersions models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsResponse
 
-// TODO: The update action will need to implement operation polling as it returns an operation
+	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "listConsulUpgradeVersions", models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsRequest{
+		ResourceGroup:  managedResourceGroupId,
+		SubscriptionID: client.SubscriptionID,
+	})
+	if err != nil {
+		return upgradeVersions, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return upgradeVersions, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&upgradeVersions),
+		autorest.ByClosing())
+
+	return upgradeVersions, err
+}
+
+// UpdateCluster invokes the update Custom Resource Provider Action.
+func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupId string, newConsulVersion string) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
+	var updateResponse models.HashicorpCloudConsulamaAmaUpdateClusterResponse
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "update", models.HashicorpCloudConsulamaAmaUpdateClusterRequest{
+		ResourceGroup:  managedResourceGroupId,
+		SubscriptionID: client.SubscriptionID,
+		Update: &models.HashicorpCloudConsulamaAmaClusterUpdate{
+			ConsulVersion: newConsulVersion,
+		},
+	})
+	if err != nil {
+		return updateResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return updateResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&updateResponse),
+		autorest.ByClosing())
+
+	return updateResponse, err
+}

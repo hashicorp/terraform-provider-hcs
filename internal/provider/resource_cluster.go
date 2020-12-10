@@ -436,7 +436,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if !consul.IsValidVersion(newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions)) {
-		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", newConsulVersion, upgradeVersionsResponse.Versions)
+		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions))
 	}
 
 	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, newConsulVersion)

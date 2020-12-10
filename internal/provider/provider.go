@@ -13,7 +13,7 @@ func New() func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			DataSourcesMap: map[string]*schema.Resource{
-				"scaffolding_data_source": dataSourceScaffolding(),
+				"hcs_cluster": dataSourceCluster(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"hcs_cluster":  resourceCluster(),

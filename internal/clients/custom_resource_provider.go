@@ -2,11 +2,13 @@ package clients
 
 import (
 	"context"
+	"fmt"
 	"net/http"
-
-	"github.com/Azure/go-autorest/autorest/azure"
+	"time"
 
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/azure"
+
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
 )
 
@@ -52,7 +54,7 @@ func (client CustomResourceProviderClient) customActionPreparer(ctx context.Cont
 	return preparer.Prepare((&http.Request{}).WithContext(ctx))
 }
 
-// CreateRootToken invokes the createToken Custom Resource Action.
+// CreateRootToken invokes the createToken Custom Resource Provider Action.
 func (client CustomResourceProviderClient) CreateRootToken(ctx context.Context, managedResourceGroupId string) (models.HashicorpCloudConsulamaAmaCreateTokenResponse, error) {
 	var rootToken models.HashicorpCloudConsulamaAmaCreateTokenResponse
 
@@ -120,6 +122,134 @@ func (client CustomResourceProviderClient) FetchConsulCluster(ctx context.Contex
 	return cluster, err
 }
 
+// CreateSnapshot invokes the createSnapshot Custom Resource Provider Action
+func (client CustomResourceProviderClient) CreateSnapshot(ctx context.Context, managedResourceGroupID,
+	resourceGroupName, snapshotName string) (models.HashicorpCloudConsulamaAmaCreateSnapshotResponse, error) {
+	var snapshotResponse models.HashicorpCloudConsulamaAmaCreateSnapshotResponse
+
+	body := models.HashicorpCloudConsulamaAmaCreateSnapshotRequest{
+		Name:           snapshotName,
+		ResourceGroup:  resourceGroupName,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "createSnapshot", body)
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&snapshotResponse),
+		autorest.ByClosing())
+
+	return snapshotResponse, err
+}
+
+// GetSnapshot invokes the getSnapshot Custom Resource Provider Action
+func (client CustomResourceProviderClient) GetSnapshot(ctx context.Context, managedResourceGroupID, resourceGroupName,
+	snapshotID string) (models.HashicorpCloudConsulamaAmaGetSnapshotResponse, error) {
+
+	var snapshotResponse models.HashicorpCloudConsulamaAmaGetSnapshotResponse
+
+	body := models.HashicorpCloudConsulamaAmaGetSnapshotRequest{
+		ResourceGroup:  resourceGroupName,
+		SnapshotID:     snapshotID,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "getSnapshot", body)
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&snapshotResponse),
+		autorest.ByClosing())
+
+	return snapshotResponse, err
+}
+
+// DeleteSnapshot invokes the deleteSnapshot Custom Resource Provider Action
+func (client CustomResourceProviderClient) DeleteSnapshot(ctx context.Context, managedResourceGroupID, resourceGroupName,
+	snapshotID string) (models.HashicorpCloudConsulamaAmaDeleteSnapshotResponse, error) {
+
+	var snapshotResponse models.HashicorpCloudConsulamaAmaDeleteSnapshotResponse
+
+	body := models.HashicorpCloudConsulamaAmaDeleteSnapshotRequest{
+		ResourceGroup:  resourceGroupName,
+		SnapshotID:     snapshotID,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "deleteSnapshot", body)
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&snapshotResponse),
+		autorest.ByClosing())
+
+	return snapshotResponse, err
+}
+
+// RenameSnapshot invokes the renameSnapshot Custom Resource Provider Action
+func (client CustomResourceProviderClient) RenameSnapshot(ctx context.Context, managedResourceGroupID, resourceGroupName,
+	snapshotID, snapshotName string) (models.HashicorpCloudConsulamaAmaRenameSnapshotResponse, error) {
+
+	var snapshotResponse models.HashicorpCloudConsulamaAmaRenameSnapshotResponse
+
+	body := models.HashicorpCloudConsulamaAmaRenameSnapshotRequest{
+		ResourceGroup:  resourceGroupName,
+		SnapshotID:     snapshotID,
+		Name:           snapshotName,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "renameSnapshot", body)
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return snapshotResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&snapshotResponse),
+		autorest.ByClosing())
+
+	return snapshotResponse, err
+}
+
 // ListUpgradeVersions invokes the listConsulUpgradeVersions Custom Resource Provider Action.
 func (client CustomResourceProviderClient) ListUpgradeVersions(ctx context.Context, managedResourceGroupId string) (models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsResponse, error) {
 	var upgradeVersions models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsResponse
@@ -148,11 +278,11 @@ func (client CustomResourceProviderClient) ListUpgradeVersions(ctx context.Conte
 }
 
 // UpdateCluster invokes the update Custom Resource Provider Action.
-func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupId string, newConsulVersion string) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
+func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupID string, newConsulVersion string) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
 	var updateResponse models.HashicorpCloudConsulamaAmaUpdateClusterResponse
 
-	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "update", models.HashicorpCloudConsulamaAmaUpdateClusterRequest{
-		ResourceGroup:  managedResourceGroupId,
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "update", models.HashicorpCloudConsulamaAmaUpdateClusterRequest{
+		ResourceGroup:  managedResourceGroupID,
 		SubscriptionID: client.SubscriptionID,
 		Update: &models.HashicorpCloudConsulamaAmaClusterUpdate{
 			ConsulVersion: newConsulVersion,
@@ -175,4 +305,68 @@ func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, ma
 		autorest.ByClosing())
 
 	return updateResponse, err
+}
+
+// GetOperation invokes the operation Custom Resource Provider Action
+func (client CustomResourceProviderClient) GetOperation(ctx context.Context, managedResourceGroupID,
+	resourceGroupName, operationID string) (models.HashicorpCloudConsulamaAmaGetOperationResponse, error) {
+
+	var opResp models.HashicorpCloudConsulamaAmaGetOperationResponse
+
+	body := models.HashicorpCloudConsulamaAmaGetOperationRequest{
+		OperationID:    operationID,
+		ResourceGroup:  resourceGroupName,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "operation", body)
+	if err != nil {
+		return opResp, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return opResp, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&opResp),
+		autorest.ByClosing())
+
+	return opResp, err
+}
+
+// PollOperation will poll the operation Custom Resource Provider Action
+// endpoint every pollInterval seconds until the operation state is DONE
+// or the context cancels the request.
+func (client CustomResourceProviderClient) PollOperation(ctx context.Context, operationID, managedResourceGroupID, managedAppName string,
+	pollInterval int) error {
+
+	ticker := time.NewTicker(time.Duration(pollInterval) * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("context cancelled")
+		case <-ticker.C:
+			resp, err := client.GetOperation(ctx, managedResourceGroupID, managedAppName, operationID)
+			if err != nil {
+				return err
+			}
+
+			if resp.Operation.State != models.HashicorpCloudConsulamaAmaOperationStateDONE {
+				continue
+			}
+
+			if resp.Operation.Error != nil {
+				return fmt.Errorf("an error occurred in an aysnc operation; code: %d", resp.Operation.Error.Code)
+			}
+
+			return nil
+		}
+	}
 }

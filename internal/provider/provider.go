@@ -16,7 +16,8 @@ func New() func() *schema.Provider {
 				"scaffolding_data_source": dataSourceScaffolding(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"hcs_cluster": resourceCluster(),
+				"hcs_cluster":  resourceCluster(),
+				"hcs_snapshot": resourceSnapshot(),
 			},
 			Schema: map[string]*schema.Schema{
 				"hcp_api_domain": {

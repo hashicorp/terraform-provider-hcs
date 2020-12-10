@@ -119,19 +119,38 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 // resourceClusterRootTokenRead will act as a no-op as the root token is not persisted in
 // any way that it can be fetched and read
 func resourceClusterRootTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
-
-	return diag.Errorf("not implemented")
+	return nil
 }
 
 // resourceClusterRootTokenDelete will "delete" an existing token by creating a new one,
 // that will not be returned, and invalidating the previous token for the cluster.
 func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
-	// client := meta.(*apiClient)
+	resourceGroupName := d.Get("resource_group_name").(string)
+	managedAppName := d.Get("managed_application_name").(string)
 
-	return diag.Errorf("not implemented")
+	managedAppClient := meta.(*clients.Client).ManagedApplication
+	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	if err != nil {
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if app.Response.StatusCode == 404 {
+		// No managed application exists, so this root token should be removed from state
+		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
+		d.SetId("")
+		return nil
+	}
+
+	mrgID := *app.ApplicationProperties.ManagedResourceGroupID
+
+	crpClient := meta.(*clients.Client).CustomResourceProvider
+	// generate a new token to invalidate the previous one, but discard the response
+	_, err = crpClient.CreateRootToken(ctx, mrgID)
+	if err != nil {
+		return diag.Errorf("failed to delete HCS Cluster root token (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
+	}
+
+	d.SetId("")
+	return nil
 }
 
 // generateKubernetesSecret will generate a Kubernetes secret with

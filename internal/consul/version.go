@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
 )
 
 // HCPConsulAPIVersion is the version of the HCP Consul API we are using to retrieve versions.
@@ -83,4 +87,26 @@ func IsValidVersion(version string, versions []Version) bool {
 	}
 
 	return false
+}
+
+// FromAMAVersions converts a slice of *HashicorpCloudConsulamaAmaVersion to a slice of
+// Version.
+func FromAMAVersions(amaVersions []*models.HashicorpCloudConsulamaAmaVersion) []Version {
+	if amaVersions == nil {
+		return nil
+	}
+
+	var versions []Version
+	for _, v := range amaVersions {
+		if v == nil {
+			continue
+		}
+
+		versions = append(versions, Version{
+			Version: v.Version,
+			Status:  helper.AMAVersionStatusToString(v.Status),
+		})
+	}
+
+	return versions
 }

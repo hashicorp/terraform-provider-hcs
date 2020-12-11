@@ -16,8 +16,9 @@ func New() func() *schema.Provider {
 				"hcs_cluster": dataSourceCluster(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"hcs_cluster":  resourceCluster(),
-				"hcs_snapshot": resourceSnapshot(),
+				"hcs_cluster":            resourceCluster(),
+				"hcs_snapshot":           resourceSnapshot(),
+				"hcs_cluster_root_token": resourceClusterRootToken(),
 			},
 			Schema: map[string]*schema.Schema{
 				"hcp_api_domain": {

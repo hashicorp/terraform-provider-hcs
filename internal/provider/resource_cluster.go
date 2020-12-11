@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
 	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
 	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
-	"github.com/hashicorp/terraform-provider-hcs/utils"
 )
 
 var createUpdateDeleteTimeoutDuration = time.Minute * 25
@@ -239,7 +238,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	location := resourceGroup.Location
 	v, ok := d.GetOk("location")
 	if ok {
-		location = utils.String(strings.ReplaceAll(strings.ToLower(v.(string)), " ", ""))
+		location = helper.String(strings.ReplaceAll(strings.ToLower(v.(string)), " ", ""))
 	}
 	supportedRegions, err := hcsmeta.GetSupportedRegions(ctx)
 	if err != nil {
@@ -275,10 +274,10 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	plan := managedapplications.Plan{
-		Name:      utils.String(planName),
-		Version:   utils.String(planDefaults.Version),
-		Product:   utils.String(meta.(*clients.Client).Config.MarketPlaceProductName),
-		Publisher: utils.String("hashicorp-4665790"),
+		Name:      helper.String(planName),
+		Version:   helper.String(planDefaults.Version),
+		Product:   helper.String(meta.(*clients.Client).Config.MarketPlaceProductName),
+		Publisher: helper.String("hashicorp-4665790"),
 	}
 
 	clusterName := managedAppName
@@ -340,11 +339,11 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	params := managedapplications.Application{
 		ApplicationProperties: &managedapplications.ApplicationProperties{
-			ManagedResourceGroupID: utils.String(managedResourceGroupId),
+			ManagedResourceGroupID: helper.String(managedResourceGroupId),
 			Parameters:             hcsAMAParams,
 		},
 		Plan:     &plan,
-		Kind:     utils.String("MarketPlace"),
+		Kind:     helper.String("MarketPlace"),
 		Location: location,
 	}
 	future, err := managedAppClient.CreateOrUpdate(ctx, resourceGroupName, managedAppName, params)

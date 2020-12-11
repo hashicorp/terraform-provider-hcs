@@ -14,17 +14,17 @@ import (
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
 )
 
-var defaultClusterRootTokenTimeoutDuration = time.Minute * 25
+var defaultClusterRootTokenTimeoutDuration = time.Minute * 5
 
 // kubernetesSecretTemplate is the template used to generate a
 // kubernetes formatted secret for the cluster root token.
 const kubernetesSecretTemplate = `apiVersion: v1
 kind: Secret
 metadata:
-name: %s-bootstrap-token
+  name: %s-bootstrap-token
 type: Opaque
 data:
-token: %s`
+  token: %s`
 
 // resourceClusterRootToken represents the cluster root token resource
 // that is used to bootstrap the cluster's ACL system.
@@ -36,7 +36,7 @@ func resourceClusterRootToken() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Default: &defaultClusterRootTokenTimeoutDuration,
 		},
-		Description: "cluster_root_token is the token used to bootstrap the cluster's ACL system",
+		Description: "hcs_cluster_root_token is the token used to bootstrap the cluster's ACL system",
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
@@ -57,12 +57,14 @@ func resourceClusterRootToken() *schema.Resource {
 				Computed: true,
 			},
 			"secret_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"kubernetes_secret": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: "the root token base64 encoded in a Kubernetes secret",
 			},
 		},
@@ -82,7 +84,6 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this root token should be removed from state
 		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
-		d.SetId("")
 		return nil
 	}
 
@@ -129,7 +130,7 @@ func resourceClusterRootTokenRead(ctx context.Context, d *schema.ResourceData, m
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
-		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
+		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q). Removing root token.", managedAppName, resourceGroupName)
 		d.SetId("")
 		return nil
 	}
@@ -151,7 +152,6 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this root token should be removed from state
 		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
-		d.SetId("")
 		return nil
 	}
 
@@ -164,7 +164,6 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 		return diag.Errorf("failed to delete HCS Cluster root token (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
 	}
 
-	d.SetId("")
 	return nil
 }
 

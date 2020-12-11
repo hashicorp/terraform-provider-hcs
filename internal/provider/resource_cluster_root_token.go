@@ -119,6 +119,21 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 // resourceClusterRootTokenRead will act as a no-op as the root token is not persisted in
 // any way that it can be fetched and read
 func resourceClusterRootTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	resourceGroupName := d.Get("resource_group_name").(string)
+	managedAppName := d.Get("managed_application_name").(string)
+
+	managedAppClient := meta.(*clients.Client).ManagedApplication
+	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	if err != nil {
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+	}
+	if app.Response.StatusCode == 404 {
+		// No managed application exists, so this snapshot should be removed from state
+		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
+		d.SetId("")
+		return nil
+	}
+
 	return nil
 }
 

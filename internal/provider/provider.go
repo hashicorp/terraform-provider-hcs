@@ -13,12 +13,12 @@ func New() func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			DataSourcesMap: map[string]*schema.Resource{
-				"hcs_cluster": dataSourceCluster(),
+				"hcs_cluster":          dataSourceCluster(),
+				"hcs_federation_token": dataSourceFederationToken(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"hcs_cluster":          resourceCluster(),
-				"hcs_federation_token": resourceFederationToken(),
-				"hcs_snapshot":         resourceSnapshot(),
+				"hcs_cluster":  resourceCluster(),
+				"hcs_snapshot": resourceSnapshot(),
 			},
 			Schema: map[string]*schema.Schema{
 				"hcp_api_domain": {

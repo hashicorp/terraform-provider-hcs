@@ -107,6 +107,12 @@ func resourceCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
+					// Since federation tokens are not persisted in HCS, we generate a new one for each federation
+					// token data source read. We don't want to force recreation of the cluster if the 'Primary' claim
+					// of the 'new' JWT (federation token) matches the 'Primary' claim for the old token.
+					return helper.FederationTokensHaveSamePrimary(old, new)
+				},
 			},
 			"consul_external_endpoint": {
 				Type:     schema.TypeBool,

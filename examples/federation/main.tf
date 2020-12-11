@@ -13,7 +13,7 @@ resource "hcs_cluster" "primary" {
   consul_datacenter        = "hcs-tf-federation-example"
 }
 
-resource "hcs_federation_token" "test" {
+data "hcs_federation_token" "test" {
   resource_group_name      = hcs_cluster.primary.resource_group_name
   managed_application_name = hcs_cluster.primary.managed_application_name
 }
@@ -31,5 +31,5 @@ resource "hcs_cluster" "secondary" {
   consul_version           = "v1.9.0"
   vnet_cidr                = "172.25.17.0/24"
   consul_datacenter        = "hcs-tf-federation-secondary"
-  consul_federation_token  = hcs_federation_token.test.token
+  consul_federation_token  = data.hcs_federation_token.test.token
 }

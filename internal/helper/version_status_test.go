@@ -25,6 +25,10 @@ func Test_AMAVersionStatusToString(t *testing.T) {
 			input:    models.HashicorpCloudConsulamaAmaVersionStatusPREVIEW,
 			expected: "PREVIEW",
 		},
+		"default": {
+			input:    "FOO",
+			expected: "",
+		},
 	}
 
 	for n, tc := range tcs {

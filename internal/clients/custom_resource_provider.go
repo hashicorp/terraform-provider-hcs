@@ -250,6 +250,35 @@ func (client CustomResourceProviderClient) RenameSnapshot(ctx context.Context, m
 	return snapshotResponse, err
 }
 
+// CreateFederationToken invokes the createFederationToken Custom Resource Provider Action
+func (client CustomResourceProviderClient) CreateFederationToken(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (models.HashicorpCloudConsulamaAmaCreateFederationTokenResponse, error) {
+	var federationTokenResponse models.HashicorpCloudConsulamaAmaCreateFederationTokenResponse
+
+	body := models.HashicorpCloudConsulamaAmaCreateFederationTokenRequest{
+		ResourceGroup:  resourceGroupName,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "createFederationToken", body)
+	if err != nil {
+		return federationTokenResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return federationTokenResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&federationTokenResponse),
+		autorest.ByClosing())
+
+	return federationTokenResponse, err
+}
+
 // GetOperation invokes the operation Custom Resource Provider Action
 func (client CustomResourceProviderClient) GetOperation(ctx context.Context, managedResourceGroupID,
 	resourceGroupName, operationID string) (models.HashicorpCloudConsulamaAmaGetOperationResponse, error) {

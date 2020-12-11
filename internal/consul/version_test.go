@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
 )
 
 func Test_RecommendedVersion(t *testing.T) {
@@ -139,4 +141,46 @@ func Test_IsValidVersion(t *testing.T) {
 			r.Equal(tc.expected, result)
 		})
 	}
+}
+
+func Test_FromAMAVersions(t *testing.T) {
+	amaVersions := []models.HashicorpCloudConsulamaAmaVersion{
+		{
+			Version: "v1.9.0",
+			Status:  models.HashicorpCloudConsulamaAmaVersionStatusRECOMMENDED,
+		},
+		{
+			Version: "v1.8.6",
+			Status:  models.HashicorpCloudConsulamaAmaVersionStatusAVAILABLE,
+		},
+		{
+			Version: "v1.8.4",
+			Status:  models.HashicorpCloudConsulamaAmaVersionStatusAVAILABLE,
+		},
+	}
+
+	var input []*models.HashicorpCloudConsulamaAmaVersion
+	for i := range amaVersions {
+		input = append(input, &amaVersions[i])
+	}
+
+	expectedVersions := []Version{
+		{
+			Version: "v1.9.0",
+			Status:  "RECOMMENDED",
+		},
+		{
+			Version: "v1.8.6",
+			Status:  "AVAILABLE",
+		},
+		{
+			Version: "v1.8.4",
+			Status:  "AVAILABLE",
+		},
+	}
+
+	r := require.New(t)
+
+	result := FromAMAVersions(input)
+	r.EqualValues(expectedVersions, result)
 }

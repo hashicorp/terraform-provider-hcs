@@ -250,6 +250,63 @@ func (client CustomResourceProviderClient) RenameSnapshot(ctx context.Context, m
 	return snapshotResponse, err
 }
 
+// ListUpgradeVersions invokes the listConsulUpgradeVersions Custom Resource Provider Action.
+func (client CustomResourceProviderClient) ListUpgradeVersions(ctx context.Context, managedResourceGroupId string) (models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsResponse, error) {
+	var upgradeVersions models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsResponse
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "listConsulUpgradeVersions", models.HashicorpCloudConsulamaAmaListConsulUpgradeVersionsRequest{
+		ResourceGroup:  managedResourceGroupId,
+		SubscriptionID: client.SubscriptionID,
+	})
+	if err != nil {
+		return upgradeVersions, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return upgradeVersions, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&upgradeVersions),
+		autorest.ByClosing())
+
+	return upgradeVersions, err
+}
+
+// UpdateCluster invokes the update Custom Resource Provider Action.
+func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupID string, newConsulVersion string) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
+	var updateResponse models.HashicorpCloudConsulamaAmaUpdateClusterResponse
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "update", models.HashicorpCloudConsulamaAmaUpdateClusterRequest{
+		ResourceGroup:  managedResourceGroupID,
+		SubscriptionID: client.SubscriptionID,
+		Update: &models.HashicorpCloudConsulamaAmaClusterUpdate{
+			ConsulVersion: newConsulVersion,
+		},
+	})
+	if err != nil {
+		return updateResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return updateResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&updateResponse),
+		autorest.ByClosing())
+
+	return updateResponse, err
+}
+
 // CreateFederationToken invokes the createFederationToken Custom Resource Provider Action
 func (client CustomResourceProviderClient) CreateFederationToken(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (models.HashicorpCloudConsulamaAmaCreateFederationTokenResponse, error) {
 	var federationTokenResponse models.HashicorpCloudConsulamaAmaCreateFederationTokenResponse

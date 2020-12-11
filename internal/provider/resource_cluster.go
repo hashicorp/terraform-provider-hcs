@@ -472,6 +472,11 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
+// resourceClusterImport implements the logic necessary to import an un-tracked
+// (by Terraform) cluster resource into Terraform state.
+//
+// This logic handles parsing out the AMA ID + cluster name to build the proper
+// request to fetch the cluster details.
 func resourceClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	id, clusterName, err := validateClusterImportString(d.Id())
 

@@ -39,6 +39,9 @@ func resourceCluster() *schema.Resource {
 			Update: &createUpdateDeleteTimeoutDuration,
 			Delete: &createUpdateDeleteTimeoutDuration,
 		},
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceClusterImport,
+		},
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
@@ -472,6 +475,56 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	return nil
+}
+
+// resourceClusterImport implements the logic necessary to import an un-tracked
+// (by Terraform) cluster resource into Terraform state.
+//
+// This logic handles parsing out the AMA ID + cluster name to build the proper
+// request to fetch the cluster details.
+func resourceClusterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	id, clusterName, err := validateClusterImportString(d.Id())
+
+	if err != nil {
+		return nil, err
+	}
+
+	d.SetId(id)
+	d.Set("cluster_name", clusterName)
+
+	diags := resourceClusterRead(ctx, d, meta)
+	if err := helper.ToError(diags); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
+}
+
+// validateClusterImportString validates that the import string
+// is of the format expected.  Which should be a colon `:` delimited
+// string with the managed_application_id to the left of the colon
+// and the cluster_name to the right of it:
+//
+// `managed_application_id:cluster_name`
+func validateClusterImportString(s string) (string, string, error) {
+	if !strings.Contains(s, ":") {
+		return "", "", fmt.Errorf("import id string must be of format `managed_application_id:cluster_name`; id string: %s does not contain `:`", s)
+	}
+
+	segments := strings.Split(s, ":")
+	if len(segments) != 2 {
+		return "", "", fmt.Errorf("import id string must be of format `managed_application_id:cluster_name`; id string: %s contains more than one `:`", s)
+	}
+
+	if segments[0] == "" {
+		return "", "", fmt.Errorf("import id string must be of format `managed_application_id:cluster_name`; id string: %s has empty string to left of `:`", s)
+	}
+
+	if segments[1] == "" {
+		return "", "", fmt.Errorf("import id string must be of format `managed_application_id:cluster_name`; id string: %s has empty string to right of `:`", s)
+	}
+
+	return segments[0], segments[1], nil
 }
 
 // setClusterData sets the KV pairs of the cluster resource schema.

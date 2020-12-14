@@ -16,9 +16,9 @@ import (
 
 var defaultClusterRootTokenTimeoutDuration = time.Minute * 5
 
-// kubernetesSecretTemplate is the template used to generate a
+// rootTokenKubernetesSecretTemplate is the template used to generate a
 // kubernetes formatted secret for the cluster root token.
-const kubernetesSecretTemplate = `apiVersion: v1
+const rootTokenKubernetesSecretTemplate = `apiVersion: v1
 kind: Secret
 metadata:
   name: %s-bootstrap-token
@@ -170,7 +170,7 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 // generateKubernetesSecret will generate a Kubernetes secret with
 // a base64 encoded root token secret as it's token.
 func generateKubernetesSecret(rootTokenSecretId, managedAppName string) string {
-	return fmt.Sprintf(kubernetesSecretTemplate,
+	return fmt.Sprintf(rootTokenKubernetesSecretTemplate,
 		// lowercase the name
 		strings.ToLower(managedAppName),
 		// base64 encode the secret value

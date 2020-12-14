@@ -13,9 +13,10 @@ func New() func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			DataSourcesMap: map[string]*schema.Resource{
-				"hcs_cluster":          dataSourceCluster(),
-				"hcs_federation_token": dataSourceFederationToken(),
-				"hcs_consul_versions":  dataSourceConsulVersions(),
+				"hcs_cluster":                 dataSourceCluster(),
+				"hcs_federation_token":        dataSourceFederationToken(),
+				"hcs_consul_versions":         dataSourceConsulVersions(),
+				"hcs_agent_kubernetes_secret": dataSourceAgentConfigKubernetesSecret(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"hcs_cluster":            resourceCluster(),

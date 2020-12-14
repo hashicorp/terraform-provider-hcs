@@ -15,6 +15,7 @@ func New() func() *schema.Provider {
 			DataSourcesMap: map[string]*schema.Resource{
 				"hcs_cluster":          dataSourceCluster(),
 				"hcs_federation_token": dataSourceFederationToken(),
+				"hcs_consul_versions":  dataSourceConsulVersions(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"hcs_cluster":            resourceCluster(),

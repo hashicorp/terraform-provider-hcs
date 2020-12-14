@@ -12,10 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// dataSourceVersions is the data source for the Consul versions supported by HCS.
-func dataSourceVersions() *schema.Resource {
+// dataSourceConsulVersions is the data source for the Consul versions supported by HCS.
+func dataSourceConsulVersions() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceVersionsRead,
+		ReadContext: dataSourceConsulVersionsRead,
 		Schema: map[string]*schema.Schema{
 			// Computed outputs
 			"recommended": {
@@ -40,9 +40,9 @@ func dataSourceVersions() *schema.Resource {
 	}
 }
 
-// dataSourceVersionsRead retrieves the available Consul versions from HCP and sets the schema fields
+// dataSourceConsulVersionsRead retrieves the available Consul versions from HCP and sets the schema fields
 // appropriately.
-func dataSourceVersionsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceConsulVersionsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	versions, err := consul.GetAvailableHCPConsulVersions(ctx, meta.(*clients.Client).Config.HCPApiDomain)
 	if err != nil {
 		return diag.Errorf("unable to retrieve available Consul versions: %+v", err)

@@ -277,6 +277,33 @@ func (client CustomResourceProviderClient) ListUpgradeVersions(ctx context.Conte
 	return upgradeVersions, err
 }
 
+// Config invokes the config Custom Resource Provider Action.
+func (client CustomResourceProviderClient) Config(ctx context.Context, managedResourceGroupId string) (models.HashicorpCloudConsulamaAmaGetConfigResponse, error) {
+	var getConfigResp models.HashicorpCloudConsulamaAmaGetConfigResponse
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "config", models.HashicorpCloudConsulamaAmaGetConfigRequest{
+		ResourceGroup:  managedResourceGroupId,
+		SubscriptionID: client.SubscriptionID,
+	})
+	if err != nil {
+		return getConfigResp, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return getConfigResp, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&getConfigResp),
+		autorest.ByClosing())
+
+	return getConfigResp, nil
+}
+
 // UpdateCluster invokes the update Custom Resource Provider Action.
 func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupID string, newConsulVersion string) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
 	var updateResponse models.HashicorpCloudConsulamaAmaUpdateClusterResponse

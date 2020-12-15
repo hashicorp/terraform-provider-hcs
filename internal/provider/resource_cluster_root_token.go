@@ -88,7 +88,7 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 			)
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -101,7 +101,7 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 	crpClient := meta.(*clients.Client).CustomResourceProvider
 	rootTokenResp, err := crpClient.CreateRootToken(ctx, mrgID)
 	if err != nil {
-		return diag.Errorf("failed to create HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error creating HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -151,7 +151,7 @@ func resourceClusterRootTokenRead(ctx context.Context, d *schema.ResourceData, m
 			return nil
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -181,7 +181,7 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 			return nil
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -195,7 +195,7 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 	// generate a new token to invalidate the previous one, but discard the response
 	_, err = crpClient.CreateRootToken(ctx, mrgID)
 	if err != nil {
-		return diag.Errorf("failed to delete HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error deleting HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,

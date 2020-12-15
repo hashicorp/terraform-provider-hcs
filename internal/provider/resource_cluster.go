@@ -360,7 +360,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 	future, err := managedAppClient.CreateOrUpdate(ctx, resourceGroupName, managedAppName, params)
 	if err != nil {
-		return diag.Errorf("failed to create HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error creating HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -368,7 +368,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 	if err = future.WaitForCompletionRef(ctx, managedAppClient.Client); err != nil {
-		return diag.Errorf("failed to wait for creation of HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error waiting for creation of HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -378,7 +378,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to retrieve HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error retrieving HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -396,7 +396,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	rootTokenResp, err := meta.(*clients.Client).CustomResourceProvider.CreateRootToken(ctx, *app.ApplicationProperties.ManagedResourceGroupID)
 	if err != nil {
-		return diag.Errorf("failed to create HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error creating HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -511,7 +511,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 
 	err = meta.(*clients.Client).CustomResourceProvider.PollOperation(ctx, updateResponse.Operation.ID, *managedApp.ManagedResourceGroupID, *managedApp.Name, 10)
 	if err != nil {
-		return diag.Errorf("error while polling update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
+		return diag.Errorf("error polling update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
 			managedAppID,
 			newConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -536,7 +536,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return diag.Errorf("failed fetch HCS Cluster before deletion (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error fetching HCS Cluster before deletion (Managed Application ID %q) (Correlation ID %q): %+v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -555,7 +555,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	// Delete the managed app (the cluster custom resource will be deleted as well).
 	future, err := managedAppClient.DeleteByID(ctx, managedAppID)
 	if err != nil {
-		return diag.Errorf("failed to delete HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error deleting HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -564,7 +564,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 
 	err = future.WaitForCompletionRef(ctx, managedAppClient.Client)
 	if err != nil {
-		return diag.Errorf("failed to wait for deleting HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error waiting for delete of HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,

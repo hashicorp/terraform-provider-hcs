@@ -95,7 +95,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 			)
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -110,7 +110,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.CreateSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotName)
 	if err != nil {
-		return diag.Errorf("failed to create snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error creating snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -152,7 +152,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 			return nil
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -170,7 +170,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		azErr, ok := err.(*azure.RequestError)
 		if !ok || azErr.StatusCode != 404 {
-			return diag.Errorf("failed to get snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			return diag.Errorf("error fetching snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 				managedAppName,
 				resourceGroupName,
 				meta.(*clients.Client).CorrelationRequestID,
@@ -210,7 +210,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -225,7 +225,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	crpClient := meta.(*clients.Client).CustomResourceProvider
 	resp, err := crpClient.RenameSnapshot(ctx, managedResourceGroupID, resourceGroupName, snapshotID, snapshotName)
 	if err != nil {
-		return diag.Errorf("failed to rename snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error renaming snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -257,7 +257,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -272,7 +272,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.DeleteSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotID)
 	if err != nil {
-		return diag.Errorf("failed to delete snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error deleting snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,

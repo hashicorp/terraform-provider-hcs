@@ -365,6 +365,35 @@ func (client CustomResourceProviderClient) CreateFederationToken(ctx context.Con
 	return federationTokenResponse, err
 }
 
+// GetConsulConfig invokes the config Custom Resource Provider Action
+func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (models.HashicorpCloudConsulamaAmaGetConfigResponse, error) {
+	var configResponse models.HashicorpCloudConsulamaAmaGetConfigResponse
+
+	body := models.HashicorpCloudConsulamaAmaGetConfigRequest{
+		ResourceGroup:  resourceGroupName,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "config", body)
+	if err != nil {
+		return configResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return configResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&configResponse),
+		autorest.ByClosing())
+
+	return configResponse, err
+}
+
 // GetOperation invokes the operation Custom Resource Provider Action
 func (client CustomResourceProviderClient) GetOperation(ctx context.Context, managedResourceGroupID,
 	resourceGroupName, operationID string) (models.HashicorpCloudConsulamaAmaGetOperationResponse, error) {

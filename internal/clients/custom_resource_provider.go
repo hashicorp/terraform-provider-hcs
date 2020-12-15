@@ -307,6 +307,35 @@ func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, ma
 	return updateResponse, err
 }
 
+// GetFederation invokes the getFederation Custom Resource Provider Action
+func (client CustomResourceProviderClient) GetFederation(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (models.HashicorpCloudConsulamaAmaGetFederationResponse, error) {
+	var federationResponse models.HashicorpCloudConsulamaAmaGetFederationResponse
+
+	body := models.HashicorpCloudConsulamaAmaGetFederationRequest{
+		ResourceGroup:  resourceGroupName,
+		SubscriptionID: client.SubscriptionID,
+	}
+
+	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "getFederation", body)
+	if err != nil {
+		return federationResponse, err
+	}
+
+	var resp *http.Response
+	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
+	if err != nil {
+		return federationResponse, err
+	}
+
+	err = autorest.Respond(
+		resp,
+		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
+		autorest.ByUnmarshallingJSON(&federationResponse),
+		autorest.ByClosing())
+
+	return federationResponse, err
+}
+
 // CreateFederationToken invokes the createFederationToken Custom Resource Provider Action
 func (client CustomResourceProviderClient) CreateFederationToken(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (models.HashicorpCloudConsulamaAmaCreateFederationTokenResponse, error) {
 	var federationTokenResponse models.HashicorpCloudConsulamaAmaCreateFederationTokenResponse

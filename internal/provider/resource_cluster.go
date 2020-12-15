@@ -461,9 +461,24 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Delete the managed app (the cluster custom resource will be deleted as well).
+	// Ensure the cluster is not the primary in a federation that still has secondaries
 	managedAppID := d.Id()
 	managedAppClient := meta.(*clients.Client).ManagedApplication
+	managedApp, err := managedAppClient.GetByID(ctx, managedAppID)
+	if err != nil {
+		return diag.Errorf("failed fetch HCS Cluster before deletion (Managed Application ID %q): %+v", managedAppID, err)
+	}
+
+	resourceGroupName := d.Get("resource_group_name").(string)
+
+	// An error here denotes that the cluster is not part of a federation
+	federationResponse, err := meta.(*clients.Client).CustomResourceProvider.GetFederation(ctx, *managedApp.ManagedResourceGroupID, d.Get("resource_group_name").(string))
+	// Ensure the cluster is not the primary in the federation
+	if err == nil && isClusterPrimaryInFederation(*managedApp.Name, resourceGroupName, federationResponse) {
+		return diag.Errorf("cannot delete the primary datacenter of a federation before all secondary datacenters are deleted: (Managed Application %q) (Resource Group %q)", *managedApp.Name, resourceGroupName)
+	}
+
+	// Delete the managed app (the cluster custom resource will be deleted as well).
 	future, err := managedAppClient.DeleteByID(ctx, managedAppID)
 	if err != nil {
 		return diag.Errorf("failed to delete HCS Cluster (Managed Application ID %q): %+v", managedAppID, err)
@@ -475,6 +490,16 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	return nil
+}
+
+// isClusterPrimaryInFederation determines if a cluster's managed app and resource group names match
+// the primary cluster's managed app and resource group names in a non-empty federation.
+func isClusterPrimaryInFederation(managedAppName string, resourceGroupName string, federationResponse models.HashicorpCloudConsulamaAmaGetFederationResponse) bool {
+	if federationResponse.PrimaryDatacenter == nil || len(federationResponse.SecondaryDatacenters) == 0 {
+		return false
+	}
+
+	return federationResponse.PrimaryDatacenter.Name == managedAppName && federationResponse.PrimaryDatacenter.ResourceGroup == resourceGroupName
 }
 
 // resourceClusterImport implements the logic necessary to import an un-tracked

@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -48,12 +47,6 @@ client:
   join: %s
 connectInject:
   enabled: true`
-
-// consulConfig represents the Consul config returned on the GetConfig response.
-type ConsulConfig struct {
-	Datacenter string   `json:"datacenter"`
-	RetryJoin  []string `json:"retry_join"`
-}
 
 // dataSourceAgentHelmConfig is the data source for the agent Helm
 // config for an HCS cluster.
@@ -112,15 +105,9 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	crpClient := meta.(*clients.Client).CustomResourceProvider
 
-	resp, err := crpClient.Config(ctx, managedAppManagedResourceGroupID)
+	consulConfig, _, err := crpClient.GetConsulConfig(ctx, managedAppManagedResourceGroupID, resourceGroupName)
 	if err != nil {
 		return diag.Errorf("failed to get config for managed app: %+v", err)
-	}
-
-	var consulConfig ConsulConfig
-	err = json.Unmarshal([]byte(resp.ClientConfig), &consulConfig)
-	if err != nil {
-		return diag.Errorf("failed to json unmarshal Consul config %v", err)
 	}
 
 	// default to resourceGroupName if aks_resource_group is not provided

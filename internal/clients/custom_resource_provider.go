@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,6 +21,13 @@ type CustomResourceProviderClient struct {
 	BaseURI string
 	// SubscriptionID is the Azure subscription id for the current authenticated user.
 	SubscriptionID string
+}
+
+// consulConfig represents the Consul config returned on the GetConfig response.
+type ConsulConfig struct {
+	GossipKey  string   `json:"encrypt"`
+	Datacenter string   `json:"datacenter"`
+	RetryJoin  []string `json:"retry_join"`
 }
 
 // NewCustomResourceProviderClientWithBaseURI constructs a CustomResourceProviderClient using the provided
@@ -277,33 +285,6 @@ func (client CustomResourceProviderClient) ListUpgradeVersions(ctx context.Conte
 	return upgradeVersions, err
 }
 
-// Config invokes the config Custom Resource Provider Action.
-func (client CustomResourceProviderClient) Config(ctx context.Context, managedResourceGroupId string) (models.HashicorpCloudConsulamaAmaGetConfigResponse, error) {
-	var getConfigResp models.HashicorpCloudConsulamaAmaGetConfigResponse
-
-	req, err := client.customActionPreparer(ctx, managedResourceGroupId, "config", models.HashicorpCloudConsulamaAmaGetConfigRequest{
-		ResourceGroup:  managedResourceGroupId,
-		SubscriptionID: client.SubscriptionID,
-	})
-	if err != nil {
-		return getConfigResp, err
-	}
-
-	var resp *http.Response
-	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
-	if err != nil {
-		return getConfigResp, err
-	}
-
-	err = autorest.Respond(
-		resp,
-		azure.WithErrorUnlessStatusCode(http.StatusOK, http.StatusCreated),
-		autorest.ByUnmarshallingJSON(&getConfigResp),
-		autorest.ByClosing())
-
-	return getConfigResp, nil
-}
-
 // UpdateCluster invokes the update Custom Resource Provider Action.
 func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupID string, newConsulVersion string) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
 	var updateResponse models.HashicorpCloudConsulamaAmaUpdateClusterResponse
@@ -393,7 +374,7 @@ func (client CustomResourceProviderClient) CreateFederationToken(ctx context.Con
 }
 
 // GetConsulConfig invokes the config Custom Resource Provider Action
-func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (models.HashicorpCloudConsulamaAmaGetConfigResponse, error) {
+func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (*ConsulConfig, string, error) {
 	var configResponse models.HashicorpCloudConsulamaAmaGetConfigResponse
 
 	body := models.HashicorpCloudConsulamaAmaGetConfigRequest{
@@ -403,13 +384,13 @@ func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, 
 
 	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "config", body)
 	if err != nil {
-		return configResponse, err
+		return nil, "", err
 	}
 
 	var resp *http.Response
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
-		return configResponse, err
+		return nil, "", err
 	}
 
 	err = autorest.Respond(
@@ -418,7 +399,13 @@ func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, 
 		autorest.ByUnmarshallingJSON(&configResponse),
 		autorest.ByClosing())
 
-	return configResponse, err
+	if err != nil {
+		return nil, "", err
+	}
+
+	config, err := unmarshalConsulConfig(configResponse.ClientConfig)
+
+	return config, configResponse.CaFile, err
 }
 
 // GetOperation invokes the operation Custom Resource Provider Action
@@ -483,4 +470,16 @@ func (client CustomResourceProviderClient) PollOperation(ctx context.Context, op
 			return nil
 		}
 	}
+}
+
+// unmarshalConsulConfig will unmarshal the passed in string c,
+// into a ConsulConfig struct
+func unmarshalConsulConfig(c string) (*ConsulConfig, error) {
+	var config ConsulConfig
+	err := json.Unmarshal([]byte(c), &config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to unmarshal Consul config: %+v", err)
+	}
+
+	return &config, nil
 }

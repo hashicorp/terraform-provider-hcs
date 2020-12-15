@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -79,19 +78,14 @@ func dataSourceAgentConfigKubernetesSecretRead(ctx context.Context, d *schema.Re
 		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
 	}
 
-	configResponse, err := meta.(*clients.Client).CustomResourceProvider.GetConsulConfig(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
+	config, caFile, err := meta.(*clients.Client).CustomResourceProvider.GetConsulConfig(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
 	if err != nil {
 		return diag.Errorf("error fetching Consul config (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
 	}
 
-	var config consulConfig
-	err = json.Unmarshal([]byte(configResponse.ClientConfig), &config)
-	if err != nil {
-		return diag.Errorf("unable to unmarshal Consul config: %+v", err)
-	}
 	encodedGossipKey := base64.StdEncoding.EncodeToString([]byte(config.GossipKey))
 
-	encodedCAFile := base64.StdEncoding.EncodeToString([]byte(configResponse.CaFile))
+	encodedCAFile := base64.StdEncoding.EncodeToString([]byte(caFile))
 
 	err = d.Set("secret", fmt.Sprintf(agentConfigKubernetesSecretTemplate, managedAppName, encodedGossipKey, encodedCAFile))
 	if err != nil {

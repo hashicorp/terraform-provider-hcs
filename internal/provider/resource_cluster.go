@@ -240,7 +240,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	// Fetch resource group
 	resourceGroup, err := meta.(*clients.Client).ResourceGroup.Get(ctx, resourceGroupName)
 	if err != nil {
-		return diag.Errorf("failed to fetch resource group (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error fetching resource group (Resource Group %q) (Correlation ID %q): %+v",
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,

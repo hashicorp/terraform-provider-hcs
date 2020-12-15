@@ -45,8 +45,7 @@ func dataSourcePlanDefaultsRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.Errorf("unable to retrieve HCS Meta plan defaults: %+v", err)
 	}
 
-	err = d.Set("plan_name", planDefaults.Name)
-	if err != nil {
+	if err := d.Set("plan_name", planDefaults.Name); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -147,7 +147,12 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
+		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q) : %+v",
+			resourceGroupName,
+			managedAppName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	clusterName := *managedApp.Name
@@ -159,7 +164,12 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 	// Fetch the cluster managed resource
 	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q): %+v", *managedApp.ID, clusterName, err)
+		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %+v",
+			*managedApp.ID,
+			clusterName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	d.SetId(*managedApp.ID)

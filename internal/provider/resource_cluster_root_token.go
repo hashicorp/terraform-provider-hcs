@@ -79,12 +79,16 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 	if app.Response.StatusCode == 404 {
-		// No managed application exists, so this root token should be removed from state
-		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
-		return nil
+		// No managed application exists, so we should not try to create a root token
+		return diag.Errorf("unable to create root token; no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 	}
 
 	mrgID := *app.ApplicationProperties.ManagedResourceGroupID
@@ -92,7 +96,12 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 	crpClient := meta.(*clients.Client).CustomResourceProvider
 	rootTokenResp, err := crpClient.CreateRootToken(ctx, mrgID)
 	if err != nil {
-		return diag.Errorf("failed to create HCS Cluster root token (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
+		return diag.Errorf("failed to create HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	err = d.Set("accessor_id", rootTokenResp.MasterToken.AccessorID)
@@ -126,7 +135,12 @@ func resourceClusterRootTokenRead(ctx context.Context, d *schema.ResourceData, m
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
@@ -147,7 +161,12 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this root token should be removed from state
@@ -161,7 +180,12 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 	// generate a new token to invalidate the previous one, but discard the response
 	_, err = crpClient.CreateRootToken(ctx, mrgID)
 	if err != nil {
-		return diag.Errorf("failed to delete HCS Cluster root token (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
+		return diag.Errorf("failed to delete HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	return nil

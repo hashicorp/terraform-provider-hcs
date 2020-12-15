@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -87,13 +86,16 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 	if app.Response.StatusCode == 404 {
-		// No managed application exists, so this snapshot should be removed from state
-		log.Printf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
-		d.SetId("")
-		return nil
+		// No managed application exists, so we should not try to create the snapshot
+		return diag.Errorf("unable to create snapshot; no HCS Cluster found for (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -103,7 +105,12 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.CreateSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotName)
 	if err != nil {
-		return diag.Errorf("failed to create snapshot for managed app: %+v", err)
+		return diag.Errorf("failed to create snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	d.SetId(resp.SnapshotID)
@@ -111,7 +118,12 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
 
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error polling operation: %+v", err))
+		return diag.Errorf("error polling create snapshot operation (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	return resourceSnapshotRead(ctx, d, meta)
@@ -124,7 +136,12 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
@@ -142,21 +159,24 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 
 	if err != nil {
 		azErr, ok := err.(*azure.RequestError)
-		if !ok {
-			return diag.Errorf("failed to get snapshot for managed app: %+v", err)
+		if !ok || azErr.StatusCode != 404 {
+			return diag.Errorf("failed to get snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+				managedAppName,
+				resourceGroupName,
+				meta.(*clients.Client).CorrelationRequestID,
+				err,
+			)
 		}
 
-		if azErr.StatusCode == 404 {
-			log.Printf("[ERROR] snapshot not found. the retention policy for snapshots is 30 days and " +
-				"this snapshot may have been deleted, if you leave the snapshot resource " +
-				"in your plan, a new snapshot will be created")
-			d.SetId("")
-			return nil
-		}
+		log.Printf("[ERROR] snapshot not found. the retention policy for snapshots is 30 days and " +
+			"this snapshot may have been deleted, if you leave the snapshot resource " +
+			"in your plan, a new snapshot will be created")
+		d.SetId("")
+		return nil
 	}
 
-	if diag := populateSnapshotState(d, resp.Snapshot); diag != nil {
-		return diag
+	if diagnostics := populateSnapshotState(d, resp.Snapshot); diagnostics != nil {
+		return diagnostics
 	}
 
 	return nil
@@ -169,7 +189,12 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
@@ -185,11 +210,16 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	crpClient := meta.(*clients.Client).CustomResourceProvider
 	resp, err := crpClient.RenameSnapshot(ctx, managedResourceGroupID, resourceGroupName, snapshotID, snapshotName)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to rename snapshot for managed app: %s", err))
+		return diag.Errorf("failed to rename snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
-	if diag := populateSnapshotState(d, resp.Snapshot); diag != nil {
-		return diag
+	if diagnostics := populateSnapshotState(d, resp.Snapshot); diagnostics != nil {
+		return diagnostics
 	}
 
 	return nil
@@ -202,7 +232,12 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 	if app.Response.StatusCode == 404 {
 		// No managed application exists, so this snapshot should be removed from state
@@ -218,13 +253,22 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.DeleteSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotID)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("failed to delete snapshot for managed app: %s", err))
+		return diag.Errorf("failed to delete snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
-
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("error polling operation: %+v", err))
+		return diag.Errorf("error polling delete snapshot operation (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	d.SetId("")
@@ -232,18 +276,30 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 }
 
 func populateSnapshotState(d *schema.ResourceData, snapshot *models.HashicorpCloudConsulamaAmaSnapshotProperties) diag.Diagnostics {
-	d.Set("state", snapshot.State)
-	d.Set("requested_at", snapshot.RequestedAt.String())
-	d.Set("finished_at", snapshot.FinishedAt.String())
+	if err := d.Set("state", snapshot.State); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("requested_at", snapshot.RequestedAt.String()); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("finished_at", snapshot.FinishedAt.String()); err != nil {
+		return diag.FromErr(err)
+	}
 
 	size, err := strconv.Atoi(snapshot.Size)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("[ERROR] Error converting string to int: %+v", err))
+		return diag.Errorf("error converting string to int: %+v", err)
 	}
-	d.Set("size", size)
+	if err := d.Set("size", size); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if snapshot.RestoredAt.String() != defaultRestoredAt {
-		d.Set("restored_at", snapshot.RestoredAt.String())
+		if err := d.Set("restored_at", snapshot.RestoredAt.String()); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil

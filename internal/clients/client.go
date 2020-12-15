@@ -54,6 +54,9 @@ type Client struct {
 
 	// Config is the provider config which contains HCS specific configuration values.
 	Config Config
+
+	// CorrelationRequestID is the correlation id for all Azure requests made by an instance of this client.
+	CorrelationRequestID string
 }
 
 // Build constructs a Client which is used by the provider to make authenticated HTTP requests to Azure.
@@ -71,8 +74,9 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 	}
 
 	client := Client{
-		Account: account,
-		Config:  options.Config,
+		Account:              account,
+		Config:               options.Config,
+		CorrelationRequestID: correlationRequestID(),
 	}
 
 	oauthConfig, err := options.AzureAuthConfig.BuildOAuthConfig(env.ActiveDirectoryEndpoint)

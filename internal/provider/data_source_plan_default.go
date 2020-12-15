@@ -49,19 +49,16 @@ func dataSourcePlanDefaultsRead(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("plan_version", planDefaults.Version)
-	if err != nil {
+	if err := d.Set("plan_version", planDefaults.Version); err != nil {
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("publisher", "hashicorp-4665790")
-	if err != nil {
+	if err := d.Set("publisher", "hashicorp-4665790"); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Offer is set on the provider config
-	err = d.Set("offer", meta.(*clients.Client).Config.MarketPlaceProductName)
-	if err != nil {
+	if err := d.Set("offer", meta.(*clients.Client).Config.MarketPlaceProductName); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -225,7 +225,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	existingCluster, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
 		if existingCluster.Response.StatusCode != 404 {
-			return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 				managedAppName,
 				resourceGroupName,
 				meta.(*clients.Client).CorrelationRequestID,

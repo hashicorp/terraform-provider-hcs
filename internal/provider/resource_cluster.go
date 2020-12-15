@@ -492,6 +492,8 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
+// isClusterPrimaryInFederation determines if a cluster's managed app and resource group names match
+// the primary cluster's managed app and resource group names in a non-empty federation.
 func isClusterPrimaryInFederation(managedAppName string, resourceGroupName string, federationResponse models.HashicorpCloudConsulamaAmaGetFederationResponse) bool {
 	if federationResponse.PrimaryDatacenter == nil || len(federationResponse.SecondaryDatacenters) == 0 {
 		return false

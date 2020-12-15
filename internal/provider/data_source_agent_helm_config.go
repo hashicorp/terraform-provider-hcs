@@ -94,11 +94,12 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
+		if app.Response.StatusCode == 404 {
+			// No managed application exists, so returning an error stating as such
+			return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q).", managedAppName, resourceGroupName)
+		}
+
 		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
-	}
-	if app.Response.StatusCode == 404 {
-		// No managed application exists, so returning an error stating as such
-		return diag.Errorf("[ERROR] no HCS Cluster found for (Managed Application %q) (Resource Group %q).", managedAppName, resourceGroupName)
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -126,7 +127,7 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 	}
 	if mcResp.Response.StatusCode == 404 {
 		// No AKS cluster exists, so returning an error stating as such
-		return diag.Errorf("[ERROR] no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
+		return diag.Errorf("no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
 	}
 
 	if err := d.Set("config", generateHelmConfig(

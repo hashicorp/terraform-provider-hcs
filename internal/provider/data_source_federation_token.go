@@ -46,7 +46,7 @@ func dataSourceFederationTokenRead(ctx context.Context, d *schema.ResourceData, 
 
 	managedApp, err := meta.(*clients.Client).ManagedApplication.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("failed to fetch HCS Cluster to be used as federation primary (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error fetching HCS Cluster to be used as federation primary (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -56,7 +56,7 @@ func dataSourceFederationTokenRead(ctx context.Context, d *schema.ResourceData, 
 
 	federationTokenResponse, err := meta.(*clients.Client).CustomResourceProvider.CreateFederationToken(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
 	if err != nil {
-		return diag.Errorf("failed to get a federation token for primary cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("error fetching a federation token for primary cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,

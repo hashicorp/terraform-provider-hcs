@@ -423,7 +423,10 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
 	if err != nil {
 		if managedApp.Response.StatusCode == 404 {
-			log.Printf("[INFO] HCS Cluster %q does not exist - removing from state", d.Id())
+			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q); removing from state",
+				managedAppID,
+				meta.(*clients.Client).CorrelationRequestID,
+			)
 			d.SetId("")
 			return nil
 		}
@@ -461,7 +464,10 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
 	if err != nil {
 		if managedApp.Response.StatusCode == 404 {
-			log.Printf("[INFO] HCS Cluster %q does not exist - removing from state", d.Id())
+			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q); removing from state",
+				managedAppID,
+				meta.(*clients.Client).CorrelationRequestID,
+			)
 			d.SetId("")
 			return nil
 		}
@@ -522,6 +528,14 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	managedApp, err := managedAppClient.GetByID(ctx, managedAppID)
 	if err != nil {
+		if managedApp.Response.StatusCode == 404 {
+			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q)",
+				managedAppID,
+				meta.(*clients.Client).CorrelationRequestID,
+			)
+			return nil
+		}
+
 		return diag.Errorf("failed fetch HCS Cluster before deletion (Managed Application ID %q) (Correlation ID %q): %+v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,

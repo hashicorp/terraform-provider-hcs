@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,6 +24,10 @@ data:
   gossipEncryptionKey: %s
   caCert: %s`
 
+// defaultAgentConfigKubernetesSecretTimeoutDuration is the default timeout
+// for reading the agent config Kubernetes secret.
+var defaultAgentConfigKubernetesSecretTimeoutDuration = time.Minute * 5
+
 // consulConfig represents the Consul config returned on the GetConfig response.
 type consulConfig struct {
 	GossipKey string `json:"encrypt"`
@@ -32,6 +37,9 @@ type consulConfig struct {
 func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceAgentConfigKubernetesSecretRead,
+		Timeouts: &schema.ResourceTimeout{
+			Default: &defaultAgentConfigKubernetesSecretTimeoutDuration,
+		},
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
@@ -64,6 +72,10 @@ func dataSourceAgentConfigKubernetesSecretRead(ctx context.Context, d *schema.Re
 
 	managedApp, err := meta.(*clients.Client).ManagedApplication.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
+		if managedApp.Response.StatusCode == 404 {
+			return diag.Errorf("HCS Cluster (Resource Group Name %q) (Managed Application Name %q) was not found", resourceGroupName, managedAppName)
+		}
+
 		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
 	}
 

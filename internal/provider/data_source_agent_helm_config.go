@@ -111,10 +111,11 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.Errorf("failed to get config for managed app: %+v", err)
 	}
 
-	// default to resourceGroupName if aks_resource_group is not provided
-	aksResourceGroup := d.Get("aks_resource_group").(string)
-	if aksResourceGroup == "" {
-		aksResourceGroup = resourceGroupName
+	// default to resource group name if aks_resource_group not present
+	aksResourceGroup := resourceGroupName
+	v, ok := d.GetOk("aks_resource_group")
+	if ok {
+		aksResourceGroup = v.(string)
 	}
 
 	aksClusterName := d.Get("aks_cluster_name").(string)

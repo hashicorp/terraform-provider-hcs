@@ -118,5 +118,8 @@ func configureAutoRestClient(c *autorest.Client, authorizer autorest.Authorizer,
 
 	c.Authorizer = authorizer
 	c.Sender = sender.BuildSender(senderProviderName)
+
+	// By setting the correlation request id header, all requests we make to Azure from the same instance of our client
+	// will have the same correlation id. This is handy to have when debugging (and when interacting with Microsoft support).
 	c.RequestInspector = withCorrelationRequestID(correlationRequestID())
 }

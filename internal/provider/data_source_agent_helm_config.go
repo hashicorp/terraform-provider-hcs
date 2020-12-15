@@ -41,9 +41,7 @@ externalServers:
   k8sAuthMethodHost: https://%s:443
 client:
   enabled: true
-  # If you are using Kubenet in your AKS cluster (the default network),
-  # uncomment the line below.
-  # exposeGossipPorts: true
+  exposeGossipPorts: %t
   join: %s
 connectInject:
   enabled: true`
@@ -75,6 +73,10 @@ func dataSourceAgentHelmConfig() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validateStringNotEmpty,
+			},
+			"expose_gossip_ports": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			// Computed outputs
 			"config": {
@@ -131,8 +133,14 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.Errorf("no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
 	}
 
+	var exposeGossipPorts bool
+	v, ok = d.GetOk("expose_gossip_ports")
+	if ok {
+		exposeGossipPorts = v.(bool)
+	}
+
 	if err := d.Set("config", generateHelmConfig(
-		managedAppName, consulConfig.Datacenter, *mcResp.Fqdn, consulConfig.RetryJoin)); err != nil {
+		managedAppName, consulConfig.Datacenter, *mcResp.Fqdn, consulConfig.RetryJoin, exposeGossipPorts)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -143,7 +151,7 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 // generateHelmConfig will generate a helm config based on the passed in
 // name, data center, retry join, and fqdn.
-func generateHelmConfig(name, datacenter, fqdn string, retryJoin []string) string {
+func generateHelmConfig(name, datacenter, fqdn string, retryJoin []string, exposeGossipPorts bool) string {
 	// lowercase the name
 	lower := strings.ToLower(name)
 
@@ -159,6 +167,7 @@ func generateHelmConfig(name, datacenter, fqdn string, retryJoin []string) strin
 		lower, lower, lower,
 		rj,
 		fqdn,
+		exposeGossipPorts,
 		rj,
 	)
 }

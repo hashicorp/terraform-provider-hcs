@@ -45,6 +45,8 @@ func GetAvailableHCPConsulVersions(ctx context.Context, hcpApiDomain string) ([]
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("User-Agent", "terraform-provider-hcs")
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve avaialable Consul versions from HCP: %+v", err)

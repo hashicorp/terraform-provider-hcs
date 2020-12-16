@@ -71,16 +71,22 @@ func dataSourceAgentConfigKubernetesSecretRead(ctx context.Context, d *schema.Re
 
 	managedApp, err := meta.(*clients.Client).ManagedApplication.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if managedApp.Response.StatusCode == 404 {
-			return diag.Errorf("HCS Cluster (Resource Group Name %q) (Managed Application Name %q) was not found", resourceGroupName, managedAppName)
-		}
-
-		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
+		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q) : %+v",
+			resourceGroupName,
+			managedAppName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	config, err := meta.(*clients.Client).CustomResourceProvider.GetConsulConfig(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
 	if err != nil {
-		return diag.Errorf("error fetching Consul config (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
+		return diag.Errorf("error fetching Consul config (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q) : %+v",
+			resourceGroupName,
+			managedAppName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	encodedGossipKey := base64.StdEncoding.EncodeToString([]byte(config.GossipKey))

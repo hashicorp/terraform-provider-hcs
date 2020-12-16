@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"log"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
 
@@ -141,13 +140,12 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	managedApp, err := meta.(*clients.Client).ManagedApplication.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if managedApp.Response.StatusCode == 404 {
-			log.Printf("[INFO] HCS Cluster %q does not exist - removing from state", d.Id())
-			d.SetId("")
-			return nil
-		}
-
-		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
+		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q) : %+v",
+			resourceGroupName,
+			managedAppName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	clusterName := *managedApp.Name
@@ -159,7 +157,12 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 	// Fetch the cluster managed resource
 	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q): %+v", *managedApp.ID, clusterName, err)
+		return diag.Errorf("error fetching HCS Cluster Managed Resource (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %+v",
+			*managedApp.ID,
+			clusterName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	d.SetId(*managedApp.ID)

@@ -126,11 +126,12 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	mcResp, err := mcClient.Get(ctx, aksResourceGroup, aksClusterName)
 	if err != nil {
+		if mcResp.Response.StatusCode == 404 {
+			// No AKS cluster exists, so returning an error stating as such
+			return diag.Errorf("no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
+		}
+
 		return diag.Errorf("failed to check for presence of existing AKS Cluster (Cluster name %q) (Resource Group %q): %+v", aksClusterName, aksResourceGroup, err)
-	}
-	if mcResp.Response.StatusCode == 404 {
-		// No AKS cluster exists, so returning an error stating as such
-		return diag.Errorf("no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
 	}
 
 	var exposeGossipPorts bool

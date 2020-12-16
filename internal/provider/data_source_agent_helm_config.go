@@ -108,7 +108,7 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	crpClient := meta.(*clients.Client).CustomResourceProvider
 
-	consulConfig, _, err := crpClient.GetConsulConfig(ctx, managedAppManagedResourceGroupID, resourceGroupName)
+	consulConfig, err := crpClient.GetConsulConfig(ctx, managedAppManagedResourceGroupID, resourceGroupName)
 	if err != nil {
 		return diag.Errorf("failed to get config for managed app: %+v", err)
 	}

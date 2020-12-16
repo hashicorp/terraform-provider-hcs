@@ -78,14 +78,14 @@ func dataSourceAgentConfigKubernetesSecretRead(ctx context.Context, d *schema.Re
 		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
 	}
 
-	config, caFile, err := meta.(*clients.Client).CustomResourceProvider.GetConsulConfig(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
+	config, err := meta.(*clients.Client).CustomResourceProvider.GetConsulConfig(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
 	if err != nil {
 		return diag.Errorf("error fetching Consul config (Resource Group Name %q) (Managed Application Name %q) : %+v", resourceGroupName, managedAppName, err)
 	}
 
 	encodedGossipKey := base64.StdEncoding.EncodeToString([]byte(config.GossipKey))
 
-	encodedCAFile := base64.StdEncoding.EncodeToString([]byte(caFile))
+	encodedCAFile := base64.StdEncoding.EncodeToString([]byte(config.CaFile))
 
 	err = d.Set("secret", fmt.Sprintf(agentConfigKubernetesSecretTemplate, managedAppName, encodedGossipKey, encodedCAFile))
 	if err != nil {

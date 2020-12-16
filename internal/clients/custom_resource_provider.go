@@ -23,11 +23,12 @@ type CustomResourceProviderClient struct {
 	SubscriptionID string
 }
 
-// consulConfig represents the Consul config returned on the GetConfig response.
+// ConsulConfig represents the Consul config returned on the GetConfig response.
 type ConsulConfig struct {
 	GossipKey  string   `json:"encrypt"`
 	Datacenter string   `json:"datacenter"`
 	RetryJoin  []string `json:"retry_join"`
+	CaFile     string
 }
 
 // NewCustomResourceProviderClientWithBaseURI constructs a CustomResourceProviderClient using the provided
@@ -374,7 +375,7 @@ func (client CustomResourceProviderClient) CreateFederationToken(ctx context.Con
 }
 
 // GetConsulConfig invokes the config Custom Resource Provider Action
-func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (*ConsulConfig, string, error) {
+func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (*ConsulConfig, error) {
 	var configResponse models.HashicorpCloudConsulamaAmaGetConfigResponse
 
 	body := models.HashicorpCloudConsulamaAmaGetConfigRequest{
@@ -384,13 +385,13 @@ func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, 
 
 	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "config", body)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	var resp *http.Response
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	err = autorest.Respond(
@@ -400,12 +401,14 @@ func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, 
 		autorest.ByClosing())
 
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
 
 	config, err := unmarshalConsulConfig(configResponse.ClientConfig)
 
-	return config, configResponse.CaFile, err
+	config.CaFile = configResponse.CaFile
+
+	return config, err
 }
 
 // GetOperation invokes the operation Custom Resource Provider Action

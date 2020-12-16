@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,6 +21,14 @@ type CustomResourceProviderClient struct {
 	BaseURI string
 	// SubscriptionID is the Azure subscription id for the current authenticated user.
 	SubscriptionID string
+}
+
+// ConsulConfig represents the Consul config returned on the GetConfig response.
+type ConsulConfig struct {
+	GossipKey  string   `json:"encrypt"`
+	Datacenter string   `json:"datacenter"`
+	RetryJoin  []string `json:"retry_join"`
+	CaFile     string
 }
 
 // NewCustomResourceProviderClientWithBaseURI constructs a CustomResourceProviderClient using the provided
@@ -366,7 +375,7 @@ func (client CustomResourceProviderClient) CreateFederationToken(ctx context.Con
 }
 
 // GetConsulConfig invokes the config Custom Resource Provider Action
-func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (models.HashicorpCloudConsulamaAmaGetConfigResponse, error) {
+func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, managedResourceGroupID string, resourceGroupName string) (*ConsulConfig, error) {
 	var configResponse models.HashicorpCloudConsulamaAmaGetConfigResponse
 
 	body := models.HashicorpCloudConsulamaAmaGetConfigRequest{
@@ -376,13 +385,13 @@ func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, 
 
 	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "config", body)
 	if err != nil {
-		return configResponse, err
+		return nil, err
 	}
 
 	var resp *http.Response
 	resp, err = client.Send(req, azure.DoRetryWithRegistration(client.Client))
 	if err != nil {
-		return configResponse, err
+		return nil, err
 	}
 
 	err = autorest.Respond(
@@ -391,7 +400,15 @@ func (client CustomResourceProviderClient) GetConsulConfig(ctx context.Context, 
 		autorest.ByUnmarshallingJSON(&configResponse),
 		autorest.ByClosing())
 
-	return configResponse, err
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := unmarshalConsulConfig(configResponse.ClientConfig)
+
+	config.CaFile = configResponse.CaFile
+
+	return config, err
 }
 
 // GetOperation invokes the operation Custom Resource Provider Action
@@ -456,4 +473,16 @@ func (client CustomResourceProviderClient) PollOperation(ctx context.Context, op
 			return nil
 		}
 	}
+}
+
+// unmarshalConsulConfig will unmarshal the passed in string c,
+// into a ConsulConfig struct
+func unmarshalConsulConfig(c string) (*ConsulConfig, error) {
+	var config ConsulConfig
+	err := json.Unmarshal([]byte(c), &config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to unmarshal Consul config: %+v", err)
+	}
+
+	return &config, nil
 }

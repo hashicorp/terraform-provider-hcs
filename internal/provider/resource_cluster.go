@@ -255,7 +255,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	// Ensure a managed app with the same name does not exist in this resource group
 	existingCluster, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if !helper.IsErrorAzureNotFound(err) {
+		if !helper.IsResponseCodeNotFound(existingCluster.Response) {
 			return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 				managedAppName,
 				resourceGroupName,

@@ -27,11 +27,6 @@ data:
 // for reading the agent config Kubernetes secret.
 var defaultAgentConfigKubernetesSecretTimeoutDuration = time.Minute * 5
 
-// consulConfig represents the Consul config returned on the GetConfig response.
-type consulConfig struct {
-	GossipKey string `json:"encrypt"`
-}
-
 // dataSourceAgentConfigKubernetesSecret is the data source for the Consul versions supported by HCS.
 func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 	return &schema.Resource{

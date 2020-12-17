@@ -6,18 +6,22 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
 
 const (
 	// defaultRestoredAt is the default string returned when a snapshot has not been restored
 	defaultRestoredAt = "0001-01-01T00:00:00.000Z"
 )
+
+// defaultSnapshotTimeoutDuration is the amount of time that can elapse
+// before a snapshot read should timeout.
+var defaultSnapshotTimeoutDuration = time.Minute * 5
 
 // snapshotCreateUpdateDeleteTimeoutDuration is the amount of time that can elapse
 // before a snapshot operation should timeout.
@@ -26,54 +30,64 @@ var snapshotCreateUpdateDeleteTimeoutDuration = time.Minute * 15
 // resourceSnapshot defines the snapshot resource schema and CRUD contexts.
 func resourceSnapshot() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The snapshot resource allows users to manage Consul snapshots of an HCS cluster.",
 		CreateContext: resourceSnapshotCreate,
 		ReadContext:   resourceSnapshotRead,
 		UpdateContext: resourceSnapshotUpdate,
 		DeleteContext: resourceSnapshotDelete,
 		Timeouts: &schema.ResourceTimeout{
-			Create: &snapshotCreateUpdateDeleteTimeoutDuration,
-			Update: &snapshotCreateUpdateDeleteTimeoutDuration,
-			Delete: &snapshotCreateUpdateDeleteTimeoutDuration,
+			Default: &defaultSnapshotTimeoutDuration,
+			Create:  &snapshotCreateUpdateDeleteTimeoutDuration,
+			Update:  &snapshotCreateUpdateDeleteTimeoutDuration,
+			Delete:  &snapshotCreateUpdateDeleteTimeoutDuration,
 		},
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
+				Description:      "The name of the Resource Group in which the HCS Azure Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 				ForceNew:         true,
 			},
 			"managed_application_name": {
+				Description:      "The name of the HCS Azure Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateManagedAppName,
 				ForceNew:         true,
 			},
 			"snapshot_name": {
+				Description:      "The name of the snapshot.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateStringNotEmpty,
 			},
 			// Computed outputs
 			"state": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The state of the snapshot.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"size": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "The size of the snapshot in bytes.",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"requested_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Timestamp of when the snapshot was requested.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"finished_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Timestamp of when the snapshot was finished.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"restored_at": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Timestamp of when the snapshot was restored. If the snapshot has not been restored, this field will be blank.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
@@ -86,7 +100,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No managed application exists, so we should not try to create the snapshot
 			return diag.Errorf("unable to create snapshot; no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -141,7 +155,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No managed application exists, so this snapshot should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -168,8 +182,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 		resourceGroupName, snapshotID)
 
 	if err != nil {
-		azErr, ok := err.(*azure.RequestError)
-		if !ok || azErr.StatusCode != 404 {
+		if !helper.IsErrorAzureNotFound(err) {
 			return diag.Errorf("error fetching snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 				managedAppName,
 				resourceGroupName,
@@ -199,7 +212,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No managed application exists, so this snapshot should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -247,7 +260,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No managed application exists, so this snapshot should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,

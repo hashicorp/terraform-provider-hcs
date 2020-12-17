@@ -4,12 +4,18 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
+
+// defaultAgentHelmConfigTimeoutDuration is the default timeout
+// for reading the agent Helm config.
+var defaultAgentHelmConfigTimeoutDuration = time.Minute * 5
 
 // helmConfigTemplate is the template used to generate a helm
 // config for an AKS cluster based on given inputs.
@@ -50,38 +56,49 @@ connectInject:
 // config for an HCS cluster.
 func dataSourceAgentHelmConfig() *schema.Resource {
 	return &schema.Resource{
+		Description: "The agent Helm config data source provides Helm values for a Consul agent running in Kubernetes.",
 		ReadContext: dataSourceAgentHelmConfigRead,
+		Timeouts: &schema.ResourceTimeout{
+			Default: &defaultAgentHelmConfigTimeoutDuration,
+		},
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
+				Description:      "The name of the Resource Group in which the HCS Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
+				Description:      "The name of the HCS Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateSlugID,
 			},
 			"aks_cluster_name": {
+				Description:      "The name of the AKS cluster that will consume the Helm config.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateStringNotEmpty,
 			},
 			// Optional
 			"aks_resource_group": {
+				Description:      "The resource group name of the AKS cluster that will consume the Helm config. If not specified, it is defaulted to the value of `resource_group_name`.",
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validateStringNotEmpty,
 			},
 			"expose_gossip_ports": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Description: "Denotes that the gossip ports should be exposed.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 			},
 			// Computed outputs
 			"config": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The agent Helm config.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
@@ -96,12 +113,12 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No managed application exists, so returning an error stating as such
 			return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q).", managedAppName, resourceGroupName)
 		}
 
-		return diag.Errorf("failed to check for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -110,7 +127,7 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	consulConfig, err := crpClient.GetConsulConfig(ctx, managedAppManagedResourceGroupID, resourceGroupName)
 	if err != nil {
-		return diag.Errorf("failed to get config for managed app: %+v", err)
+		return diag.Errorf("error fetching config for managed app: %+v", err)
 	}
 
 	// default to resource group name if aks_resource_group not present
@@ -126,19 +143,15 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	mcResp, err := mcClient.Get(ctx, aksResourceGroup, aksClusterName)
 	if err != nil {
-		if mcResp.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No AKS cluster exists, so returning an error stating as such
 			return diag.Errorf("no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
 		}
 
-		return diag.Errorf("failed to check for presence of existing AKS Cluster (Cluster name %q) (Resource Group %q): %+v", aksClusterName, aksResourceGroup, err)
+		return diag.Errorf("error checking for presence of existing AKS Cluster (Cluster name %q) (Resource Group %q): %+v", aksClusterName, aksResourceGroup, err)
 	}
 
-	var exposeGossipPorts bool
-	v, ok = d.GetOk("expose_gossip_ports")
-	if ok {
-		exposeGossipPorts = v.(bool)
-	}
+	exposeGossipPorts := d.Get("expose_gossip_ports").(bool)
 
 	if err := d.Set("config", generateHelmConfig(
 		managedAppName, consulConfig.Datacenter, *mcResp.Fqdn, consulConfig.RetryJoin, exposeGossipPorts)); err != nil {

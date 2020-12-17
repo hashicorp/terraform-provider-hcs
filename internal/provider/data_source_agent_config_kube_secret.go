@@ -35,6 +35,7 @@ type consulConfig struct {
 // dataSourceAgentConfigKubernetesSecret is the data source for the Consul versions supported by HCS.
 func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 	return &schema.Resource{
+		Description: "The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the cluster.",
 		ReadContext: dataSourceAgentConfigKubernetesSecretRead,
 		Timeouts: &schema.ResourceTimeout{
 			Default: &defaultAgentConfigKubernetesSecretTimeoutDuration,
@@ -42,12 +43,14 @@ func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
+				Description:      "The name of the Resource Group in which the HCS Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
+				Description:      "The name of the HCS Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
@@ -55,9 +58,10 @@ func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 			},
 			// Computed output
 			"secret": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Description: "The Consul agent configuration in the format of a Kubernetes secret (YAML).",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}

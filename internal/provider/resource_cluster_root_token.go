@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
 
 var defaultClusterRootTokenTimeoutDuration = time.Minute * 5
@@ -30,22 +31,24 @@ data:
 // that is used to bootstrap the cluster's ACL system.
 func resourceClusterRootToken() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The cluster root token resource is the token used to bootstrap the cluster's ACL system.",
 		CreateContext: resourceClusterRootTokenCreate,
 		ReadContext:   resourceClusterRootTokenRead,
 		DeleteContext: resourceClusterRootTokenDelete,
 		Timeouts: &schema.ResourceTimeout{
 			Default: &defaultClusterRootTokenTimeoutDuration,
 		},
-		Description: "hcs_cluster_root_token is the token used to bootstrap the cluster's ACL system",
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
+				Description:      "The name of the Resource Group in which the HCS Azure Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
+				Description:      "The name of the HCS Azure Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
@@ -53,19 +56,21 @@ func resourceClusterRootToken() *schema.Resource {
 			},
 			// Computed outputs
 			"accessor_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The accessor ID of the root ACL token.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"secret_id": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
-			},
-			"kubernetes_secret": {
+				Description: "The secret ID of the root ACL token.",
 				Type:        schema.TypeString,
 				Computed:    true,
 				Sensitive:   true,
-				Description: "the root token base64 encoded in a Kubernetes secret",
+			},
+			"kubernetes_secret": {
+				Description: "The root ACL token Base64 encoded in a Kubernetes secret.",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}
@@ -79,7 +84,7 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No managed application exists, so we should not try to create a root token
 			return diag.Errorf("unable to create root token; no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -138,10 +143,10 @@ func resourceClusterRootTokenRead(ctx context.Context, d *schema.ResourceData, m
 	managedAppName := d.Get("managed_application_name").(string)
 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
-	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	_, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
-			// No managed application exists, so this snapshot should be removed from state
+		if helper.IsErrorAzureNotFound(err) {
+			// No managed application exists, so this root token should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q); removing root token.",
 				managedAppName,
 				resourceGroupName,
@@ -171,7 +176,7 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if app.Response.StatusCode == 404 {
+		if helper.IsErrorAzureNotFound(err) {
 			// No managed application exists, so this root token should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,

@@ -1,0 +1,19 @@
+---
+layout: ""
+page_title: "Provider: HCS (HashiCorp Consul Service on Azure)"
+description: |-
+  The HCS provider provides resources to manage [HashiCorp Consul Service on Azure](https://www.hashicorp.com/products/consul/service-on-azure) (HCS) clusters.
+---
+
+# HashiCorp Consul Service on Azure (HCS) Provider
+
+The HCS provider provides resources to manage [HashiCorp Consul Service on Azure](https://www.hashicorp.com/products/consul/service-on-azure) (HCS) clusters.
+
+## Authenticating to Azure
+The HCS provider supports the same authentication methods as the [Azure provider](https://registry.terraform.io/providers/hashicorp/azurerm/2.40.0/docs#authenticating-to-azure).
+
+## Example Usage
+
+{{tffile "examples/provider/provider.tf"}}
+
+{{ .SchemaMarkdown | trimspace }}

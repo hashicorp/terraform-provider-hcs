@@ -30,7 +30,8 @@ var snapshotCreateUpdateDeleteTimeoutDuration = time.Minute * 15
 // resourceSnapshot defines the snapshot resource schema and CRUD contexts.
 func resourceSnapshot() *schema.Resource {
 	return &schema.Resource{
-		Description:   "The snapshot resource allows users to manage Consul snapshots of an HCS cluster.",
+		Description: "The snapshot resource allows users to manage Consul snapshots of an HCS cluster." +
+			" Snapshots currently have a retention policy of 30 days.",
 		CreateContext: resourceSnapshotCreate,
 		ReadContext:   resourceSnapshotRead,
 		UpdateContext: resourceSnapshotUpdate,

@@ -182,20 +182,20 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 		resourceGroupName, snapshotID)
 
 	if err != nil {
-		if !crpClient.IsCRPErrorAzureNotFound(err) {
-			return diag.Errorf("error fetching snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
-				managedAppName,
-				resourceGroupName,
-				meta.(*clients.Client).CorrelationRequestID,
-				err,
-			)
+		if crpClient.IsCRPErrorAzureNotFound(err) {
+			log.Printf("[WARN] snapshot not found. the retention policy for snapshots is 30 days and " +
+				"this snapshot may have been deleted, if you leave the snapshot resource " +
+				"in your plan, a new snapshot will be created")
+			d.SetId("")
+			return nil
 		}
 
-		log.Printf("[WARN] snapshot not found. the retention policy for snapshots is 30 days and " +
-			"this snapshot may have been deleted, if you leave the snapshot resource " +
-			"in your plan, a new snapshot will be created")
-		d.SetId("")
-		return nil
+		return diag.Errorf("error fetching snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			managedAppName,
+			resourceGroupName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
 	}
 
 	if diagnostics := populateSnapshotState(d, resp.Snapshot); diagnostics != nil {

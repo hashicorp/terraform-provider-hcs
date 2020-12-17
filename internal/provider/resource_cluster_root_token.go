@@ -84,7 +84,7 @@ func resourceClusterRootTokenCreate(ctx context.Context, d *schema.ResourceData,
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so we should not try to create a root token
 			return diag.Errorf("unable to create root token; no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -143,9 +143,9 @@ func resourceClusterRootTokenRead(ctx context.Context, d *schema.ResourceData, m
 	managedAppName := d.Get("managed_application_name").(string)
 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
-	_, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
+	managedApp, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(managedApp.Response) {
 			// No managed application exists, so this root token should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q); removing root token.",
 				managedAppName,
@@ -176,7 +176,7 @@ func resourceClusterRootTokenDelete(ctx context.Context, d *schema.ResourceData,
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so this root token should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,

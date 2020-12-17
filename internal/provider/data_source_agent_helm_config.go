@@ -113,7 +113,7 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so returning an error stating as such
 			return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q).", managedAppName, resourceGroupName)
 		}
@@ -143,7 +143,7 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	mcResp, err := mcClient.Get(ctx, aksResourceGroup, aksClusterName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(mcResp.Response) {
 			// No AKS cluster exists, so returning an error stating as such
 			return diag.Errorf("no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
 		}

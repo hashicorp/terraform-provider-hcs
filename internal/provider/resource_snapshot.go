@@ -100,7 +100,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so we should not try to create the snapshot
 			return diag.Errorf("unable to create snapshot; no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -155,7 +155,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so this snapshot should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -182,7 +182,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 		resourceGroupName, snapshotID)
 
 	if err != nil {
-		if !helper.IsErrorAzureNotFound(err) {
+		if !crpClient.IsCRPErrorAzureNotFound(err) {
 			return diag.Errorf("error fetching snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 				managedAppName,
 				resourceGroupName,
@@ -212,7 +212,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so this snapshot should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
@@ -260,7 +260,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so this snapshot should be removed from state
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,

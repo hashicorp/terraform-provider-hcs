@@ -255,7 +255,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	// Ensure a managed app with the same name does not exist in this resource group
 	existingCluster, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if !helper.IsResponseCodeNotFound(existingCluster.Response) {
+		if !helper.IsAutoRestResponseCodeNotFound(existingCluster.Response) {
 			return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 				managedAppName,
 				resourceGroupName,
@@ -453,7 +453,7 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 	managedAppID := d.Id()
 	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(managedApp.Response) {
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q); removing from state",
 				managedAppID,
 				meta.(*clients.Client).CorrelationRequestID,
@@ -494,7 +494,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	managedAppID := d.Id()
 	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(managedApp.Response) {
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q); removing from state",
 				managedAppID,
 				meta.(*clients.Client).CorrelationRequestID,
@@ -559,7 +559,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	managedApp, err := managedAppClient.GetByID(ctx, managedAppID)
 	if err != nil {
-		if helper.IsErrorAzureNotFound(err) {
+		if helper.IsAutoRestResponseCodeNotFound(managedApp.Response) {
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q)",
 				managedAppID,
 				meta.(*clients.Client).CorrelationRequestID,

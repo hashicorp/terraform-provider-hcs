@@ -475,6 +475,14 @@ func (client CustomResourceProviderClient) PollOperation(ctx context.Context, op
 	}
 }
 
+// IsCRPErrorAzureNotFound determines if the the error returned from a Custom Resource Provider Action
+// was a 404 not found.
+func (_ CustomResourceProviderClient) IsCRPErrorAzureNotFound(err error) bool {
+	azErr, ok := err.(*azure.RequestError)
+
+	return ok && azErr.StatusCode == 404
+}
+
 // unmarshalConsulConfig will unmarshal the passed in string c,
 // into a ConsulConfig struct
 func unmarshalConsulConfig(c string) (*ConsulConfig, error) {

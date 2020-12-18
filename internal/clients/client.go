@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/containerservice/mgmt/2020-07-01/containerservice"
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2020-05-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2020-06-01/resources"
 	"github.com/Azure/go-autorest/autorest"
@@ -55,6 +56,9 @@ type Client struct {
 
 	// ManagedClusters is the client used for Azure Container services managed clusters CRUD.
 	ManagedClusters *containerservice.ManagedClustersClient
+
+	// VNet is the client used for Azure Virtual Networks CRUD
+	VNet *network.VirtualNetworksClient
 
 	// Config is the provider config which contains HCS specific configuration values.
 	Config Config
@@ -115,6 +119,10 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 	managedClustersClient := containerservice.NewManagedClustersClient(options.AzureAuthConfig.SubscriptionID)
 	configureAutoRestClient(&managedClustersClient.Client, auth, options.ProviderUserAgent)
 	client.ManagedClusters = &managedClustersClient
+
+	vNetClient := network.NewVirtualNetworksClient(options.AzureAuthConfig.SubscriptionID)
+	configureAutoRestClient(&vNetClient.Client, auth, options.ProviderUserAgent)
+	client.VNet = &vNetClient
 
 	return &client, nil
 }

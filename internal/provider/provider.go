@@ -2,12 +2,31 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/hashicorp/go-azure-helpers/authentication"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
 )
+
+func init() {
+	schema.DescriptionKind = schema.StringPlain
+
+	// Add defaults and deprecated to schema descriptions.
+	schema.SchemaDescriptionBuilder = func(s *schema.Schema) string {
+		desc := s.Description
+		if s.Default != nil {
+			desc += fmt.Sprintf(" Defaults to `%v`.", s.Default)
+		}
+		if s.Deprecated != "" {
+			desc += " " + s.Deprecated
+		}
+		return strings.TrimSpace(desc)
+	}
+}
 
 func New() func() *schema.Provider {
 	return func() *schema.Provider {

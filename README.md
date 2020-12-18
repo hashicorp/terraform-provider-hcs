@@ -1,16 +1,5 @@
-HashiCorp Consul Service (HCS) Terraform Provider
+HashiCorp Consul Service on Azure (HCS) Terraform Provider
 ==================
-
-This repository is a *template* for a [Terraform](https://www.terraform.io) provider. It is intended as a starting point for creating Terraform providers, containing:
-
- - A resource, and a data source (`internal/provider/`),
- - Documentation (`website/`),
- - Miscellanious meta files.
- 
-These files contain boilerplate code that you will need to edit to create your own Terraform provider. A full guide to creating Terraform providers can be found at [Writing Custom Providers](https://www.terraform.io/docs/extend/writing-custom-providers.html).
-
-Please see the [GitHub template repository documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) for how to create a new repository from this template on GitHub.
-
 
 Requirements
 ------------
@@ -23,10 +12,7 @@ Building The Provider
 
 1. Clone the repository
 1. Enter the repository directory
-1. Build the provider using the Go `install` command: 
-```sh
-$ go install
-```
+1. Build the provider using the `make dev` command
 
 Adding Dependencies
 ---------------------
@@ -42,12 +28,6 @@ go mod tidy
 ```
 
 Then commit the changes to `go.mod` and `go.sum`.
-
-
-Using the provider
-----------------------
-
-Fill this in for each provider
 
 Developing the Provider
 ---------------------------
@@ -69,3 +49,55 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 $ make testacc
 ```
  
+ Generating Docs
+ ----------------------
+ 
+ From the root of the repo run:
+ 
+ ```
+ go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+ ```
+
+ 
+Using the provider
+----------------------
+
+Please see the docs for details about a particular resource. 
+Below is a complex example that leverages the Azure Terraform provider and creates a federation of two HCS clusters.
+```hcl
+resource "azurerm_resource_group" "primary" {
+  name     = "hcs-tf-federation-primary-rg"
+  location = "westus2"
+}
+
+resource "hcs_cluster" "primary" {
+  resource_group_name      = azurerm_resource_group.primary.name
+  managed_application_name = "hcs-tf-federation-primary"
+  email                    = "me@example.com"
+  cluster_mode             = "production"
+  consul_version           = "v1.9.0"
+  vnet_cidr                = "172.25.16.0/24"
+  consul_datacenter        = "hcs-tf-federation-example"
+}
+
+data "hcs_federation_token" "fed" {
+  resource_group_name      = hcs_cluster.primary.resource_group_name
+  managed_application_name = hcs_cluster.primary.managed_application_name
+}
+
+resource "azurerm_resource_group" "secondary" {
+  name     = "hcs-tf-federation-secondary-rg"
+  location = "eastus"
+}
+
+resource "hcs_cluster" "secondary" {
+  resource_group_name      = azurerm_resource_group.secondary.name
+  managed_application_name = "hcs-tf-federation-secondary"
+  email                    = "me@example.com"
+  cluster_mode             = "production"
+  consul_version           = "v1.9.0"
+  vnet_cidr                = "172.25.17.0/24"
+  consul_datacenter        = "hcs-tf-federation-secondary"
+  consul_federation_token  = data.hcs_federation_token.fed.token
+}
+```

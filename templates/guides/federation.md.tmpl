@@ -1,0 +1,13 @@
+---
+subcategory: ""
+page_title: "Multi-Cluster Federation - HCS Provider"
+description: |-
+    An example of creating a Consul multi-cluster federation comprised of HCS clusters.
+---
+
+# Federate multiple HCS clusters
+
+Additional information about HCS federation can be found [here](https://www.hashicorp.com/blog/introducing-federation-on-hashicorp-consul-service).
+When federating HCS clusters, be sure the `vnet_cidr`s do not overlap and that each cluster has a unique `consul_datacenter` name.
+
+{{ tffile "examples/federation/main.tf" }}

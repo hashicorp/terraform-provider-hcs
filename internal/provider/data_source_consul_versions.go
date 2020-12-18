@@ -3,34 +3,44 @@ package provider
 import (
 	"context"
 	"fmt"
-
-	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
-
-	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/consul"
 )
+
+// defaultConsulVersionsTimeoutDuration is the default timeout for reading Consul versions.
+var defaultConsulVersionsTimeoutDuration = time.Minute * 5
 
 // dataSourceConsulVersions is the data source for the Consul versions supported by HCS.
 func dataSourceConsulVersions() *schema.Resource {
 	return &schema.Resource{
+		Description: "The Consul versions data source provides the Consul versions supported by HCS.",
 		ReadContext: dataSourceConsulVersionsRead,
+		Timeouts: &schema.ResourceTimeout{
+			Default: &defaultConsulVersionsTimeoutDuration,
+		},
 		Schema: map[string]*schema.Schema{
 			// Computed outputs
 			"recommended": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The recommended Consul version for HCS clusters.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"available": {
-				Type: schema.TypeList,
+				Description: "The Consul versions available on HCS.",
+				Type:        schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Computed: true,
 			},
 			"preview": {
-				Type: schema.TypeList,
+				Description: "The preview versions of Consul available on HCS.",
+				Type:        schema.TypeList,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

@@ -3,135 +3,169 @@ package provider
 import (
 	"context"
 	"strings"
-
-	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
-
-	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
+
+// defaultClusterTimeoutDuration is the default timeout for reading the HCS cluster.
+var defaultClusterTimeoutDuration = time.Minute * 5
 
 // dataSourceCluster is the data source for an HCS Cluster.
 // It has the same schema as the cluster resource, with the exception of
 // consul_root_token_accessor_id and consul_root_token_secret_id.
 func dataSourceCluster() *schema.Resource {
 	return &schema.Resource{
+		Description: "The cluster data source provides information about an existing HCS cluster.",
 		ReadContext: dataSourceClusterRead,
+		Timeouts: &schema.ResourceTimeout{
+			Default: &defaultClusterTimeoutDuration,
+		},
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
+				Description:      "The name of the Resource Group in which the HCS Azure Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
+				Description:      "The name of the HCS Azure Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateSlugID,
 			},
 			// Optional inputs
 			"cluster_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
+				Description: "The name of the cluster Managed Resource. If not specified, it is defaulted to the value of `managed_application_name`.",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
 			},
 			// Computed outputs
 			"email": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The contact email for the primary owner of the cluster.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"cluster_mode": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server node. Production clusters deploy with a minimum of three nodes.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"vnet_cidr": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The VNET CIDR range of the Consul cluster.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_version": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The Consul version of the cluster.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_datacenter": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The Consul data center name of the cluster.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_federation_token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The token used to join a federation of Consul clusters. If the cluster is not part of a federation, this field will be empty.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_external_endpoint": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Description: "Denotes that the cluster has an external endpoint for the Consul UI.",
+				Type:        schema.TypeBool,
+				Computed:    true,
 			},
 			"location": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The Azure region that the cluster is deployed to.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"plan_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Azure Marketplace HCS plan for the cluster.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"managed_resource_group_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Managed Resource Group in which the cluster resources belong.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"state": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The state of the cluster.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"storage_account_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Storage Account in which cluster data is persisted.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"blob_container_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Blob Container in which cluster data is persisted.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"managed_application_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The ID of the Managed Application.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"storage_account_resource_group": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Storage Account's Resource Group.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_automatic_upgrades": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Description: "Denotes that automatic Consul upgrades are enabled.",
+				Type:        schema.TypeBool,
+				Computed:    true,
 			},
 			"consul_snapshot_interval": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The Consul snapshot interval.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_snapshot_retention": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The retention policy for Consul snapshots.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_config_file": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The cluster config encoded as a Base64 string.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_ca_file": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The cluster CA file encoded as a Base64 string.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_connect": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Description: "Denotes that Consul connect is enabled.",
+				Type:        schema.TypeBool,
+				Computed:    true,
 			},
 			"consul_external_endpoint_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The public URL for the Consul UI. This will be empty if `consul_external_endpoint` is `true`.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_private_endpoint_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The private URL for the Consul UI.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_cluster_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The cluster ID.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}

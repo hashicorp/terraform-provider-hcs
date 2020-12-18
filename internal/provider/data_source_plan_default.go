@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,27 +12,39 @@ import (
 	"github.com/hashicorp/terraform-provider-hcs/internal/hcsmeta"
 )
 
+// defaultPlanDefaultsTimeoutDuration is the default timeout for reading plan defaults.
+var defaultPlanDefaultsTimeoutDuration = time.Minute * 5
+
 // dataSourcePlanDefaults is the data source for the HCS plan defaults for the Azure Marketplace.
 func dataSourcePlanDefaults() *schema.Resource {
 	return &schema.Resource{
+		Description: "The plan defaults data source provides details about the current Azure Marketplace Plan defaults for the HCS offering." +
+			" The plan defaults are useful when accepting the Azure Marketplace Agreement for the HCS Azure Managed Application.",
 		ReadContext: dataSourcePlanDefaultsRead,
+		Timeouts: &schema.ResourceTimeout{
+			Default: &defaultPlanDefaultsTimeoutDuration,
+		},
 		Schema: map[string]*schema.Schema{
 			// Computed outputs
 			"publisher": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The publisher for the HCS Azure Managed Application offer.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"offer": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the offer for the HCS Azure Managed Application.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"plan_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The plan name for the HCS Azure Managed Application offer.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"plan_version": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The plan version for the HCS Azure Managed Application offer.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}

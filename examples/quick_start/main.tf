@@ -3,7 +3,7 @@ resource "azurerm_resource_group" "example" {
   location = "westus2"
 }
 
-resource "hcs_cluster" "test" {
+resource "hcs_cluster" "example" {
   resource_group_name      = azurerm_resource_group.example.name
   managed_application_name = "hcs-tf-example"
   email                    = "me@example.com"

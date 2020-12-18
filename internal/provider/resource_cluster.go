@@ -31,14 +31,16 @@ type managedAppParamValue struct {
 // Most of the CRUD involves the Azure Managed Application and Custom Resource Provider actions.
 func resourceCluster() *schema.Resource {
 	return &schema.Resource{
+		Description:   "The cluster resource allows you to manage an HCS Azure Managed Application.",
 		CreateContext: resourceClusterCreate,
 		ReadContext:   resourceClusterRead,
 		UpdateContext: resourceClusterUpdate,
 		DeleteContext: resourceClusterDelete,
 		Timeouts: &schema.ResourceTimeout{
-			Create: &createUpdateDeleteTimeoutDuration,
-			Update: &createUpdateDeleteTimeoutDuration,
-			Delete: &createUpdateDeleteTimeoutDuration,
+			Default: &defaultClusterTimeoutDuration,
+			Create:  &createUpdateDeleteTimeoutDuration,
+			Update:  &createUpdateDeleteTimeoutDuration,
+			Delete:  &createUpdateDeleteTimeoutDuration,
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceClusterImport,
@@ -46,27 +48,31 @@ func resourceCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
+				Description:      "The name of the Resource Group in which the HCS Azure Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
+				Description:      "The name of the HCS Azure Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validateSlugID,
 			},
 			"email": {
+				Description:      "The contact email for the primary owner of the cluster.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validateStringNotEmpty,
 			},
 			"cluster_mode": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Description: "The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server node. Production clusters deploy with a minimum of three nodes.",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 				ValidateDiagFunc: validateStringInSlice([]string{
 					"Development",
 					"Production",
@@ -77,6 +83,7 @@ func resourceCluster() *schema.Resource {
 			},
 			// Optional inputs
 			"cluster_name": {
+				Description:      "The name of the cluster Managed Resource. If not specified, it is defaulted to the value of `managed_application_name`.",
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
@@ -84,6 +91,7 @@ func resourceCluster() *schema.Resource {
 				ValidateDiagFunc: validateSlugID,
 			},
 			"vnet_cidr": {
+				Description:      "The VNET CIDR range of the Consul cluster.",
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
@@ -91,6 +99,7 @@ func resourceCluster() *schema.Resource {
 				ValidateDiagFunc: validateCIDR,
 			},
 			"consul_version": {
+				Description:      "The Consul version of the cluster. If not specified, it is defaulted to the version that is currently recommended by HCS. ",
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
@@ -100,6 +109,7 @@ func resourceCluster() *schema.Resource {
 				},
 			},
 			"consul_datacenter": {
+				Description:      "The Consul data center name of the cluster. If not specified, it is defaulted to the value of `managed_application_name`.",
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validateSlugID,
@@ -107,9 +117,10 @@ func resourceCluster() *schema.Resource {
 				Computed:         true,
 			},
 			"consul_federation_token": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Description: "The token used to join a federation of Consul clusters. If the cluster is not part of a federation, this field will be empty.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
 					// Since federation tokens are not persisted in HCS, we generate a new one for each federation
 					// token data source read. We don't want to force recreation of the cluster if the 'Primary' claim
@@ -118,33 +129,37 @@ func resourceCluster() *schema.Resource {
 				},
 			},
 			"consul_external_endpoint": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-				ForceNew: true,
+				Description: "Denotes that the cluster has an external endpoint for the Consul UI.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
 			},
 			"location": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Description: "The Azure region that the cluster is deployed to. If not specified, it is defaulted to the region of the Resource Group the Managed Application belongs to.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 				// TODO: validate location the same way azurerm does
 			},
 			"plan_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Description: "The name of the Azure Marketplace HCS plan for the cluster. If not specified, it will default to the current HCS default plan (see the `hcs_plan_defaults` data source).",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 				ValidateDiagFunc: validateStringInSlice([]string{
 					"on-demand-v2",
 					"annual",
 				}, false),
 			},
 			"managed_resource_group_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Description: "The name of the Managed Resource Group in which the cluster resources belong. If not specified, it is defaulted to the value of `managed_application_name` with 'mrg-' prepended.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 			},
 			// Computed outputs
 			"vnet_id": {
@@ -163,69 +178,85 @@ func resourceCluster() *schema.Resource {
 				Computed:    true,
 			},
 			"state": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The state of the cluster.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"storage_account_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Storage Account in which cluster data is persisted.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"blob_container_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Blob Container in which cluster data is persisted.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"managed_application_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The ID of the Managed Application.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"storage_account_resource_group": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The name of the Storage Account's Resource Group.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_automatic_upgrades": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Description: "Denotes that automatic Consul upgrades are enabled.",
+				Type:        schema.TypeBool,
+				Computed:    true,
 			},
 			"consul_snapshot_interval": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The Consul snapshot interval.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_snapshot_retention": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The retention policy for Consul snapshots.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_config_file": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The cluster config encoded as a Base64 string.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_ca_file": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The cluster CA file encoded as a Base64 string.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_connect": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Description: "Denotes that Consul connect is enabled.",
+				Type:        schema.TypeBool,
+				Computed:    true,
 			},
 			"consul_external_endpoint_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The public URL for the Consul UI. This will be empty if `consul_external_endpoint` is `true`.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_private_endpoint_url": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The private URL for the Consul UI.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_cluster_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The cluster ID.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_root_token_accessor_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The accessor ID of the root ACL token that is generated upon cluster creation. If a new root token is generated using the `hcs_cluster_root_token` resource, this field is no longer valid.",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"consul_root_token_secret_id": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Description: "The secret ID of the root ACL token that is generated upon cluster creation. If a new root token is generated using the `hcs_cluster_root_token` resource, this field is no longer valid.",
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}
@@ -240,7 +271,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	// Ensure a managed app with the same name does not exist in this resource group
 	existingCluster, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		if existingCluster.Response.StatusCode != 404 {
+		if !helper.IsAutoRestResponseCodeNotFound(existingCluster.Response) {
 			return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
 				managedAppName,
 				resourceGroupName,
@@ -278,7 +309,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	availableConsulVersions, err := consul.GetAvailableHCPConsulVersions(ctx, meta.(*clients.Client).Config.HCPApiDomain)
 	if err != nil || availableConsulVersions == nil {
-		return diag.Errorf("failed to get available HCP Consul versions: %+v", err)
+		return diag.Errorf("error fetching available HCP Consul versions: %+v", err)
 	}
 	consulVersion := consul.RecommendedVersion(availableConsulVersions)
 	v, ok = d.GetOk("consul_version")
@@ -438,7 +469,7 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 	managedAppID := d.Id()
 	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
 	if err != nil {
-		if managedApp.Response.StatusCode == 404 {
+		if helper.IsAutoRestResponseCodeNotFound(managedApp.Response) {
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q); removing from state",
 				managedAppID,
 				meta.(*clients.Client).CorrelationRequestID,
@@ -498,7 +529,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	managedAppID := d.Id()
 	managedApp, err := meta.(*clients.Client).ManagedApplication.GetByID(ctx, managedAppID)
 	if err != nil {
-		if managedApp.Response.StatusCode == 404 {
+		if helper.IsAutoRestResponseCodeNotFound(managedApp.Response) {
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q); removing from state",
 				managedAppID,
 				meta.(*clients.Client).CorrelationRequestID,
@@ -563,7 +594,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	managedAppClient := meta.(*clients.Client).ManagedApplication
 	managedApp, err := managedAppClient.GetByID(ctx, managedAppID)
 	if err != nil {
-		if managedApp.Response.StatusCode == 404 {
+		if helper.IsAutoRestResponseCodeNotFound(managedApp.Response) {
 			log.Printf("[WARN] no HCS Cluster found for (Managed Application ID %q) (Correlation ID %q)",
 				managedAppID,
 				meta.(*clients.Client).CorrelationRequestID,

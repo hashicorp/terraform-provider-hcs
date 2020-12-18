@@ -2,12 +2,12 @@
 page_title: "hcs_agent_kubernetes_secret Data Source - terraform-provider-hcs"
 subcategory: ""
 description: |-
-  The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the cluster.
+  The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the Consul cluster.
 ---
 
 # Data Source `hcs_agent_kubernetes_secret`
 
-The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the cluster.
+The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the Consul cluster.
 
 ## Example Usage
 
@@ -22,8 +22,8 @@ data "hcs_agent_kubernetes_secret" "default" {
 
 ### Required
 
-- **managed_application_name** (String) The name of the HCS Managed Application.
-- **resource_group_name** (String) The name of the Resource Group in which the HCS Managed Application belongs.
+- **managed_application_name** (String) The name of the HCS Azure Managed Application.
+- **resource_group_name** (String) The name of the Resource Group in which the HCS Azure Managed Application belongs.
 
 ### Optional
 

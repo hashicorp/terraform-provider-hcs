@@ -26,8 +26,8 @@ data "hcs_agent_helm_config" "default" {
 ### Required
 
 - **aks_cluster_name** (String) The name of the AKS cluster that will consume the Helm config.
-- **managed_application_name** (String) The name of the HCS Managed Application.
-- **resource_group_name** (String) The name of the Resource Group in which the HCS Managed Application belongs.
+- **managed_application_name** (String) The name of the HCS Azure Managed Application.
+- **resource_group_name** (String) The name of the Resource Group in which the HCS Azure Managed Application belongs.
 
 ### Optional
 

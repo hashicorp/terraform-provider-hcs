@@ -2,12 +2,12 @@
 page_title: "hcs_cluster_root_token Resource - terraform-provider-hcs"
 subcategory: ""
 description: |-
-  The cluster root token resource is the token used to bootstrap the cluster's ACL system. Using this resource to create a new root token for an cluster resource will invalidate the consul root token accessor id and consul root token secret id properties of the cluster.
+  The cluster root token resource is the token used to bootstrap the cluster's ACL system. Using this resource to create a new root token for an cluster resource will invalidate the consul root token accessor id and Consul root token secret id properties of the cluster.
 ---
 
 # Resource `hcs_cluster_root_token`
 
-The cluster root token resource is the token used to bootstrap the cluster's ACL system. Using this resource to create a new root token for an cluster resource will invalidate the consul root token accessor id and consul root token secret id properties of the cluster.
+The cluster root token resource is the token used to bootstrap the cluster's ACL system. Using this resource to create a new root token for an cluster resource will invalidate the consul root token accessor id and Consul root token secret id properties of the cluster.
 
 ## Example Usage
 

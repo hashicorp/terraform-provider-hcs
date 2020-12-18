@@ -2,12 +2,12 @@
 page_title: "hcs_federation_token Data Source - terraform-provider-hcs"
 subcategory: ""
 description: |-
-  The federation token data source can be used during HCS cluster create to join the cluster to a federation.
+  The federation token data source can be used during HCS cluster creation to join the cluster to a federation.
 ---
 
 # Data Source `hcs_federation_token`
 
-The federation token data source can be used during HCS cluster create to join the cluster to a federation.
+The federation token data source can be used during HCS cluster creation to join the cluster to a federation.
 
 ## Example Usage
 
@@ -22,8 +22,8 @@ data "hcs_federation_token" "default" {
 
 ### Required
 
-- **managed_application_name** (String) The name of the HCS Managed Application.
-- **resource_group_name** (String) The name of the Resource Group in which the HCS Managed Application belongs.
+- **managed_application_name** (String) The name of the HCS Azure Managed Application.
+- **resource_group_name** (String) The name of the Resource Group in which the HCS Azure Managed Application belongs.
 
 ### Optional
 

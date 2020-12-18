@@ -30,7 +30,7 @@ var defaultAgentConfigKubernetesSecretTimeoutDuration = time.Minute * 5
 // dataSourceAgentConfigKubernetesSecret is the data source for the Consul versions supported by HCS.
 func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 	return &schema.Resource{
-		Description: "The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the cluster.",
+		Description: "The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the Consul cluster.",
 		ReadContext: dataSourceAgentConfigKubernetesSecretRead,
 		Timeouts: &schema.ResourceTimeout{
 			Default: &defaultAgentConfigKubernetesSecretTimeoutDuration,
@@ -38,14 +38,14 @@ func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
-				Description:      "The name of the Resource Group in which the HCS Managed Application belongs.",
+				Description:      "The name of the Resource Group in which the HCS Azure Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
-				Description:      "The name of the HCS Managed Application.",
+				Description:      "The name of the HCS Azure Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,

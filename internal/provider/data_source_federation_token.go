@@ -16,7 +16,7 @@ var defaultFederationTokenTimeoutDuration = time.Minute * 5
 // dataSourceFederationToken represents a federation token for an HCS Cluster.
 func dataSourceFederationToken() *schema.Resource {
 	return &schema.Resource{
-		Description: "The federation token data source can be used during HCS cluster create to join the cluster to a federation.",
+		Description: "The federation token data source can be used during HCS cluster creation to join the cluster to a federation.",
 		ReadContext: dataSourceFederationTokenRead,
 		Timeouts: &schema.ResourceTimeout{
 			Default: &defaultFederationTokenTimeoutDuration,
@@ -24,14 +24,14 @@ func dataSourceFederationToken() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
-				Description:      "The name of the Resource Group in which the HCS Managed Application belongs.",
+				Description:      "The name of the Resource Group in which the HCS Azure Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
-				Description:      "The name of the HCS Managed Application.",
+				Description:      "The name of the HCS Azure Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,

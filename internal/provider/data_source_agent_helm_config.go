@@ -64,13 +64,13 @@ func dataSourceAgentHelmConfig() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required inputs
 			"resource_group_name": {
-				Description:      "The name of the Resource Group in which the HCS Managed Application belongs.",
+				Description:      "The name of the Resource Group in which the HCS Azure Managed Application belongs.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateResourceGroupName,
 			},
 			"managed_application_name": {
-				Description:      "The name of the HCS Managed Application.",
+				Description:      "The name of the HCS Azure Managed Application.",
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validateSlugID,

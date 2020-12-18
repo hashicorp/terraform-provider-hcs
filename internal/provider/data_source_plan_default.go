@@ -18,7 +18,7 @@ var defaultPlanDefaultsTimeoutDuration = time.Minute * 5
 // dataSourcePlanDefaults is the data source for the HCS plan defaults for the Azure Marketplace.
 func dataSourcePlanDefaults() *schema.Resource {
 	return &schema.Resource{
-		Description: "The plan defaults data source is useful for accepting the Azure Marketplace Agreement for the HCS Managed Application.",
+		Description: "The plan defaults data source is useful for accepting the Azure Marketplace Agreement for the HCS Azure Managed Application.",
 		ReadContext: dataSourcePlanDefaultsRead,
 		Timeouts: &schema.ResourceTimeout{
 			Default: &defaultPlanDefaultsTimeoutDuration,
@@ -26,22 +26,22 @@ func dataSourcePlanDefaults() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Computed outputs
 			"publisher": {
-				Description: "The publisher for the HCS Managed Application offer.",
+				Description: "The publisher for the HCS Azure Managed Application offer.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
 			"offer": {
-				Description: "The name of the offer for the HCS Managed Application.",
+				Description: "The name of the offer for the HCS Azure Managed Application.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
 			"plan_name": {
-				Description: "The plan name for the HCS Managed Application offer.",
+				Description: "The plan name for the HCS Azure Managed Application offer.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
 			"plan_version": {
-				Description: "The plan version for the HCS Managed Application offer.",
+				Description: "The plan version for the HCS Azure Managed Application offer.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2020-05-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -161,6 +162,21 @@ func resourceCluster() *schema.Resource {
 				Computed:    true,
 			},
 			// Computed outputs
+			"vnet_id": {
+				Description: "The ID of the cluster's managed VNet.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
+			"vnet_name": {
+				Description: "The name of the cluster's managed VNet.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
+			"vnet_resource_group_name": {
+				Description: "The resource group that the cluster's managed VNet belongs to. This will be the same value as `managed_resource_group_name`.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 			"state": {
 				Description: "The state of the cluster.",
 				Type:        schema.TypeString,
@@ -486,7 +502,26 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 		)
 	}
 
-	return setClusterData(d, managedApp, cluster)
+	// Fetch the managed VNet
+	managedResourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ManagedResourceGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// VNet name has a '-vnet' suffix that is not saved on the cluster properties
+	vNetName := strings.TrimSuffix(cluster.Properties.VnetName, "-vnet") + "-vnet"
+	vNet, err := meta.(*clients.Client).VNet.Get(ctx, managedResourceGroupName, vNetName, "")
+	if err != nil {
+		return diag.Errorf("error fetching VNet for HCS Cluster (Managed Application ID %q) (Managed Resource Group Name %q) (VNet Name %q) (Correlation ID %q): %+v",
+			managedAppID,
+			managedResourceGroupName,
+			vNetName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
+	}
+
+	return setClusterData(d, managedApp, cluster, vNet)
 }
 
 func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -668,7 +703,7 @@ func validateClusterImportString(s string) (string, string, error) {
 // setClusterData sets the KV pairs of the cluster resource schema.
 // We do not set consul_root_token_accessor_id and consul_root_token_secret_id here since
 // the original root token is only available during cluster creation.
-func setClusterData(d *schema.ResourceData, managedApp managedapplications.Application, cluster models.HashicorpCloudConsulamaAmaClusterResponse) diag.Diagnostics {
+func setClusterData(d *schema.ResourceData, managedApp managedapplications.Application, cluster models.HashicorpCloudConsulamaAmaClusterResponse, vNet network.VirtualNetwork) diag.Diagnostics {
 	resourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -710,6 +745,26 @@ func setClusterData(d *schema.ResourceData, managedApp managedapplications.Appli
 		return diag.FromErr(err)
 	}
 
+	err = d.Set("vnet_id", *vNet.ID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("vnet_name", *vNet.Name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	managedResourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ManagedResourceGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("vnet_resource_group_name", managedResourceGroupName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	err = d.Set("consul_version", cluster.Properties.ConsulCurrentVersion)
 	if err != nil {
 		return diag.FromErr(err)
@@ -740,10 +795,6 @@ func setClusterData(d *schema.ResourceData, managedApp managedapplications.Appli
 		return diag.FromErr(err)
 	}
 
-	managedResourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ManagedResourceGroupID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
 	err = d.Set("managed_resource_group_name", managedResourceGroupName)
 	if err != nil {
 		return diag.FromErr(err)

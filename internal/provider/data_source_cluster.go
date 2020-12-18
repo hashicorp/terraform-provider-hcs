@@ -2,12 +2,14 @@ package provider
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
 
 // defaultClusterTimeoutDuration is the default timeout for reading the HCS cluster.
@@ -200,7 +202,26 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 
+	// Fetch the managed VNet
+	managedResourceGroupName, err := helper.ParseResourceGroupNameFromID(*managedApp.ManagedResourceGroupID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// VNet name has a '-vnet' suffix that is not saved on the cluster properties
+	vNetName := strings.TrimSuffix(cluster.Properties.VnetName, "-vnet") + "-vnet"
+	vNet, err := meta.(*clients.Client).VNet.Get(ctx, managedResourceGroupName, vNetName, "")
+	if err != nil {
+		return diag.Errorf("error fetching VNet for HCS Cluster (Managed Application ID %q) (Managed Resource Group Name %q) (VNet Name %q) (Correlation ID %q): %+v",
+			*managedApp.ID,
+			managedResourceGroupName,
+			vNetName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
+	}
+
 	d.SetId(*managedApp.ID)
 
-	return setClusterData(d, managedApp, cluster)
+	return setClusterData(d, managedApp, cluster, vNet)
 }

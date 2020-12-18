@@ -25,31 +25,31 @@ resource "hcs_snapshot" "default" {
 
 ### Required
 
-- **managed_application_name** (String, Required) The name of the HCS Azure Managed Application.
-- **resource_group_name** (String, Required) The name of the Resource Group in which the HCS Azure Managed Application belongs.
-- **snapshot_name** (String, Required) The name of the snapshot.
+- **managed_application_name** (String) The name of the HCS Azure Managed Application.
+- **resource_group_name** (String) The name of the Resource Group in which the HCS Azure Managed Application belongs.
+- **snapshot_name** (String) The name of the snapshot.
 
 ### Optional
 
-- **id** (String, Optional) The ID of this resource.
+- **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-only
 
-- **finished_at** (String, Read-only) Timestamp of when the snapshot was finished.
-- **requested_at** (String, Read-only) Timestamp of when the snapshot was requested.
-- **restored_at** (String, Read-only) Timestamp of when the snapshot was restored. If the snapshot has not been restored, this field will be blank.
-- **size** (Number, Read-only) The size of the snapshot in bytes.
-- **state** (String, Read-only) The state of the snapshot.
+- **finished_at** (String) Timestamp of when the snapshot was finished.
+- **requested_at** (String) Timestamp of when the snapshot was requested.
+- **restored_at** (String) Timestamp of when the snapshot was restored. If the snapshot has not been restored, this field will be blank.
+- **size** (Number) The size of the snapshot in bytes.
+- **state** (String) The state of the snapshot.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **create** (String, Optional)
-- **default** (String, Optional)
-- **delete** (String, Optional)
-- **update** (String, Optional)
+- **create** (String)
+- **default** (String)
+- **delete** (String)
+- **update** (String)
 
 

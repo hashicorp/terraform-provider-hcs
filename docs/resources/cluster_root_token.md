@@ -25,25 +25,25 @@ resource "hcs_root_token" "new_token" {
 
 ### Required
 
-- **managed_application_name** (String, Required) The name of the HCS Azure Managed Application.
-- **resource_group_name** (String, Required) The name of the Resource Group in which the HCS Azure Managed Application belongs.
+- **managed_application_name** (String) The name of the HCS Azure Managed Application.
+- **resource_group_name** (String) The name of the Resource Group in which the HCS Azure Managed Application belongs.
 
 ### Optional
 
-- **id** (String, Optional) The ID of this resource.
+- **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-only
 
-- **accessor_id** (String, Read-only) The accessor ID of the root ACL token.
-- **kubernetes_secret** (String, Read-only) The root ACL token Base64 encoded in a Kubernetes secret.
-- **secret_id** (String, Read-only) The secret ID of the root ACL token.
+- **accessor_id** (String) The accessor ID of the root ACL token.
+- **kubernetes_secret** (String, Sensitive) The root ACL token Base64 encoded in a Kubernetes secret.
+- **secret_id** (String, Sensitive) The secret ID of the root ACL token.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **default** (String, Optional)
+- **default** (String)
 
 

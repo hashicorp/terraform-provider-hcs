@@ -22,23 +22,23 @@ data "hcs_federation_token" "default" {
 
 ### Required
 
-- **managed_application_name** (String, Required) The name of the HCS Managed Application.
-- **resource_group_name** (String, Required) The name of the Resource Group in which the HCS Managed Application belongs.
+- **managed_application_name** (String) The name of the HCS Managed Application.
+- **resource_group_name** (String) The name of the Resource Group in which the HCS Managed Application belongs.
 
 ### Optional
 
-- **id** (String, Optional) The ID of this resource.
+- **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-only
 
-- **token** (String, Read-only) The federation token.
+- **token** (String, Sensitive) The federation token.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **default** (String, Optional)
+- **default** (String)
 
 

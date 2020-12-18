@@ -25,26 +25,26 @@ data "hcs_agent_helm_config" "default" {
 
 ### Required
 
-- **aks_cluster_name** (String, Required) The name of the AKS cluster that will consume the Helm config.
-- **managed_application_name** (String, Required) The name of the HCS Managed Application.
-- **resource_group_name** (String, Required) The name of the Resource Group in which the HCS Managed Application belongs.
+- **aks_cluster_name** (String) The name of the AKS cluster that will consume the Helm config.
+- **managed_application_name** (String) The name of the HCS Managed Application.
+- **resource_group_name** (String) The name of the Resource Group in which the HCS Managed Application belongs.
 
 ### Optional
 
-- **aks_resource_group** (String, Optional) The resource group name of the AKS cluster that will consume the Helm config. If not specified, it is defaulted to the value of `resource_group_name`.
-- **expose_gossip_ports** (Boolean, Optional) Denotes that the gossip ports should be exposed.
-- **id** (String, Optional) The ID of this resource.
+- **aks_resource_group** (String) The resource group name of the AKS cluster that will consume the Helm config. If not specified, it is defaulted to the value of `resource_group_name`.
+- **expose_gossip_ports** (Boolean) Denotes that the gossip ports should be exposed. Defaults to `false`.
+- **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-only
 
-- **config** (String, Read-only) The agent Helm config.
+- **config** (String) The agent Helm config.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **default** (String, Optional)
+- **default** (String)
 
 

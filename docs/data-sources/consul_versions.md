@@ -19,20 +19,20 @@ data "hcs_consul_versions" "default" {}
 
 ### Optional
 
-- **id** (String, Optional) The ID of this resource.
+- **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-only
 
-- **available** (List of String, Read-only) The Consul versions available on HCS.
-- **preview** (List of String, Read-only) The preview versions of Consul available on HCS.
-- **recommended** (String, Read-only) The recommended Consul version for HCS clusters.
+- **available** (List of String) The Consul versions available on HCS.
+- **preview** (List of String) The preview versions of Consul available on HCS.
+- **recommended** (String) The recommended Consul version for HCS clusters.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **default** (String, Optional)
+- **default** (String)
 
 

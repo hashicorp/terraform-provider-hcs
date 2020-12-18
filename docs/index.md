@@ -42,15 +42,15 @@ resource "hcs_cluster" "example" {
 
 ### Optional
 
-- **azure_client_certificate_password** (String, Optional) The password associated with the Azure Client Certificate. For use when authenticating as a Service Principal using a Client Certificate
-- **azure_client_certificate_path** (String, Optional) The path to the Azure Client Certificate associated with the Service Principal for use when authenticating as a Service Principal using a Client Certificate.
-- **azure_client_id** (String, Optional) The Azure Client ID which should be used.
-- **azure_client_secret** (String, Optional) The Azure Client Secret which should be used. For use when authenticating as a Service Principal using a Client Secret.
-- **azure_environment** (String, Optional) The Azure Cloud Environment which should be used. Possible values are public, usgovernment, german, and china. Defaults to public.
-- **azure_metadata_host** (String, Optional) The hostname which should be used for the Azure Metadata Service.
-- **azure_msi_endpoint** (String, Optional) The path to a custom endpoint for Azure Managed Service Identity - in most circumstances this should be detected automatically.
-- **azure_subscription_id** (String, Optional) The Azure Subscription ID which should be used.
-- **azure_tenant_id** (String, Optional) The Azure Tenant ID which should be used.
-- **azure_use_msi** (Boolean, Optional) Allowed Azure Managed Service Identity be used for Authentication.
-- **hcp_api_domain** (String, Optional) The HashiCorp Cloud Platform API domain.
-- **hcs_marketplace_product_name** (String, Optional) The HashiCorp Consul Service product name on the Azure marketplace.
+- **azure_client_certificate_password** (String) The password associated with the Azure Client Certificate. For use when authenticating as a Service Principal using a Client Certificate
+- **azure_client_certificate_path** (String) The path to the Azure Client Certificate associated with the Service Principal for use when authenticating as a Service Principal using a Client Certificate.
+- **azure_client_id** (String) The Azure Client ID which should be used.
+- **azure_client_secret** (String) The Azure Client Secret which should be used. For use when authenticating as a Service Principal using a Client Secret.
+- **azure_environment** (String) The Azure Cloud Environment which should be used. Possible values are public, usgovernment, german, and china. Defaults to public.
+- **azure_metadata_host** (String) The hostname which should be used for the Azure Metadata Service.
+- **azure_msi_endpoint** (String) The path to a custom endpoint for Azure Managed Service Identity - in most circumstances this should be detected automatically.
+- **azure_subscription_id** (String) The Azure Subscription ID which should be used.
+- **azure_tenant_id** (String) The Azure Tenant ID which should be used.
+- **azure_use_msi** (Boolean) Allowed Azure Managed Service Identity be used for Authentication.
+- **hcp_api_domain** (String) The HashiCorp Cloud Platform API domain.
+- **hcs_marketplace_product_name** (String) The HashiCorp Consul Service product name on the Azure marketplace.

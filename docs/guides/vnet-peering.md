@@ -1,3 +1,16 @@
+---
+subcategory: ""
+page_title: "Peer an HCS cluster VNet - HCS Provider"
+description: |-
+    An example of peering an Azure Virtual Network (VNet) to an HCS cluster VNet.
+---
+
+# Peer an Azure Virtual Network (VNet) to an HCS cluster VNet
+
+Depending on your network topology, VNet peering can be an essential part of connecting
+Consul agents to your HCS cluster. 
+
+```terraform
 resource "azurerm_resource_group" "example" {
   name     = "hcs-tf-example"
   location = "westus2"
@@ -30,3 +43,4 @@ resource "azurerm_virtual_network_peering" "network-to-cluster" {
   virtual_network_name      = azurerm_virtual_network.example.name
   remote_virtual_network_id = hcs_cluster.example.vnet_id
 }
+```

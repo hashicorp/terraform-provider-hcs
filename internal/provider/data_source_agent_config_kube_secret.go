@@ -27,7 +27,8 @@ data:
 // for reading the agent config Kubernetes secret.
 var defaultAgentConfigKubernetesSecretTimeoutDuration = time.Minute * 5
 
-// dataSourceAgentConfigKubernetesSecret is the data source for the Consul versions supported by HCS.
+// dataSourceAgentConfigKubernetesSecret is the data source for generating the configuration for a
+// Consul agent in the form of a Kubernetes secret.
 func dataSourceAgentConfigKubernetesSecret() *schema.Resource {
 	return &schema.Resource{
 		Description: "The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the Consul cluster.",

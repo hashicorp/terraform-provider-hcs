@@ -53,7 +53,7 @@ func dataSourceCluster() *schema.Resource {
 				Computed:    true,
 			},
 			"cluster_mode": {
-				Description: "The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server node. Production clusters deploy with a minimum of three nodes.",
+				Description: "The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server. Production clusters are fully supported, full featured, and deploy with a minimum of three hosts.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},

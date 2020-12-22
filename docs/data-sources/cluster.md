@@ -36,7 +36,7 @@ data "hcs_cluster" "default" {
 ### Read-only
 
 - **blob_container_name** (String) The name of the Blob Container in which cluster data is persisted.
-- **cluster_mode** (String) The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server node. Production clusters deploy with a minimum of three nodes.
+- **cluster_mode** (String) The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server. Production clusters are fully supported, full featured, and deploy with a minimum of three hosts.
 - **consul_automatic_upgrades** (Boolean) Denotes that automatic Consul upgrades are enabled.
 - **consul_ca_file** (String) The cluster CA file encoded as a Base64 string.
 - **consul_cluster_id** (String) The cluster ID.

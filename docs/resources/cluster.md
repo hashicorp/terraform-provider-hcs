@@ -32,7 +32,7 @@ resource "hcs_cluster" "example" {
 
 ### Required
 
-- **cluster_mode** (String) The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server node. Production clusters deploy with a minimum of three nodes.
+- **cluster_mode** (String) The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server. Production clusters are fully supported, full featured, and deploy with a minimum of three hosts.
 - **email** (String) The contact email for the primary owner of the cluster.
 - **managed_application_name** (String) The name of the HCS Azure Managed Application.
 - **resource_group_name** (String) The name of the Resource Group in which the HCS Azure Managed Application belongs.

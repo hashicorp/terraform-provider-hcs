@@ -8,7 +8,7 @@ resource "hcs_cluster" "example" {
   email                    = var.email
   cluster_mode             = var.cluster_mode
   vnet_cidr                = var.vnet_cidr
-  consul_version           = data.hcs_consul_versions.default.recommended
+  min_consul_version       = data.hcs_consul_versions.default.recommended
   location                 = var.location
   plan_name                = data.hcs_plan_defaults.default.plan_name
 }

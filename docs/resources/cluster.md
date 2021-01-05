@@ -22,7 +22,7 @@ resource "hcs_cluster" "example" {
   email                    = var.email
   cluster_mode             = var.cluster_mode
   vnet_cidr                = var.vnet_cidr
-  consul_version           = data.hcs_consul_versions.default.recommended
+  min_consul_version       = data.hcs_consul_versions.default.recommended
   location                 = var.location
   plan_name                = data.hcs_plan_defaults.default.plan_name
 }
@@ -43,10 +43,10 @@ resource "hcs_cluster" "example" {
 - **consul_datacenter** (String) The Consul data center name of the cluster. If not specified, it is defaulted to the value of `managed_application_name`.
 - **consul_external_endpoint** (Boolean) Denotes that the cluster has an external endpoint for the Consul UI. Defaults to `false`.
 - **consul_federation_token** (String) The token used to join a federation of Consul clusters. If the cluster is not part of a federation, this field will be empty.
-- **consul_version** (String) The Consul version of the cluster. If not specified, it is defaulted to the version that is currently recommended by HCS.
 - **id** (String) The ID of this resource.
 - **location** (String) The Azure region that the cluster is deployed to. If not specified, it is defaulted to the region of the Resource Group the Managed Application belongs to.
 - **managed_resource_group_name** (String) The name of the Managed Resource Group in which the cluster resources belong. If not specified, it is defaulted to the value of `managed_application_name` with 'mrg-' prepended.
+- **min_consul_version** (String) The minimum Consul version of the cluster. If not specified, it is defaulted to the version that is currently recommended by HCS.
 - **plan_name** (String) The name of the Azure Marketplace HCS plan for the cluster. If not specified, it will default to the current HCS default plan (see the `hcs_plan_defaults` data source).
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - **vnet_cidr** (String) The VNET CIDR range of the Consul cluster. Defaults to `172.25.16.0/24`.
@@ -65,6 +65,7 @@ resource "hcs_cluster" "example" {
 - **consul_root_token_secret_id** (String, Sensitive) The secret ID of the root ACL token that is generated upon cluster creation. If a new root token is generated using the `hcs_cluster_root_token` resource, this field is no longer valid.
 - **consul_snapshot_interval** (String) The Consul snapshot interval.
 - **consul_snapshot_retention** (String) The retention policy for Consul snapshots.
+- **consul_version** (String) The Consul version of the cluster.
 - **managed_application_id** (String) The ID of the Managed Application.
 - **state** (String) The state of the cluster.
 - **storage_account_name** (String) The name of the Storage Account in which cluster data is persisted.

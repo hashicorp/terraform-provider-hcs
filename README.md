@@ -93,7 +93,7 @@ resource "hcs_cluster" "primary" {
   managed_application_name = "hcs-tf-federation-primary"
   email                    = "me@example.com"
   cluster_mode             = "production"
-  consul_version           = "v1.9.0"
+  min_consul_version       = "v1.9.0"
   vnet_cidr                = "172.25.16.0/24"
   consul_datacenter        = "hcs-tf-federation-example"
 }
@@ -116,7 +116,7 @@ resource "hcs_cluster" "secondary" {
   managed_application_name = "hcs-tf-federation-secondary"
   email                    = "me@example.com"
   cluster_mode             = "production"
-  consul_version           = "v1.9.0"
+  min_consul_version       = "v1.9.0"
   vnet_cidr                = "172.25.17.0/24"
   consul_datacenter        = "hcs-tf-federation-secondary"
   consul_federation_token  = data.hcs_federation_token.fed.token

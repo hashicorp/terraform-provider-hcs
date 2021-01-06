@@ -26,6 +26,10 @@ type Config struct {
 
 	// MarketPlaceProductName is the HCS product name on the Azure marketplace.
 	MarketPlaceProductName string
+
+	// SourceChannel denotes the client (channel) that originated the HCS cluster request.
+	// This is synonymous to a user-agent.
+	SourceChannel string
 }
 
 // Options are the options passed to the client.
@@ -112,7 +116,7 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 	configureAutoRestClient(&resourceGroupClient.Client, auth, options.ProviderUserAgent)
 	client.ResourceGroup = &resourceGroupClient
 
-	customResourceProviderClient := NewCustomResourceProviderClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID)
+	customResourceProviderClient := NewCustomResourceProviderClientWithBaseURI(env.ResourceManagerEndpoint, options.AzureAuthConfig.SubscriptionID, options.Config.SourceChannel)
 	configureAutoRestClient(&customResourceProviderClient.Client, auth, options.ProviderUserAgent)
 	client.CustomResourceProvider = &customResourceProviderClient
 

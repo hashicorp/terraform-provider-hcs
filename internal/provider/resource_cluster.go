@@ -394,6 +394,9 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		"initialConsulVersion": {
 			Value: consulVersion,
 		},
+		"sourceChannel": {
+			Value: meta.(*clients.Client).Config.SourceChannel,
+		},
 	}
 
 	if federationToken != "" {

@@ -647,6 +647,10 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 
+	// Sleep to prevent ResourcePurchaseCanceling errors returned from Azure during the scenario when
+	// a cluster resource must be deleted and re-created.
+	time.Sleep(time.Minute)
+
 	return nil
 }
 

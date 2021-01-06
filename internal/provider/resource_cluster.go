@@ -98,14 +98,15 @@ func resourceCluster() *schema.Resource {
 				Default:          "172.25.16.0/24",
 				ValidateDiagFunc: validateCIDR,
 			},
-			"consul_version": {
-				Description:      "The Consul version of the cluster. If not specified, it is defaulted to the version that is currently recommended by HCS. ",
+			"min_consul_version": {
+				Description:      "The minimum Consul version of the cluster. If not specified, it is defaulted to the version that is currently recommended by HCS.",
 				Type:             schema.TypeString,
 				Optional:         true,
-				Computed:         true,
 				ValidateDiagFunc: validateSemVer,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
-					return consul.NormalizeVersion(old) == consul.NormalizeVersion(new)
+					// Suppress diff is normalized versions match OR min_consul_version is removed from the resource
+					// since min_consul_version is required in order to upgrade the cluster to a new Consul version.
+					return consul.NormalizeVersion(old) == consul.NormalizeVersion(new) || new == ""
 				},
 			},
 			"consul_datacenter": {
@@ -199,6 +200,11 @@ func resourceCluster() *schema.Resource {
 			},
 			"storage_account_resource_group": {
 				Description: "The name of the Storage Account's Resource Group.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
+			"consul_version": {
+				Description: "The Consul version of the cluster.",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
@@ -312,7 +318,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("error fetching available HCP Consul versions: %+v", err)
 	}
 	consulVersion := consul.RecommendedVersion(availableConsulVersions)
-	v, ok = d.GetOk("consul_version")
+	v, ok = d.GetOk("min_consul_version")
 	if ok {
 		consulVersion = consul.NormalizeVersion(v.(string))
 	}
@@ -555,7 +561,11 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 
-	newConsulVersion := consul.NormalizeVersion(d.Get("consul_version").(string))
+	v, ok := d.GetOk("min_consul_version")
+	if !ok {
+		return diag.Errorf("min_consul_version is required in order to upgrade the cluster")
+	}
+	newConsulVersion := consul.NormalizeVersion(v.(string))
 
 	if upgradeVersionsResponse.Versions == nil {
 		return diag.Errorf("no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS")

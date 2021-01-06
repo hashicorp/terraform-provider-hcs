@@ -23,6 +23,15 @@ provider "azurerm" {
   features {}
 }
 
+// If you have not already done so, accept the HCS Marketplace agreement
+data "hcs_plan_defaults" "hcs_plan" {}
+
+resource "azurerm_marketplace_agreement" "hcs_marketplace_agreement" {
+  publisher = data.hcs_plan_defaults.hcs_plan.publisher
+  offer     = data.hcs_plan_defaults.hcs_plan.offer
+  plan      = data.hcs_plan_defaults.hcs_plan.plan_name
+}
+
 // Create an Azure Resource Group
 resource "azurerm_resource_group" "example" {
   name     = "hcs-tf-example-rg"

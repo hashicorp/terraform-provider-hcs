@@ -151,6 +151,7 @@ func resourceCluster() *schema.Resource {
 				ForceNew:    true,
 				Computed:    true,
 				ValidateDiagFunc: validateStringInSlice([]string{
+					"on-demand",
 					"on-demand-v2",
 					"annual",
 				}, false),

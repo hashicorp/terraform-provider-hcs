@@ -54,7 +54,7 @@ func New() func() *schema.Provider {
 				"hcs_marketplace_product_name": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					DefaultFunc: schema.EnvDefaultFunc("HCP_PLAN", "hcs-production"),
+					DefaultFunc: schema.EnvDefaultFunc("HCP_MARKETPLACE_PRODUCT_NAME", "hcs-production"),
 					Description: "The HashiCorp Consul Service product name on the Azure marketplace.",
 				},
 				// We must support the same optional fields found in the azurerm provider schema

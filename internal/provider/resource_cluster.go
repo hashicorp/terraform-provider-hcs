@@ -19,7 +19,13 @@ import (
 	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
 
-var createUpdateDeleteTimeoutDuration = time.Minute * 25
+// createUpdateTimeoutDuration is the amount of time that can elapse
+// before a cluster create or update operation should timeout.
+var createUpdateTimeoutDuration = time.Minute * 40
+
+// deleteTimeoutDuration is the amount of time that can elapse
+// before a cluster delete operation should timeout.
+var deleteTimeoutDuration = time.Minute * 25
 
 // managedAppParamValue is the container struct for passing AMA values on creation/update.
 type managedAppParamValue struct {
@@ -38,9 +44,9 @@ func resourceCluster() *schema.Resource {
 		DeleteContext: resourceClusterDelete,
 		Timeouts: &schema.ResourceTimeout{
 			Default: &defaultClusterTimeoutDuration,
-			Create:  &createUpdateDeleteTimeoutDuration,
-			Update:  &createUpdateDeleteTimeoutDuration,
-			Delete:  &createUpdateDeleteTimeoutDuration,
+			Create:  &createUpdateTimeoutDuration,
+			Update:  &createUpdateTimeoutDuration,
+			Delete:  &deleteTimeoutDuration,
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceClusterImport,
@@ -151,6 +157,7 @@ func resourceCluster() *schema.Resource {
 				ForceNew:    true,
 				Computed:    true,
 				ValidateDiagFunc: validateStringInSlice([]string{
+					"on-demand",
 					"on-demand-v2",
 					"annual",
 				}, false),
@@ -649,6 +656,10 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 			err,
 		)
 	}
+
+	// Sleep to prevent ResourcePurchaseCanceling errors returned from Azure during the scenario when
+	// a cluster resource must be deleted and re-created.
+	time.Sleep(time.Minute)
 
 	return nil
 }

@@ -20,6 +20,11 @@ type HashicorpCloudConsulamaAmaUpdateClusterRequest struct {
 	// running. This is the AMA instance's managed resource group.
 	ResourceGroup string `json:"resourceGroup,omitempty"`
 
+	// source_channel indicates which mechanism was used to initiate an update
+	// of this cluster.
+	// This typically should be: terraform-provider-hcs, azure-portal, hcs-cli.
+	SourceChannel string `json:"sourceChannel,omitempty"`
+
 	// subscription_id is the ID of the Azure subscription the Consul cluster
 	// exists in. This is the customer's subscription ID.
 	SubscriptionID string `json:"subscriptionId,omitempty"`

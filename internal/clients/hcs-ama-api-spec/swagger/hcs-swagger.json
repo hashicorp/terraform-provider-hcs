@@ -3,7 +3,7 @@
   "info": {
     "title": "HashiCorp Consul Service (HCS)",
     "description": "Azure Managed App API for HCS",
-    "version": "2020-11-06"
+    "version": "2020-12-21"
   },
   "schemes": [
     "https"
@@ -1505,6 +1505,10 @@
         "vnetName": {
           "type": "string",
           "description": "vnet_name is the name of the Azure Virtual Network the consul cluster\nis deployed in."
+        },
+        "sourceChannel": {
+          "type": "string",
+          "description": "source_channel indicates which mechanism was used to create this cluster.\nThis typically should be: terraform-provider-hcs, azure-portal, hcs-cli.\nThis is synonymous to a user-agent."
         }
       },
       "description": "ClusterProperties contains properties the user selected when creating the\nmanaged app instance."
@@ -2280,6 +2284,10 @@
         "update": {
           "$ref": "#/definitions/hashicorp.cloud.consulama.ama.ClusterUpdate",
           "description": "update contains the details of the Consul cluster to be updated."
+        },
+        "sourceChannel": {
+          "type": "string",
+          "description": "source_channel indicates which mechanism was used to initiate an update\nof this cluster.\nThis typically should be: terraform-provider-hcs, azure-portal, hcs-cli."
         }
       },
       "title": "See ConsulAMAService.UpdateCluster"

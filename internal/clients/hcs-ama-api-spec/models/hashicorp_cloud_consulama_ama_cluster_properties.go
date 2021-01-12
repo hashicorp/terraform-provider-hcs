@@ -94,6 +94,11 @@ type HashicorpCloudConsulamaAmaClusterProperties struct {
 	// instance. This ID is required to identified managed apps.
 	ManagedAppID string `json:"managedAppId,omitempty"`
 
+	// source_channel indicates which mechanism was used to create this cluster.
+	// This typically should be: terraform-provider-hcs, azure-portal, hcs-cli.
+	// This is synonymous to a user-agent.
+	SourceChannel string `json:"sourceChannel,omitempty"`
+
 	// state is the cluster's current state.
 	// This is used in HTTP responses to Azure, but when this pb message is used
 	// to persist cluster data in the DB, this attribute is either ignored or

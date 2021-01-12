@@ -163,12 +163,15 @@ func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (
 		}
 
 		//TODO: pass provider version to user agent
+		userAgent := p.UserAgent("terraform-provider-hcs", "")
+
 		clientOptions := clients.Options{
-			ProviderUserAgent: p.UserAgent("terraform-provider-hcs", ""),
+			ProviderUserAgent: userAgent,
 			AzureAuthConfig:   authConfig,
 			Config: clients.Config{
 				HCPApiDomain:           d.Get("hcp_api_domain").(string),
 				MarketPlaceProductName: d.Get("hcs_marketplace_product_name").(string),
+				SourceChannel:          userAgent,
 			},
 		}
 

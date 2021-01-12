@@ -21,6 +21,9 @@ type CustomResourceProviderClient struct {
 	BaseURI string
 	// SubscriptionID is the Azure subscription id for the current authenticated user.
 	SubscriptionID string
+	// SourceChannel denotes the client (channel) that originated the HCS cluster request.
+	// This is synonymous to a user-agent.
+	SourceChannel string
 }
 
 // ConsulConfig represents the Consul config returned on the GetConfig response.
@@ -33,11 +36,12 @@ type ConsulConfig struct {
 
 // NewCustomResourceProviderClientWithBaseURI constructs a CustomResourceProviderClient using the provided
 // base URI and subscription id.
-func NewCustomResourceProviderClientWithBaseURI(baseURI string, subscriptionID string) CustomResourceProviderClient {
+func NewCustomResourceProviderClientWithBaseURI(baseURI string, subscriptionID string, sourceChannel string) CustomResourceProviderClient {
 	return CustomResourceProviderClient{
 		Client:         autorest.NewClientWithUserAgent("hcs-custom-resource-provider"),
 		BaseURI:        baseURI,
 		SubscriptionID: subscriptionID,
+		SourceChannel:  sourceChannel,
 	}
 }
 
@@ -296,6 +300,7 @@ func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, ma
 		Update: &models.HashicorpCloudConsulamaAmaClusterUpdate{
 			ConsulVersion: newConsulVersion,
 		},
+		SourceChannel: client.SourceChannel,
 	})
 	if err != nil {
 		return updateResponse, err

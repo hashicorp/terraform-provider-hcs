@@ -173,7 +173,6 @@ func resourceCluster() *schema.Resource {
 				Description:      "A mapping of tags to assign to the HCS Azure Managed Application resource.",
 				Type:             schema.TypeMap,
 				Optional:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validateAzureTags,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -584,11 +583,51 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 
+	clusterName := *managedApp.Name
+	v, ok := d.GetOk("cluster_name")
+	if ok {
+		clusterName = v.(string)
+	}
+
+	// Fetch the cluster managed resource
+	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
+	if err != nil {
+		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %+v",
+			managedAppID,
+			clusterName,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
+	}
+
+	// If the min_consul_version differs from the current version, attempt to upgrade the cluster
+	v, ok = d.GetOk("min_consul_version")
+	if ok && v.(string) != cluster.Properties.ConsulCurrentVersion {
+		clusterUpgradeDiag := upgradeClusterVersion(ctx, d, meta, managedApp)
+		if clusterUpgradeDiag != nil {
+			return clusterUpgradeDiag
+		}
+	}
+
+	// If we are updating due to modified tags OR removing existing tags, attempt to update the Managed App
+	v, ok = d.GetOk("tags")
+	if ok || (!ok && len(managedApp.Tags) > 0) {
+		managedAppUpdateDiag := updateManagedApplicationTags(ctx, d, meta, managedApp)
+		if managedAppUpdateDiag != nil {
+			return managedAppUpdateDiag
+		}
+	}
+
+	return resourceClusterRead(ctx, d, meta)
+}
+
+// upgradeClusterVersion updates a cluster's Consul version to a valid upgrade version
+func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta interface{}, managedApp managedapplications.Application) diag.Diagnostics {
 	// Retrieve the valid upgrade versions
 	upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
 	if err != nil {
 		return diag.Errorf("error retrieving upgrade versions for HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
-			managedAppID,
+			*managedApp.ID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
 		)
@@ -611,7 +650,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, newConsulVersion)
 	if err != nil {
 		return diag.Errorf("error updating HCS Cluster (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
-			managedAppID,
+			*managedApp.ID,
 			newConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -621,14 +660,48 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	err = meta.(*clients.Client).CustomResourceProvider.PollOperation(ctx, updateResponse.Operation.ID, *managedApp.ManagedResourceGroupID, *managedApp.Name, 10)
 	if err != nil {
 		return diag.Errorf("error polling update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
-			managedAppID,
+			*managedApp.ID,
 			newConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
 		)
 	}
 
-	return resourceClusterRead(ctx, d, meta)
+	return nil
+}
+
+// updateManagedApplicationTags updates a cluster's Managed Application tags
+func updateManagedApplicationTags(ctx context.Context, d *schema.ResourceData, meta interface{}, managedApp managedapplications.Application) diag.Diagnostics {
+	t := d.Get("tags").(map[string]interface{})
+	tags := make(map[string]*string, len(t))
+
+	for i, v := range t {
+		tag, _ := helper.TagValueToString(v)
+		tags[i] = &tag
+	}
+
+	updateResp, err := meta.(*clients.Client).ManagedApplication.Update(
+		ctx,
+		d.Get("resource_group_name").(string),
+		*managedApp.Name,
+		&managedapplications.ApplicationPatchable{Tags: tags},
+	)
+	if err != nil {
+		// Azure seems to return a 202 on successful update, but the Autorest client has trouble responding
+		// to the response. Ignore the error in this case as the update was successful.
+		if helper.IsAutoRestResponseCodeAccepted(updateResp.Response) {
+			log.Printf("[INFO] successfully updated tags for (Managed Application ID %q)", *managedApp.ID)
+			return nil
+		}
+
+		return diag.Errorf("error updating Managed Application tags (Managed Application ID %q) (Correlation ID %q): %+v",
+			*managedApp.ID,
+			meta.(*clients.Client).CorrelationRequestID,
+			err,
+		)
+	}
+
+	return nil
 }
 
 func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

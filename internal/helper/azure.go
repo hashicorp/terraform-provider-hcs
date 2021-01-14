@@ -9,8 +9,19 @@ import (
 // IsAutoRestResponseCodeNotFound determines if an AutoRest response code was
 // 404 not found.
 func IsAutoRestResponseCodeNotFound(resp autorest.Response) bool {
+	return isAutoRestCode(resp, 404)
+}
+
+// IsAutoRestResponseCodeAccepted determines if an AutoRest response code was
+// 202 Accepted.
+func IsAutoRestResponseCodeAccepted(resp autorest.Response) bool {
+	return isAutoRestCode(resp, 202)
+}
+
+// isAutoRestCode determines if the Autorest response status code matches the code specified.
+func isAutoRestCode(resp autorest.Response, code int) bool {
 	if r := resp.Response; r != nil {
-		if r.StatusCode == 404 {
+		if r.StatusCode == code {
 			return true
 		}
 	}

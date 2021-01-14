@@ -169,6 +169,16 @@ func resourceCluster() *schema.Resource {
 				ForceNew:    true,
 				Computed:    true,
 			},
+			"tags": {
+				Description:      "A mapping of tags to assign the HCS Azure Managed Application resource.",
+				Type:             schema.TypeMap,
+				Optional:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validateAzureTags,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			// Computed outputs
 			"vnet_id": {
 				Description: "The ID of the cluster's managed VNet.",
@@ -412,6 +422,18 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 
+	var tags map[string]*string
+	v, ok = d.GetOk("tags")
+	if ok {
+		t := v.(map[string]interface{})
+		tags = make(map[string]*string, len(t))
+
+		for i, v := range t {
+			tag, _ := helper.TagValueToString(v)
+			tags[i] = &tag
+		}
+	}
+
 	params := managedapplications.Application{
 		ApplicationProperties: &managedapplications.ApplicationProperties{
 			ManagedResourceGroupID: helper.String(managedResourceGroupId),
@@ -420,6 +442,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		Plan:     &plan,
 		Kind:     helper.String("MarketPlace"),
 		Location: location,
+		Tags:     tags,
 	}
 	future, err := managedAppClient.CreateOrUpdate(ctx, resourceGroupName, managedAppName, params)
 	if err != nil {
@@ -820,6 +843,11 @@ func setClusterData(d *schema.ResourceData, managedApp managedapplications.Appli
 	}
 
 	err = d.Set("managed_resource_group_name", managedResourceGroupName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("tags", helper.FlattenTags(managedApp.Tags))
 	if err != nil {
 		return diag.FromErr(err)
 	}

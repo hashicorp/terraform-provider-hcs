@@ -9,14 +9,17 @@ description: |-
 
 ```terraform
 resource "azurerm_resource_group" "example" {
-  name     = "hcs-tf-example"
+  name     = "hcs-tf-example-tags"
   location = "westus2"
 }
 
 resource "hcs_cluster" "example" {
   resource_group_name      = azurerm_resource_group.example.name
-  managed_application_name = "hcs-tf-example"
+  managed_application_name = "hcs-tf-example-tags"
   email                    = "me@example.com"
   cluster_mode             = "production"
+  tags = {
+    foo = "bar"
+  }
 }
 ```

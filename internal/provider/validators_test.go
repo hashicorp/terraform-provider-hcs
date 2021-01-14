@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -278,6 +279,91 @@ func Test_validateSemVer(t *testing.T) {
 			r := require.New(t)
 
 			result := validateSemVer(tc.input, nil)
+			r.Equal(tc.expected, result)
+		})
+	}
+}
+
+func Test_validateAzureTags(t *testing.T) {
+	tooManyTagKeys := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	tooManyTags := make(map[string]interface{}, len(tooManyTagKeys))
+	for _, r := range tooManyTagKeys {
+		tooManyTags[string(r)] = "abc"
+	}
+
+	var tooLongSb strings.Builder
+	for i := 0; i < 513; i++ {
+		tooLongSb.WriteString("a")
+	}
+
+	tcs := map[string]struct {
+		expected diag.Diagnostics
+		input    map[string]interface{}
+	}{
+		"valid tags": {
+			input: map[string]interface{}{
+				"foo":  "bar",
+				"beep": "baz",
+			},
+			expected: nil,
+		},
+		"too many tags": {
+			input: tooManyTags,
+			expected: diag.Diagnostics{
+				diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       "a maximum of 50 tags can be applied to each ARM resource",
+					Detail:        "a maximum of 50 tags can be applied to each ARM resource",
+					AttributePath: nil,
+				},
+			},
+		},
+		"tag key too long": {
+			input: map[string]interface{}{
+				tooLongSb.String(): "bar",
+			},
+			expected: diag.Diagnostics{
+				diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       fmt.Sprintf("the maximum length for a tag key is 512 characters: %q is %d characters", tooLongSb.String(), tooLongSb.Len()),
+					Detail:        fmt.Sprintf("the maximum length for a tag key is 512 characters: %q is %d characters", tooLongSb.String(), tooLongSb.Len()),
+					AttributePath: nil,
+				},
+			},
+		},
+		"tag value too long": {
+			input: map[string]interface{}{
+				"foo": tooLongSb.String(),
+			},
+			expected: diag.Diagnostics{
+				diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       fmt.Sprintf("the maximum length for a tag value is 256 characters: the value for %q is %d characters", "foo", tooLongSb.Len()),
+					Detail:        fmt.Sprintf("the maximum length for a tag value is 256 characters: the value for %q is %d characters", "foo", tooLongSb.Len()),
+					AttributePath: nil,
+				},
+			},
+		},
+		"invalid tag value type": {
+			input: map[string]interface{}{
+				"foo": 1.23,
+			},
+			expected: diag.Diagnostics{
+				diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       "unknown tag type float64 in tag value",
+					Detail:        "unknown tag type float64 in tag value",
+					AttributePath: nil,
+				},
+			},
+		},
+	}
+
+	for n, tc := range tcs {
+		t.Run(n, func(t *testing.T) {
+			r := require.New(t)
+
+			result := validateAzureTags(tc.input, nil)
 			r.Equal(tc.expected, result)
 		})
 	}

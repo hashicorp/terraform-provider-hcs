@@ -60,7 +60,7 @@ data "hcs_cluster" "default" {
 - **state** (String) The state of the cluster.
 - **storage_account_name** (String) The name of the Storage Account in which cluster data is persisted.
 - **storage_account_resource_group** (String) The name of the Storage Account's Resource Group.
-- **tags** (Map of String) A mapping of tags to assign the HCS Azure Managed Application resource.
+- **tags** (Map of String) A mapping of tags assigned to the HCS Azure Managed Application resource.
 - **vnet_cidr** (String) The VNET CIDR range of the Consul cluster.
 
 <a id="nestedblock--timeouts"></a>

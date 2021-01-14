@@ -50,7 +50,7 @@ resource "hcs_cluster" "example" {
 - **managed_resource_group_name** (String) The name of the Managed Resource Group in which the cluster resources belong. If not specified, it is defaulted to the value of `managed_application_name` with 'mrg-' prepended.
 - **min_consul_version** (String) The minimum Consul version of the cluster. If not specified, it is defaulted to the version that is currently recommended by HCS.
 - **plan_name** (String) The name of the Azure Marketplace HCS plan for the cluster. If not specified, it will default to the current HCS default plan (see the `hcs_plan_defaults` data source).
-- **tags** (Map of String) A mapping of tags to assign the HCS Azure Managed Application resource.
+- **tags** (Map of String) A mapping of tags to assign to the HCS Azure Managed Application resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - **vnet_cidr** (String) The VNET CIDR range of the Consul cluster. Defaults to `172.25.16.0/24`.
 

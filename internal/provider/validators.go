@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
 
 // validateStringNotEmpty ensures a given string is non-empty.
@@ -179,6 +181,57 @@ func validateManagedAppName(v interface{}, path cty.Path) diag.Diagnostics {
 			Detail:        msg,
 			AttributePath: path,
 		})
+	}
+
+	return diagnostics
+}
+
+// validateAzureTags validates tags that will be applied to an Azure resource.
+// Adapted from the azurerm provider.
+// https://github.com/terraform-providers/terraform-provider-azurerm/blob/b7299d0b8c6f3685db07586530a7f52216dd48e4/azurerm/internal/tags/validation.go#L8
+func validateAzureTags(v interface{}, path cty.Path) diag.Diagnostics {
+	var diagnostics diag.Diagnostics
+
+	tags := v.(map[string]interface{})
+
+	if len(tags) > 50 {
+		msg := "a maximum of 50 tags can be applied to each ARM resource"
+		diagnostics = append(diagnostics, diag.Diagnostic{
+			Severity:      diag.Error,
+			Summary:       msg,
+			Detail:        msg,
+			AttributePath: path,
+		})
+	}
+
+	for k, v := range tags {
+		if len(k) > 512 {
+			msg := fmt.Sprintf("the maximum length for a tag key is 512 characters: %q is %d characters", k, len(k))
+			diagnostics = append(diagnostics, diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       msg,
+				Detail:        msg,
+				AttributePath: path,
+			})
+		}
+
+		value, err := helper.TagValueToString(v)
+		if err != nil {
+			diagnostics = append(diagnostics, diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       err.Error(),
+				Detail:        err.Error(),
+				AttributePath: path,
+			})
+		} else if len(value) > 256 {
+			msg := fmt.Sprintf("the maximum length for a tag value is 256 characters: the value for %q is %d characters", k, len(value))
+			diagnostics = append(diagnostics, diag.Diagnostic{
+				Severity:      diag.Error,
+				Summary:       msg,
+				Detail:        msg,
+				AttributePath: path,
+			})
+		}
 	}
 
 	return diagnostics

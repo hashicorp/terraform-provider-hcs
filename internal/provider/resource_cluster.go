@@ -170,7 +170,7 @@ func resourceCluster() *schema.Resource {
 				Computed:    true,
 			},
 			"tags": {
-				Description:      "A mapping of tags to assign the HCS Azure Managed Application resource.",
+				Description:      "A mapping of tags to assign to the HCS Azure Managed Application resource.",
 				Type:             schema.TypeMap,
 				Optional:         true,
 				ForceNew:         true,

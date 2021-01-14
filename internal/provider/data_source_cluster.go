@@ -98,7 +98,7 @@ func dataSourceCluster() *schema.Resource {
 				Computed:    true,
 			},
 			"tags": {
-				Description: "A mapping of tags to assign the HCS Azure Managed Application resource.",
+				Description: "A mapping of tags assigned to the HCS Azure Managed Application resource.",
 				Type:        schema.TypeMap,
 				Computed:    true,
 				Elem: &schema.Schema{

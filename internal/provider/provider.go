@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients"
+	"github.com/hashicorp/terraform-provider-hcs/version"
 )
 
 func init() {
@@ -162,8 +163,7 @@ func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (
 			return nil, diag.Errorf("unable to build Azure authentication config: %+v", err)
 		}
 
-		//TODO: pass provider version to user agent
-		userAgent := p.UserAgent("terraform-provider-hcs", "")
+		userAgent := p.UserAgent("terraform-provider-hcs", version.ProviderVersion)
 
 		clientOptions := clients.Options{
 			ProviderUserAgent: userAgent,

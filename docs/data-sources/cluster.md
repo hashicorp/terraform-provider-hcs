@@ -62,6 +62,9 @@ data "hcs_cluster" "default" {
 - **storage_account_resource_group** (String) The name of the Storage Account's Resource Group.
 - **tags** (Map of String) A mapping of tags assigned to the HCS Azure Managed Application resource.
 - **vnet_cidr** (String) The VNET CIDR range of the Consul cluster.
+- **vnet_id** (String) The ID of the cluster's managed VNet.
+- **vnet_name** (String) The name of the cluster's managed VNet.
+- **vnet_resource_group_name** (String) The resource group that the cluster's managed VNet belongs to. This will be the same value as `managed_resource_group_name`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`

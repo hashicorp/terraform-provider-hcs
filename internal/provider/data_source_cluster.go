@@ -105,6 +105,21 @@ func dataSourceCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"vnet_id": {
+				Description: "The ID of the cluster's managed VNet.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
+			"vnet_name": {
+				Description: "The name of the cluster's managed VNet.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
+			"vnet_resource_group_name": {
+				Description: "The resource group that the cluster's managed VNet belongs to. This will be the same value as `managed_resource_group_name`.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 			"state": {
 				Description: "The state of the cluster.",
 				Type:        schema.TypeString,

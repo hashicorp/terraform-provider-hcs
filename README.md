@@ -55,7 +55,7 @@ $ make testacc
  From the root of the repo run:
  
  ```
- go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+ go generate && go mod tidy
  ```
 
  

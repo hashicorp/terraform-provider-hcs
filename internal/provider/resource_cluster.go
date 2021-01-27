@@ -21,7 +21,7 @@ import (
 
 // createUpdateTimeoutDuration is the amount of time that can elapse
 // before a cluster create or update operation should timeout.
-var createUpdateTimeoutDuration = time.Minute * 40
+var createUpdateTimeoutDuration = time.Minute * 60
 
 // deleteTimeoutDuration is the amount of time that can elapse
 // before a cluster delete operation should timeout.

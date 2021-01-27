@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -140,8 +141,21 @@ func validateCIDR(v interface{}, path cty.Path) diag.Diagnostics {
 func validateSemVer(v interface{}, path cty.Path) diag.Diagnostics {
 	var diagnostics diag.Diagnostics
 
-	if !regexp.MustCompile(`^v?\d+.\d+.\d+$`).MatchString(v.(string)) {
+	ver, err := version.NewSemver(v.(string))
+	if err != nil {
 		msg := "must be a valid semver"
+		diagnostics = append(diagnostics, diag.Diagnostic{
+			Severity:      diag.Error,
+			Summary:       msg,
+			Detail:        err.Error(),
+			AttributePath: path,
+		})
+	} else if len(ver.Segments()) != 3 {
+		// TODO - Should we allow 2 segments to opt-in to a major Consul version
+		// and let us pick the latest patch release. This could potentially allow
+		// us to stop supporting consul versions with known issues in them without
+		// breaking anyones tf code.
+		msg := "version must have 3 segments"
 		diagnostics = append(diagnostics, diag.Diagnostic{
 			Severity:      diag.Error,
 			Summary:       msg,

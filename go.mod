@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.1
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.1
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/zclconf/go-cty v1.4.1 // indirect

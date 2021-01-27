@@ -261,13 +261,28 @@ func Test_validateSemVer(t *testing.T) {
 			input:    "1.2.3",
 			expected: nil,
 		},
+		"with prerelease": {
+			input:    "v1.2.3-unreleased",
+			expected: nil,
+		},
 		"invalid semver": {
-			input: "v1.2.3.4.5",
+			input: "v1.2.foo",
 			expected: diag.Diagnostics{
 				diag.Diagnostic{
 					Severity:      diag.Error,
 					Summary:       "must be a valid semver",
-					Detail:        "must be a valid semver",
+					Detail:        "Malformed version: v1.2.foo",
+					AttributePath: nil,
+				},
+			},
+		},
+		"too many segments": {
+			input: "v1.2.3.4.5",
+			expected: diag.Diagnostics{
+				diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       "version must have 3 segments",
+					Detail:        "version must have 3 segments",
 					AttributePath: nil,
 				},
 			},

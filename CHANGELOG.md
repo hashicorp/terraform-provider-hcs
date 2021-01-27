@@ -1,7 +1,9 @@
 ## 0.1.1 (Unreleased)
 
 IMPROVEMENTS:
-* `hcs_cluster`: `min_consul_version` now can handle semver versions with metadata or a prerelease.
+* `hcs_cluster` resource: `min_consul_version` now can handle semver versions with metadata or a prerelease.
+* `hcs_cluster` resource: Create timeout increased to 60 minutes.
+* `hcs_cluster` data source: Added `vnet_id`, `vnet_name`, and `vnet_resource_group_name` to schema. 
 
 ## 0.1.0 (January 15, 2021)
 

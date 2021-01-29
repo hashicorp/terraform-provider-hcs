@@ -592,7 +592,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	// Fetch the cluster managed resource
 	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %v",
 			managedAppID,
 			clusterName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -626,7 +626,7 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 	// Retrieve the valid upgrade versions
 	upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
 	if err != nil {
-		return diag.Errorf("error retrieving upgrade versions for HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to retrieve upgrade versions for HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			*managedApp.ID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -649,7 +649,7 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 
 	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, newConsulVersion)
 	if err != nil {
-		return diag.Errorf("error updating HCS Cluster (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to update HCS cluster (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %v",
 			*managedApp.ID,
 			newConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -659,7 +659,7 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 
 	err = meta.(*clients.Client).CustomResourceProvider.PollOperation(ctx, updateResponse.Operation.ID, *managedApp.ManagedResourceGroupID, *managedApp.Name, 10)
 	if err != nil {
-		return diag.Errorf("error polling update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to poll update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %v",
 			*managedApp.ID,
 			newConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -694,7 +694,7 @@ func updateManagedApplicationTags(ctx context.Context, d *schema.ResourceData, m
 			return nil
 		}
 
-		return diag.Errorf("error updating Managed Application tags (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to update Managed Application tags (Managed Application ID %q) (Correlation ID %q): %v",
 			*managedApp.ID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -718,7 +718,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return diag.Errorf("error fetching HCS Cluster before deletion (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster before deletion (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -731,13 +731,13 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	federationResponse, err := meta.(*clients.Client).CustomResourceProvider.GetFederation(ctx, *managedApp.ManagedResourceGroupID, d.Get("resource_group_name").(string))
 	// Ensure the cluster is not the primary in the federation
 	if err == nil && isClusterPrimaryInFederation(*managedApp.Name, resourceGroupName, federationResponse) {
-		return diag.Errorf("cannot delete the primary datacenter of a federation before all secondary datacenters are deleted: (Managed Application %q) (Resource Group %q)", *managedApp.Name, resourceGroupName)
+		return diag.Errorf("unable to delete primary datacenter of a federation before all secondary datacenters are deleted: (Managed Application %q) (Resource Group %q)", *managedApp.Name, resourceGroupName)
 	}
 
 	// Delete the managed app (the cluster custom resource will be deleted as well).
 	future, err := managedAppClient.DeleteByID(ctx, managedAppID)
 	if err != nil {
-		return diag.Errorf("error deleting HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to delete HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -746,7 +746,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 
 	err = future.WaitForCompletionRef(ctx, managedAppClient.Client)
 	if err != nil {
-		return diag.Errorf("error waiting for delete of HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to wait for delete of HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,

@@ -125,7 +125,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.CreateSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotName)
 	if err != nil {
-		return diag.Errorf("error creating snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to create snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -322,7 +322,7 @@ func populateSnapshotState(d *schema.ResourceData, snapshot *models.HashicorpClo
 
 	size, err := strconv.Atoi(snapshot.Size)
 	if err != nil {
-		return diag.Errorf("error converting string to int: %+v", err)
+		return diag.Errorf("unable to convert string to int: %v", err)
 	}
 	if err := d.Set("size", size); err != nil {
 		return diag.FromErr(err)

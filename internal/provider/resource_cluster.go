@@ -294,7 +294,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	existingCluster, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
 		if !helper.IsAutoRestResponseCodeNotFound(existingCluster.Response) {
-			return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+			return diag.Errorf("unable to check for presence of existing HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 				managedAppName,
 				resourceGroupName,
 				meta.(*clients.Client).CorrelationRequestID,
@@ -303,13 +303,13 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		}
 	}
 	if existingCluster.ID != nil && *existingCluster.ID != "" {
-		return diag.Errorf("a resource with the ID %q already exists - to be managed via Terraform this resource needs to be imported into the State. Please see the resource documentation for hcs_cluster for more information", *existingCluster.ID)
+		return diag.Errorf("unable to create HCS cluster (%s) - an HCS cluster with this ID already exists; see resouce documentation for hcs_cluster for instructions on how to add an already existing HCS cluster to the state", *existingCluster.ID)
 	}
 
 	// Fetch resource group
 	resourceGroup, err := meta.(*clients.Client).ResourceGroup.Get(ctx, resourceGroupName)
 	if err != nil {
-		return diag.Errorf("error fetching resource group (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch resource group (Resource Group %q) (Correlation ID %q): %v",
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -331,7 +331,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	availableConsulVersions, err := consul.GetAvailableHCPConsulVersions(ctx, meta.(*clients.Client).Config.HCPApiDomain)
 	if err != nil || availableConsulVersions == nil {
-		return diag.Errorf("error fetching available HCP Consul versions: %+v", err)
+		return diag.Errorf("unable to fetch available HCP Consul versions: %v", err)
 	}
 	consulVersion := consul.RecommendedVersion(availableConsulVersions)
 	v, ok = d.GetOk("min_consul_version")
@@ -445,7 +445,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 	future, err := managedAppClient.CreateOrUpdate(ctx, resourceGroupName, managedAppName, params)
 	if err != nil {
-		return diag.Errorf("error creating HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to create HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -453,7 +453,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 	if err = future.WaitForCompletionRef(ctx, managedAppClient.Client); err != nil {
-		return diag.Errorf("error waiting for creation of HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to wait for creation of HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -463,7 +463,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	app, err := managedAppClient.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("error retrieving HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to retrieve HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -471,7 +471,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 	if app.ID == nil || *app.ID == "" {
-		return diag.Errorf("cannot read HCS Cluster (Managed Application %q) (Resource Group %q) ID", managedAppName, resourceGroupName)
+		return diag.Errorf("unable to read HCS cluster ID (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 	}
 
 	// We need to set the cluster name to be able to fetch the cluster on read
@@ -481,7 +481,7 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	rootTokenResp, err := meta.(*clients.Client).CustomResourceProvider.CreateRootToken(ctx, *app.ApplicationProperties.ManagedResourceGroupID)
 	if err != nil {
-		return diag.Errorf("error creating HCS Cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to create HCS cluster root token (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -516,7 +516,7 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 			return nil
 		}
 
-		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -532,7 +532,7 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 	// Fetch the cluster managed resource
 	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %v",
 			managedAppID,
 			clusterName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -550,7 +550,7 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 	vNetName := strings.TrimSuffix(cluster.Properties.VnetName, "-vnet") + "-vnet"
 	vNet, err := meta.(*clients.Client).VNet.Get(ctx, managedResourceGroupName, vNetName, "")
 	if err != nil {
-		return diag.Errorf("error fetching VNet for HCS Cluster (Managed Application ID %q) (Managed Resource Group Name %q) (VNet Name %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch VNet for HCS cluster (Managed Application ID %q) (Managed Resource Group Name %q) (VNet Name %q) (Correlation ID %q): %v",
 			managedAppID,
 			managedResourceGroupName,
 			vNetName,
@@ -576,7 +576,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -592,7 +592,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 	// Fetch the cluster managed resource
 	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %v",
 			managedAppID,
 			clusterName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -626,7 +626,7 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 	// Retrieve the valid upgrade versions
 	upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
 	if err != nil {
-		return diag.Errorf("error retrieving upgrade versions for HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to retrieve upgrade versions for HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			*managedApp.ID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -649,7 +649,7 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 
 	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, newConsulVersion)
 	if err != nil {
-		return diag.Errorf("error updating HCS Cluster (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to update HCS cluster (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %v",
 			*managedApp.ID,
 			newConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -659,7 +659,7 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 
 	err = meta.(*clients.Client).CustomResourceProvider.PollOperation(ctx, updateResponse.Operation.ID, *managedApp.ManagedResourceGroupID, *managedApp.Name, 10)
 	if err != nil {
-		return diag.Errorf("error polling update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to poll update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %v",
 			*managedApp.ID,
 			newConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -694,7 +694,7 @@ func updateManagedApplicationTags(ctx context.Context, d *schema.ResourceData, m
 			return nil
 		}
 
-		return diag.Errorf("error updating Managed Application tags (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to update Managed Application tags (Managed Application ID %q) (Correlation ID %q): %v",
 			*managedApp.ID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -718,7 +718,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return diag.Errorf("error fetching HCS Cluster before deletion (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster before deletion (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -731,13 +731,13 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 	federationResponse, err := meta.(*clients.Client).CustomResourceProvider.GetFederation(ctx, *managedApp.ManagedResourceGroupID, d.Get("resource_group_name").(string))
 	// Ensure the cluster is not the primary in the federation
 	if err == nil && isClusterPrimaryInFederation(*managedApp.Name, resourceGroupName, federationResponse) {
-		return diag.Errorf("cannot delete the primary datacenter of a federation before all secondary datacenters are deleted: (Managed Application %q) (Resource Group %q)", *managedApp.Name, resourceGroupName)
+		return diag.Errorf("unable to delete primary datacenter of a federation before all secondary datacenters are deleted: (Managed Application %q) (Resource Group %q)", *managedApp.Name, resourceGroupName)
 	}
 
 	// Delete the managed app (the cluster custom resource will be deleted as well).
 	future, err := managedAppClient.DeleteByID(ctx, managedAppID)
 	if err != nil {
-		return diag.Errorf("error deleting HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to delete HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
@@ -746,7 +746,7 @@ func resourceClusterDelete(ctx context.Context, d *schema.ResourceData, meta int
 
 	err = future.WaitForCompletionRef(ctx, managedAppClient.Client)
 	if err != nil {
-		return diag.Errorf("error waiting for delete of HCS Cluster (Managed Application ID %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to wait for delete of HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
 			managedAppID,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,

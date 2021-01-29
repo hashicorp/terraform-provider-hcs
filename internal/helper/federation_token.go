@@ -51,7 +51,7 @@ func extractEncodedFederationTokenClaims(token string) (*federationTokenClaims, 
 
 	claims, ok := parsedToken.Claims.(*federationTokenClaims)
 	if !ok {
-		return nil, fmt.Errorf("could not extract claims from federation token (type assertion failure)")
+		return nil, fmt.Errorf("unable to extract claims from federation token (type assertion failure)")
 	}
 
 	return claims, nil

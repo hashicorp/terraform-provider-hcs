@@ -49,11 +49,11 @@ func GetAvailableHCPConsulVersions(ctx context.Context, hcpApiDomain string) ([]
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve avaialable Consul versions from HCP: %+v", err)
+		return nil, fmt.Errorf("unable to retrieve available Consul versions from HCP: %v", err)
 	}
 	var availableVersionsBody availableVersionsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&availableVersionsBody); err != nil {
-		return nil, fmt.Errorf("unable to deserialize versions JSON from HCP Consul service: %+v", err)
+		return nil, fmt.Errorf("unable to deserialize versions JSON from HCP Consul service: %v", err)
 	}
 
 	return availableVersionsBody.Versions, nil

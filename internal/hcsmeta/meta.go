@@ -53,11 +53,11 @@ func GetPlanDefaults(ctx context.Context) (PlanDefaults, error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return planDefaults, fmt.Errorf("unable to retrieve HCS plan defaults: %+v", err)
+		return planDefaults, fmt.Errorf("unable to retrieve HCS plan defaults: %v", err)
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&planDefaults); err != nil {
-		return planDefaults, fmt.Errorf("unable to deserialize HCS plan defaults: %+v", err)
+		return planDefaults, fmt.Errorf("unable to deserialize HCS plan defaults: %v", err)
 	}
 
 	return planDefaults, nil
@@ -77,13 +77,13 @@ func GetSupportedRegions(ctx context.Context) ([]SupportedRegion, error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve supported HCS regions: %+v", err)
+		return nil, fmt.Errorf("unable to retrieve supported HCS regions: %v", err)
 	}
 
 	var supportedRegionsBody supportedRegionsResponse
 
 	if err := json.NewDecoder(resp.Body).Decode(&supportedRegionsBody); err != nil {
-		return nil, fmt.Errorf("unable to deserialize supported HCS regions JSON: %+v", err)
+		return nil, fmt.Errorf("unable to deserialize supported HCS regions JSON: %v", err)
 	}
 
 	return supportedRegionsBody.Regions, nil

@@ -82,7 +82,7 @@ func Build(ctx context.Context, options Options) (*Client, error) {
 
 	account, err := NewAzureResourceManagerAccount(ctx, *options.AzureAuthConfig, *env)
 	if err != nil {
-		return nil, fmt.Errorf("error building account: %+v", err)
+		return nil, fmt.Errorf("unable to build account: %v", err)
 	}
 
 	client := Client{

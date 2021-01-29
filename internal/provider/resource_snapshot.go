@@ -103,14 +103,14 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so we should not try to create the snapshot
-			return diag.Errorf("unable to create snapshot; no HCS Cluster found for (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
+			return diag.Errorf("unable to create snapshot; HCS cluster not found (Managed Application %q) (Resource Group %q) (Correlation ID %q)",
 				managedAppName,
 				resourceGroupName,
 				meta.(*clients.Client).CorrelationRequestID,
 			)
 		}
 
-		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to check for presence of an existing HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -125,7 +125,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.CreateSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotName)
 	if err != nil {
-		return diag.Errorf("error creating snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to create snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -138,7 +138,7 @@ func resourceSnapshotCreate(ctx context.Context, d *schema.ResourceData, meta in
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
 
 	if err != nil {
-		return diag.Errorf("error polling create snapshot operation (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to poll create snapshot operation (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -167,7 +167,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 			return nil
 		}
 
-		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to check for presence of an existing HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -191,7 +191,7 @@ func resourceSnapshotRead(ctx context.Context, d *schema.ResourceData, meta inte
 			return nil
 		}
 
-		return diag.Errorf("error fetching snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -224,7 +224,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to check for presence of an existing HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -239,7 +239,7 @@ func resourceSnapshotUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	crpClient := meta.(*clients.Client).CustomResourceProvider
 	resp, err := crpClient.RenameSnapshot(ctx, managedResourceGroupID, resourceGroupName, snapshotID, snapshotName)
 	if err != nil {
-		return diag.Errorf("error renaming snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to rename snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -271,7 +271,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to check for presence of an existing HCS cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -286,7 +286,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 	resp, err := crpClient.DeleteSnapshot(ctx, managedAppManagedResourceGroupID,
 		resourceGroupName, snapshotID)
 	if err != nil {
-		return diag.Errorf("error deleting snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to delete snapshot (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -296,7 +296,7 @@ func resourceSnapshotDelete(ctx context.Context, d *schema.ResourceData, meta in
 
 	err = crpClient.PollOperation(ctx, resp.Operation.ID, managedAppManagedResourceGroupID, managedAppName, 10)
 	if err != nil {
-		return diag.Errorf("error polling delete snapshot operation (Managed Application %q) (Resource Group %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to poll delete snapshot operation (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
 			managedAppName,
 			resourceGroupName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -322,7 +322,7 @@ func populateSnapshotState(d *schema.ResourceData, snapshot *models.HashicorpClo
 
 	size, err := strconv.Atoi(snapshot.Size)
 	if err != nil {
-		return diag.Errorf("error converting string to int: %+v", err)
+		return diag.Errorf("unable to convert string to int: %v", err)
 	}
 	if err := d.Set("size", size); err != nil {
 		return diag.FromErr(err)

@@ -160,7 +160,7 @@ func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (
 
 		authConfig, err := builder.Build()
 		if err != nil {
-			return nil, diag.Errorf("unable to build Azure authentication config: %+v", err)
+			return nil, diag.Errorf("unable to build Azure authentication config: %v", err)
 		}
 
 		userAgent := p.UserAgent("terraform-provider-hcs", version.ProviderVersion)
@@ -177,7 +177,7 @@ func configure(p *schema.Provider) func(context.Context, *schema.ResourceData) (
 
 		c, err := clients.Build(ctx, clientOptions)
 		if err != nil {
-			return nil, diag.Errorf("unable to create HCS client: %+v", err)
+			return nil, diag.Errorf("unable to create HCS client: %v", err)
 		}
 
 		return c, nil

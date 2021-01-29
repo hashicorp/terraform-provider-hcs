@@ -115,10 +115,10 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		if helper.IsAutoRestResponseCodeNotFound(app.Response) {
 			// No managed application exists, so returning an error stating as such
-			return diag.Errorf("no HCS Cluster found for (Managed Application %q) (Resource Group %q).", managedAppName, resourceGroupName)
+			return diag.Errorf("HCS cluster not found (Managed Application %q) (Resource Group %q)", managedAppName, resourceGroupName)
 		}
 
-		return diag.Errorf("error checking for presence of existing HCS Cluster (Managed Application %q) (Resource Group %q): %+v", managedAppName, resourceGroupName, err)
+		return diag.Errorf("unable to check for presence of an existing HCS cluster (Managed Application %q) (Resource Group %q): %v", managedAppName, resourceGroupName, err)
 	}
 
 	managedAppManagedResourceGroupID := *app.ManagedResourceGroupID
@@ -127,7 +127,7 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 
 	consulConfig, err := crpClient.GetConsulConfig(ctx, managedAppManagedResourceGroupID, resourceGroupName)
 	if err != nil {
-		return diag.Errorf("error fetching config for managed app: %+v", err)
+		return diag.Errorf("unable to fetch config for managed app: %v", err)
 	}
 
 	// default to resource group name if aks_resource_group not present
@@ -145,10 +145,10 @@ func dataSourceAgentHelmConfigRead(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		if helper.IsAutoRestResponseCodeNotFound(mcResp.Response) {
 			// No AKS cluster exists, so returning an error stating as such
-			return diag.Errorf("no AKS Cluster found for (Cluster name %q) (Resource Group %q).", aksClusterName, aksResourceGroup)
+			return diag.Errorf("AKS cluster not found (Cluster name %q) (Resource Group %q)", aksClusterName, aksResourceGroup)
 		}
 
-		return diag.Errorf("error checking for presence of existing AKS Cluster (Cluster name %q) (Resource Group %q): %+v", aksClusterName, aksResourceGroup, err)
+		return diag.Errorf("unable to check for presence of an existing AKS Cluster (Cluster name %q) (Resource Group %q): %v", aksClusterName, aksResourceGroup, err)
 	}
 
 	exposeGossipPorts := d.Get("expose_gossip_ports").(bool)

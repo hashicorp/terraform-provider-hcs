@@ -200,7 +200,7 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 
 	managedApp, err := meta.(*clients.Client).ManagedApplication.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q) : %+v",
+		return diag.Errorf("unable to fetch HCS cluster (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q): %v",
 			resourceGroupName,
 			managedAppName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -217,7 +217,7 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 	// Fetch the cluster managed resource
 	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster Managed Resource (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch HCS cluster Managed Resource (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %v",
 			*managedApp.ID,
 			clusterName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -235,7 +235,7 @@ func dataSourceClusterRead(ctx context.Context, d *schema.ResourceData, meta int
 	vNetName := strings.TrimSuffix(cluster.Properties.VnetName, "-vnet") + "-vnet"
 	vNet, err := meta.(*clients.Client).VNet.Get(ctx, managedResourceGroupName, vNetName, "")
 	if err != nil {
-		return diag.Errorf("error fetching VNet for HCS Cluster (Managed Application ID %q) (Managed Resource Group Name %q) (VNet Name %q) (Correlation ID %q): %+v",
+		return diag.Errorf("unable to fetch VNet for HCS cluster (Managed Application ID %q) (Managed Resource Group Name %q) (VNet Name %q) (Correlation ID %q): %v",
 			*managedApp.ID,
 			managedResourceGroupName,
 			vNetName,

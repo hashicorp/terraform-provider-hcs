@@ -34,7 +34,7 @@ func NewAzureResourceManagerAccount(ctx context.Context, config authentication.C
 	if getAuthenticatedObjectID := config.GetAuthenticatedObjectID; getAuthenticatedObjectID != nil {
 		v, err := getAuthenticatedObjectID(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("error getting authenticated object ID: %v", err)
+			return nil, fmt.Errorf("unable to fetch authenticated object ID: %v", err)
 		}
 		objectId = v
 	}

@@ -55,7 +55,7 @@ func dataSourceConsulVersions() *schema.Resource {
 func dataSourceConsulVersionsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	versions, err := consul.GetAvailableHCPConsulVersions(ctx, meta.(*clients.Client).Config.HCPApiDomain)
 	if err != nil {
-		return diag.Errorf("unable to retrieve available Consul versions: %+v", err)
+		return diag.Errorf("unable to retrieve available Consul versions: %v", err)
 	}
 
 	var recommendedVersion string

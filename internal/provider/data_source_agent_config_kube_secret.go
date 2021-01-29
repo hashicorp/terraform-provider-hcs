@@ -71,7 +71,7 @@ func dataSourceAgentConfigKubernetesSecretRead(ctx context.Context, d *schema.Re
 
 	managedApp, err := meta.(*clients.Client).ManagedApplication.Get(ctx, resourceGroupName, managedAppName)
 	if err != nil {
-		return diag.Errorf("error fetching HCS Cluster (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q) : %+v",
+		return diag.Errorf("unable to fetch HCS cluster (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q): %v",
 			resourceGroupName,
 			managedAppName,
 			meta.(*clients.Client).CorrelationRequestID,
@@ -81,7 +81,7 @@ func dataSourceAgentConfigKubernetesSecretRead(ctx context.Context, d *schema.Re
 
 	config, err := meta.(*clients.Client).CustomResourceProvider.GetConsulConfig(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
 	if err != nil {
-		return diag.Errorf("error fetching Consul config (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q) : %+v",
+		return diag.Errorf("unable to fetch Consul config (Resource Group Name %q) (Managed Application Name %q) (Correlation ID %q): %v",
 			resourceGroupName,
 			managedAppName,
 			meta.(*clients.Client).CorrelationRequestID,

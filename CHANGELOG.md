@@ -1,4 +1,4 @@
-## 0.1.1 (Unreleased)
+## 0.1.1 (February 01, 2021)
 
 IMPROVEMENTS:
 * `hcs_cluster` resource: `min_consul_version` now can handle semver versions with metadata or a prerelease.

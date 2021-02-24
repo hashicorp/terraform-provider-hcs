@@ -9,7 +9,7 @@ require (
 	github.com/go-openapi/errors v0.19.9
 	github.com/go-openapi/strfmt v0.20.0
 	github.com/go-openapi/swag v0.19.14
-	github.com/go-openapi/validate v0.20.0
+	github.com/go-openapi/validate v0.20.2
 	github.com/hashicorp/go-azure-helpers v0.13.1
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-multierror v1.1.0

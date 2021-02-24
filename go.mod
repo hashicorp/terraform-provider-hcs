@@ -7,7 +7,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.18
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/errors v0.19.9
-	github.com/go-openapi/strfmt v0.19.11
+	github.com/go-openapi/strfmt v0.20.0
 	github.com/go-openapi/swag v0.19.14
 	github.com/go-openapi/validate v0.20.0
 	github.com/hashicorp/go-azure-helpers v0.13.1

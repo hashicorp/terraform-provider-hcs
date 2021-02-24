@@ -8,7 +8,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/errors v0.19.9
 	github.com/go-openapi/strfmt v0.19.11
-	github.com/go-openapi/swag v0.19.12
+	github.com/go-openapi/swag v0.19.14
 	github.com/go-openapi/validate v0.20.0
 	github.com/hashicorp/go-azure-helpers v0.13.1
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320

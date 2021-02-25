@@ -1,6 +1,6 @@
 module github.com/hashicorp/terraform-provider-hcs
 
-go 1.14
+go 1.15
 
 require (
 	github.com/Azure/azure-sdk-for-go v48.2.2+incompatible

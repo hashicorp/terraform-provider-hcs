@@ -6,7 +6,7 @@ description: |-
   The snapshot resource allows users to manage Consul snapshots of an HCS cluster. Snapshots currently have a retention policy of 30 days.
 ---
 
-# Resource `hcs_snapshot`
+# hcs_snapshot (Resource)
 
 The snapshot resource allows users to manage Consul snapshots of an HCS cluster. Snapshots currently have a retention policy of 30 days.
 
@@ -36,7 +36,7 @@ resource "hcs_snapshot" "default" {
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **finished_at** (String) Timestamp of when the snapshot was finished.
 - **requested_at** (String) Timestamp of when the snapshot was requested.

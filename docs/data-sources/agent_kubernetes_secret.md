@@ -6,7 +6,7 @@ description: |-
   The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the Consul cluster.
 ---
 
-# Data Source `hcs_agent_kubernetes_secret`
+# hcs_agent_kubernetes_secret (Data Source)
 
 The agent config Kubernetes secret data source provides Consul agents running in Kubernetes the configuration needed to connect to the Consul cluster.
 
@@ -32,7 +32,7 @@ data "hcs_agent_kubernetes_secret" "default" {
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **secret** (String, Sensitive) The Consul agent configuration in the format of a Kubernetes secret (YAML).
 

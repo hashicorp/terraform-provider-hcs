@@ -6,7 +6,7 @@ description: |-
   The Consul versions data source provides the Consul versions supported by HCS.
 ---
 
-# Data Source `hcs_consul_versions`
+# hcs_consul_versions (Data Source)
 
 The Consul versions data source provides the Consul versions supported by HCS.
 
@@ -24,7 +24,7 @@ data "hcs_consul_versions" "default" {}
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **available** (List of String) The Consul versions available on HCS.
 - **preview** (List of String) The preview versions of Consul available on HCS.

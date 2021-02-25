@@ -6,7 +6,7 @@ description: |-
   The plan defaults data source provides details about the current Azure Marketplace Plan defaults for the HCS offering. The plan defaults are useful when accepting the Azure Marketplace Agreement for the HCS Azure Managed Application.
 ---
 
-# Data Source `hcs_plan_defaults`
+# hcs_plan_defaults (Data Source)
 
 The plan defaults data source provides details about the current Azure Marketplace Plan defaults for the HCS offering. The plan defaults are useful when accepting the Azure Marketplace Agreement for the HCS Azure Managed Application.
 
@@ -24,7 +24,7 @@ data "hcs_plan_defaults" "default" {}
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **offer** (String) The name of the offer for the HCS Azure Managed Application.
 - **plan_name** (String) The plan name for the HCS Azure Managed Application offer.

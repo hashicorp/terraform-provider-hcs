@@ -6,7 +6,7 @@ description: |-
   The cluster resource allows you to manage an HCS Azure Managed Application.
 ---
 
-# Resource `hcs_cluster`
+# hcs_cluster (Resource)
 
 The cluster resource allows you to manage an HCS Azure Managed Application.
 
@@ -54,7 +54,7 @@ resource "hcs_cluster" "example" {
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 - **vnet_cidr** (String) The VNET CIDR range of the Consul cluster. Defaults to `172.25.16.0/24`.
 
-### Read-only
+### Read-Only
 
 - **blob_container_name** (String) The name of the Blob Container in which cluster data is persisted.
 - **consul_automatic_upgrades** (Boolean) Denotes that automatic Consul upgrades are enabled.

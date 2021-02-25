@@ -6,7 +6,7 @@ description: |-
   The cluster data source provides information about an existing HCS cluster.
 ---
 
-# Data Source `hcs_cluster`
+# hcs_cluster (Data Source)
 
 The cluster data source provides information about an existing HCS cluster.
 
@@ -35,7 +35,7 @@ data "hcs_cluster" "default" {
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **blob_container_name** (String) The name of the Blob Container in which cluster data is persisted.
 - **cluster_mode** (String) The mode of the cluster ('Development' or 'Production'). Development clusters only have a single Consul server. Production clusters are fully supported, full featured, and deploy with a minimum of three hosts.

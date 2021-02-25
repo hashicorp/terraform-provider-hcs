@@ -6,7 +6,7 @@ description: |-
   The agent Helm config data source provides Helm values for a Consul agent running in Kubernetes.
 ---
 
-# Data Source `hcs_agent_helm_config`
+# hcs_agent_helm_config (Data Source)
 
 The agent Helm config data source provides Helm values for a Consul agent running in Kubernetes.
 
@@ -38,7 +38,7 @@ data "hcs_agent_helm_config" "default" {
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **config** (String) The agent Helm config.
 

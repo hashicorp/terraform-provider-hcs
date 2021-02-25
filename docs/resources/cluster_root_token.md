@@ -6,7 +6,7 @@ description: |-
   The cluster root token resource is the token used to bootstrap the cluster's ACL system. Using this resource to create a new root token for an cluster resource will invalidate the consul root token accessor id and Consul root token secret id properties of the cluster.
 ---
 
-# Resource `hcs_cluster_root_token`
+# hcs_cluster_root_token (Resource)
 
 The cluster root token resource is the token used to bootstrap the cluster's ACL system. Using this resource to create a new root token for an cluster resource will invalidate the consul root token accessor id and Consul root token secret id properties of the cluster.
 
@@ -35,7 +35,7 @@ resource "hcs_root_token" "new_token" {
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **accessor_id** (String) The accessor ID of the root ACL token.
 - **kubernetes_secret** (String, Sensitive) The root ACL token Base64 encoded in a Kubernetes secret.

@@ -6,7 +6,7 @@ description: |-
   The federation token data source can be used during HCS cluster creation to join the cluster to a federation.
 ---
 
-# Data Source `hcs_federation_token`
+# hcs_federation_token (Data Source)
 
 The federation token data source can be used during HCS cluster creation to join the cluster to a federation.
 
@@ -32,7 +32,7 @@ data "hcs_federation_token" "default" {
 - **id** (String) The ID of this resource.
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
-### Read-only
+### Read-Only
 
 - **token** (String, Sensitive) The federation token.
 

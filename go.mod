@@ -3,7 +3,7 @@ module github.com/hashicorp/terraform-provider-hcs
 go 1.15
 
 require (
-	github.com/Azure/azure-sdk-for-go v51.2.0+incompatible
+	github.com/Azure/azure-sdk-for-go v51.3.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.18
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/errors v0.20.0

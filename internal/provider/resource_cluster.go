@@ -178,6 +178,17 @@ func resourceCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"audit_logging_enabled": {
+				Description: "Enables audit logging for the cluster resource. If not specified, it is defaulted to false.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
+			"audit_log_storage_container_url": {
+				Description: "The url of the blob storage for audit logging to be uploaded to.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+			},
 			// Computed outputs
 			"vnet_id": {
 				Description: "The ID of the cluster's managed VNet.",
@@ -391,6 +402,18 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		federationToken = v.(string)
 	}
 
+	var auditLogginEnabled string
+	v, ok = d.GetOk("audit_logging_enabled")
+	if ok {
+		federationToken = v.(string)
+	}
+
+	var auditLogBucketURL string
+	v, ok = d.GetOk("audit_log_storage_container_url")
+	if ok {
+		federationToken = v.(string)
+	}
+
 	hcsAMAParams := map[string]managedAppParamValue{
 		"clusterName": {
 			Value: clusterName,
@@ -412,6 +435,12 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		},
 		"sourceChannel": {
 			Value: meta.(*clients.Client).Config.SourceChannel,
+		},
+		"auditLoggingEnabled": {
+			Value: auditLogginEnabled,
+		},
+		"auditLogStorageContainerURL": {
+			Value: auditLogBucketURL,
 		},
 	}
 

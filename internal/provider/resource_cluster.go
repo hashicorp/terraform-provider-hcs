@@ -186,7 +186,7 @@ func resourceCluster() *schema.Resource {
 			},
 			"audit_log_storage_container_url": {
 				Description: "The url of the blob storage for audit logging to be uploaded to.",
-				Type:        schema.TypeBool,
+				Type:        schema.TypeString,
 				Optional:    true,
 			},
 			// Computed outputs

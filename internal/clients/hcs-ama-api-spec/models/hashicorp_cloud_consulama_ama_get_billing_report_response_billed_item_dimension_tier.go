@@ -6,12 +6,12 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaGetBillingReportResponseBilledItemDimensionTier Tier represents the usage that is billed according to one tier.
+//
 // swagger:model hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem.Dimension.Tier
 type HashicorpCloudConsulamaAmaGetBillingReportResponseBilledItemDimensionTier struct {
 

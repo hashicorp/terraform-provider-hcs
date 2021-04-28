@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaBillingSettingsPrices Prices represents prices of a billing plan.
+//
 // swagger:model hashicorp.cloud.consulama.ama.BillingSettings.Prices
 type HashicorpCloudConsulamaAmaBillingSettingsPrices struct {
 

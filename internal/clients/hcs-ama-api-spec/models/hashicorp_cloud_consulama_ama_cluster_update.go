@@ -6,15 +6,19 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaClusterUpdate ClusterUpdate contains the details of the cluster which are requested
 // to be updated.
+//
 // swagger:model hashicorp.cloud.consulama.ama.ClusterUpdate
 type HashicorpCloudConsulamaAmaClusterUpdate struct {
+
+	// audit_logging is the configuration for enabling Consul audit logs.
+	AuditLogging *HashicorpCloudConsulamaAmaAuditLoggingUpdate `json:"auditLogging,omitempty"`
 
 	// consul_version is the Consul version to upgrade the cluster to.
 	ConsulVersion string `json:"consulVersion,omitempty"`
@@ -22,6 +26,33 @@ type HashicorpCloudConsulamaAmaClusterUpdate struct {
 
 // Validate validates this hashicorp cloud consulama ama cluster update
 func (m *HashicorpCloudConsulamaAmaClusterUpdate) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateAuditLogging(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *HashicorpCloudConsulamaAmaClusterUpdate) validateAuditLogging(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AuditLogging) { // not required
+		return nil
+	}
+
+	if m.AuditLogging != nil {
+		if err := m.AuditLogging.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("auditLogging")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

@@ -3,7 +3,7 @@
   "info": {
     "title": "HashiCorp Consul Service (HCS)",
     "description": "Azure Managed App API for HCS",
-    "version": "2020-12-21"
+    "version": "2021-04-23"
   },
   "schemes": [
     "https"
@@ -42,6 +42,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -87,6 +93,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -147,6 +159,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -205,6 +223,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -272,6 +296,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -336,6 +366,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -399,6 +435,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -461,6 +503,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -528,6 +576,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -584,6 +638,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -644,6 +704,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -700,6 +766,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -760,6 +832,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -816,6 +894,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -876,6 +960,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -934,6 +1024,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -1000,6 +1096,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -1059,6 +1161,12 @@
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
             }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
           }
         },
         "parameters": [
@@ -1117,6 +1225,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -1182,6 +1296,12 @@
             "description": "Returned when there was an internal error.",
             "schema": {
               "$ref": "#/definitions/google.rpc.Status"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
             }
           }
         },
@@ -1259,6 +1379,27 @@
       "description": "- Simple to use and understand for most users\n- Flexible enough to meet unexpected needs\n\n# Overview\n\nThe `Status` message contains three pieces of data: error code, error\nmessage, and error details. The error code should be an enum value of\n[google.rpc.Code][google.rpc.Code], but it may accept additional error codes\nif needed.  The error message should be a developer-facing English message\nthat helps developers *understand* and *resolve* the error. If a localized\nuser-facing error message is needed, put the localized message in the error\ndetails or localize it in the client. The optional error details may contain\narbitrary information about the error. There is a predefined set of error\ndetail types in the package `google.rpc` that can be used for common error\nconditions.\n\n# Language mapping\n\nThe `Status` message is the logical representation of the error model, but it\nis not necessarily the actual wire format. When the `Status` message is\nexposed in different client libraries and different wire protocols, it can be\nmapped differently. For example, it will likely be mapped to some exceptions\nin Java, but more likely mapped to some error codes in C.\n\n# Other uses\n\nThe error model and the `Status` message can be used in a variety of\nenvironments, either with or without APIs, to provide a\nconsistent developer experience across different environments.\n\nExample uses of this error model include:\n\n- Partial errors. If a service needs to return partial errors to the client,\n    it may embed the `Status` in the normal response to indicate the partial\n    errors.\n\n- Workflow errors. A typical workflow has multiple steps. Each step may\n    have a `Status` message for error reporting.\n\n- Batch operations. If a client uses batch request and batch response, the\n    `Status` message should be used directly inside batch response, one for\n    each error sub-response.\n\n- Asynchronous operations. If an API call embeds asynchronous operation\n    results in its response, the status of those operations should be\n    represented directly using the `Status` message.\n\n- Logging. If some API errors are stored in logs, the message `Status` could\n    be used directly after any stripping needed for security/privacy reasons.",
       "title": "The `Status` type defines a logical error model that is suitable for\ndifferent programming environments, including REST APIs and RPC APIs. It is\nused by [gRPC](https://github.com/grpc). The error model is designed to be:"
     },
+    "grpc.gateway.runtime.Error": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/google.protobuf.Any"
+          }
+        }
+      }
+    },
     "hashicorp.cloud.consulama.ama.ACLToken": {
       "type": "object",
       "properties": {
@@ -1270,6 +1411,20 @@
         }
       },
       "description": "ACLToken represents the Consul 1.4+ ACL token we just created."
+    },
+    "hashicorp.cloud.consulama.ama.AuditLoggingUpdate": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Boolean",
+          "description": "enabled should be set to TRUE to enable audit logging."
+        },
+        "storageContainerUrl": {
+          "type": "string",
+          "description": "storage_container_url is the URL of an Azure blob container to write\nthe Consul audit logs to. The vmss_identity must have write permissions \nfor this storage container."
+        }
+      },
+      "description": "AuditLoggingUpdate contains the details required to configure Consul audit logging\nfor the cluster."
     },
     "hashicorp.cloud.consulama.ama.BilledUsage": {
       "type": "object",
@@ -1509,6 +1664,18 @@
         "sourceChannel": {
           "type": "string",
           "description": "source_channel indicates which mechanism was used to create this cluster.\nThis typically should be: terraform-provider-hcs, azure-portal, hcs-cli.\nThis is synonymous to a user-agent."
+        },
+        "auditLoggingEnabled": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.Boolean",
+          "title": "audit_logging_enabled controls whether Consul should emit audit logs"
+        },
+        "managedIdentity": {
+          "type": "string",
+          "title": "managedidentity is the Azure managed identity that should be assigned to\nvmss resources created within the app"
+        },
+        "auditLogStorageContainerURL": {
+          "type": "string",
+          "description": "audit_log_storage_container_url is an Azure blob container URL for where\nthe log exfiltration process will copy audit logs."
         }
       },
       "description": "ClusterProperties contains properties the user selected when creating the\nmanaged app instance."
@@ -1558,6 +1725,10 @@
         "consulVersion": {
           "type": "string",
           "description": "consul_version is the Consul version to upgrade the cluster to."
+        },
+        "auditLogging": {
+          "$ref": "#/definitions/hashicorp.cloud.consulama.ama.AuditLoggingUpdate",
+          "description": "audit_logging is the configuration for enabling Consul audit logs."
         }
       },
       "description": "ClusterUpdate contains the details of the cluster which are requested\nto be updated."

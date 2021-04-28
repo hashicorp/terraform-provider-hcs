@@ -8,14 +8,14 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaBilledUsage BilledUsage describes the usage that was recorded and billed for a specific
 // time frame.
+//
 // swagger:model hashicorp.cloud.consulama.ama.BilledUsage
 type HashicorpCloudConsulamaAmaBilledUsage struct {
 

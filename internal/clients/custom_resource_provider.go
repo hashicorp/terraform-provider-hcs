@@ -291,16 +291,14 @@ func (client CustomResourceProviderClient) ListUpgradeVersions(ctx context.Conte
 }
 
 // UpdateCluster invokes the update Custom Resource Provider Action.
-func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupID string, newConsulVersion string) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
+func (client CustomResourceProviderClient) UpdateCluster(ctx context.Context, managedResourceGroupID string, update *models.HashicorpCloudConsulamaAmaClusterUpdate) (models.HashicorpCloudConsulamaAmaUpdateClusterResponse, error) {
 	var updateResponse models.HashicorpCloudConsulamaAmaUpdateClusterResponse
 
 	req, err := client.customActionPreparer(ctx, managedResourceGroupID, "update", models.HashicorpCloudConsulamaAmaUpdateClusterRequest{
 		ResourceGroup:  managedResourceGroupID,
 		SubscriptionID: client.SubscriptionID,
-		Update: &models.HashicorpCloudConsulamaAmaClusterUpdate{
-			ConsulVersion: newConsulVersion,
-		},
-		SourceChannel: client.SourceChannel,
+		Update:         update,
+		SourceChannel:  client.SourceChannel,
 	})
 	if err != nil {
 		return updateResponse, err

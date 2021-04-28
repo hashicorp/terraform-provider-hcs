@@ -6,12 +6,12 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaResourceNotificationRequestBillingDetails BillingDetails contains billing related information about a managed app.
+//
 // swagger:model hashicorp.cloud.consulama.ama.ResourceNotificationRequest.BillingDetails
 type HashicorpCloudConsulamaAmaResourceNotificationRequestBillingDetails struct {
 

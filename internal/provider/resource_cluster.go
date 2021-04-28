@@ -631,17 +631,45 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 
+	curAuditLoggingEnabled := cluster.Properties.AuditLoggingEnabled == models.HashicorpCloudConsulamaAmaBooleanTRUE
+	v, ok = d.GetOk("audit_logging_enabled")
+	targetAuditLoggingEnabled := v.(bool)
+	hasAuditLoggingEnabledChanged := ok && targetAuditLoggingEnabled != curAuditLoggingEnabled
+
+	curAuditLoggingURL := cluster.Properties.AuditLogStorageContainerURL
+	v, ok = d.GetOk("audit_log_storage_container_url")
+	targetAuditLoggingURL := v.(string)
+	hasAuditLoggingURLChanged := ok && curAuditLoggingURL != targetAuditLoggingURL
+
 	// If the min_consul_version differs from the current version, attempt to upgrade the cluster
+
+	curClusterVersion := cluster.Properties.ConsulCurrentVersion
 	v, ok = d.GetOk("min_consul_version")
-	if ok && v.(string) != cluster.Properties.ConsulCurrentVersion {
-		clusterUpgradeDiag := upgradeClusterVersion(ctx, d, meta, managedApp)
+	targetClusterVersion := v.(string)
+	hasConsulVersionChanged := ok && targetClusterVersion != curClusterVersion
+
+	if hasAuditLoggingEnabledChanged || hasAuditLoggingURLChanged || hasConsulVersionChanged {
+		enabled := models.HashicorpCloudConsulamaAmaBooleanFALSE
+		if targetAuditLoggingEnabled {
+			enabled = models.HashicorpCloudConsulamaAmaBooleanTRUE
+		}
+
+		update := &models.HashicorpCloudConsulamaAmaClusterUpdate{
+			AuditLogging: &models.HashicorpCloudConsulamaAmaAuditLoggingUpdate{
+				Enabled:             enabled,
+				StorageContainerURL: targetAuditLoggingURL,
+			},
+			ConsulVersion: targetClusterVersion,
+		}
+
+		clusterUpgradeDiag := upgradeClusterVersion(ctx, meta, managedApp, update)
 		if clusterUpgradeDiag != nil {
 			return clusterUpgradeDiag
 		}
 	}
 
 	// If we are updating due to modified tags OR removing existing tags, attempt to update the Managed App
-	v, ok = d.GetOk("tags")
+	_, ok = d.GetOk("tags")
 	if ok || (!ok && len(managedApp.Tags) > 0) {
 		managedAppUpdateDiag := updateManagedApplicationTags(ctx, d, meta, managedApp)
 		if managedAppUpdateDiag != nil {
@@ -653,7 +681,7 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 // upgradeClusterVersion updates a cluster's Consul version to a valid upgrade version
-func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta interface{}, managedApp managedapplications.Application) diag.Diagnostics {
+func upgradeClusterVersion(ctx context.Context, meta interface{}, managedApp managedapplications.Application, update *models.HashicorpCloudConsulamaAmaClusterUpdate) diag.Diagnostics {
 	// Retrieve the valid upgrade versions
 	upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
 	if err != nil {
@@ -664,11 +692,10 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 
-	v, ok := d.GetOk("min_consul_version")
-	if !ok {
+	if update.ConsulVersion == "" {
 		return diag.Errorf("min_consul_version is required in order to upgrade the cluster")
 	}
-	newConsulVersion := consul.NormalizeVersion(v.(string))
+	newConsulVersion := consul.NormalizeVersion(update.ConsulVersion)
 
 	if upgradeVersionsResponse.Versions == nil {
 		return diag.Errorf("no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS")
@@ -678,7 +705,7 @@ func upgradeClusterVersion(ctx context.Context, d *schema.ResourceData, meta int
 		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions))
 	}
 
-	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, newConsulVersion)
+	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, update)
 	if err != nil {
 		return diag.Errorf("unable to update HCS cluster (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %v",
 			*managedApp.ID,

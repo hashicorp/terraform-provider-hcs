@@ -8,9 +8,8 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
@@ -21,6 +20,7 @@ import (
 //  - RECOMMENDED: RECOMMENDED represents a version that is generally available
 // and recommended by HashiCorp.
 //  - PREVIEW: PREVIEW represents a version that is not generally available.
+//
 // swagger:model hashicorp.cloud.consulama.ama.Version.Status
 type HashicorpCloudConsulamaAmaVersionStatus string
 
@@ -50,7 +50,7 @@ func init() {
 }
 
 func (m HashicorpCloudConsulamaAmaVersionStatus) validateHashicorpCloudConsulamaAmaVersionStatusEnum(path, location string, value HashicorpCloudConsulamaAmaVersionStatus) error {
-	if err := validate.Enum(path, location, value, hashicorpCloudConsulamaAmaVersionStatusEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, hashicorpCloudConsulamaAmaVersionStatusEnum, true); err != nil {
 		return err
 	}
 	return nil

@@ -6,16 +6,23 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaClusterProperties ClusterProperties contains properties the user selected when creating the
 // managed app instance.
+//
 // swagger:model hashicorp.cloud.consulama.ama.ClusterProperties
 type HashicorpCloudConsulamaAmaClusterProperties struct {
+
+	// audit_log_storage_container_url is an Azure blob container URL for where
+	// the log exfiltration process will copy audit logs.
+	AuditLogStorageContainerURL string `json:"auditLogStorageContainerURL,omitempty"`
+
+	// audit_logging_enabled controls whether Consul should emit audit logs
+	AuditLoggingEnabled HashicorpCloudConsulamaAmaBoolean `json:"auditLoggingEnabled,omitempty"`
 
 	// blob_container_name is the blob container to use to upload the Consul
 	// configuration and certificates to.
@@ -94,6 +101,10 @@ type HashicorpCloudConsulamaAmaClusterProperties struct {
 	// instance. This ID is required to identified managed apps.
 	ManagedAppID string `json:"managedAppId,omitempty"`
 
+	// managedidentity is the Azure managed identity that should be assigned to
+	// vmss resources created within the app
+	ManagedIdentity string `json:"managedIdentity,omitempty"`
+
 	// source_channel indicates which mechanism was used to create this cluster.
 	// This typically should be: terraform-provider-hcs, azure-portal, hcs-cli.
 	// This is synonymous to a user-agent.
@@ -122,6 +133,10 @@ type HashicorpCloudConsulamaAmaClusterProperties struct {
 func (m *HashicorpCloudConsulamaAmaClusterProperties) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateAuditLoggingEnabled(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateConsulClusterMode(formats); err != nil {
 		res = append(res, err)
 	}
@@ -133,6 +148,22 @@ func (m *HashicorpCloudConsulamaAmaClusterProperties) Validate(formats strfmt.Re
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *HashicorpCloudConsulamaAmaClusterProperties) validateAuditLoggingEnabled(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.AuditLoggingEnabled) { // not required
+		return nil
+	}
+
+	if err := m.AuditLoggingEnabled.Validate(formats); err != nil {
+		if ve, ok := err.(*errors.Validation); ok {
+			return ve.ValidateName("auditLoggingEnabled")
+		}
+		return err
+	}
+
 	return nil
 }
 

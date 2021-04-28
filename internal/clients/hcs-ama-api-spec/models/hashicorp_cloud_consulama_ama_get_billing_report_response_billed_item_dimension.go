@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaGetBillingReportResponseBilledItemDimension Dimension represents a billing dimension.
+//
 // swagger:model hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem.Dimension
 type HashicorpCloudConsulamaAmaGetBillingReportResponseBilledItemDimension struct {
 

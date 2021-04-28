@@ -6,12 +6,12 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaCreateFederationTokenRequest CreateFederationTokenRequest creates a federation token for the sole cluster found using this subscription ID and managed resource group.
+//
 // swagger:model hashicorp.cloud.consulama.ama.CreateFederationTokenRequest
 type HashicorpCloudConsulamaAmaCreateFederationTokenRequest struct {
 

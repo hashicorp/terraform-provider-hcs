@@ -8,13 +8,13 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaListSnapshotsResponse See ConsulAMAService.ListSnapshots
+//
 // swagger:model hashicorp.cloud.consulama.ama.ListSnapshotsResponse
 type HashicorpCloudConsulamaAmaListSnapshotsResponse struct {
 

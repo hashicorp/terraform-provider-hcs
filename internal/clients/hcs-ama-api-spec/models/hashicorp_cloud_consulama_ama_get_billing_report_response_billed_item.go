@@ -8,14 +8,14 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaGetBillingReportResponseBilledItem BilledItem represents one time frame for which a specific billing plan
 // was applied to the managed app.
+//
 // swagger:model hashicorp.cloud.consulama.ama.GetBillingReportResponse.BilledItem
 type HashicorpCloudConsulamaAmaGetBillingReportResponseBilledItem struct {
 

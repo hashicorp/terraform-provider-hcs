@@ -6,14 +6,14 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaGetBillingInfoResponseCurrentUsage CurrentUsage describes what has been billed for a managed app in the current
 // time period(s).
+//
 // swagger:model hashicorp.cloud.consulama.ama.GetBillingInfoResponse.CurrentUsage
 type HashicorpCloudConsulamaAmaGetBillingInfoResponseCurrentUsage struct {
 

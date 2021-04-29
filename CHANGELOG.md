@@ -1,3 +1,8 @@
+## 0.3.0 (Unreleased)
+
+BUG FIXES:
+* Pass `cluster_mode` as a property when creating the `hcs_cluster` resource.
+
 ## 0.2.0 (March 01, 2021)
 
 IMPROVEMENTS:

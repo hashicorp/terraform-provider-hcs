@@ -392,6 +392,9 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	hcsAMAParams := map[string]managedAppParamValue{
+		"clusterMode": {
+			Value: strings.ToUpper(d.Get("cluster_mode").(string)),
+		},
 		"clusterName": {
 			Value: clusterName,
 		},

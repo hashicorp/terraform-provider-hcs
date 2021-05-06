@@ -593,6 +593,13 @@ func resourceClusterRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return setClusterData(d, managedApp, cluster, vNet)
 }
 
+func toModelBoolean(b bool) models.HashicorpCloudConsulamaAmaBoolean {
+	if b {
+		return models.HashicorpCloudConsulamaAmaBooleanTRUE
+	}
+	return models.HashicorpCloudConsulamaAmaBooleanFALSE
+}
+
 func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Fetch the managed app
 	managedAppID := d.Id()
@@ -614,62 +621,55 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		)
 	}
 
-	clusterName := *managedApp.Name
-	v, ok := d.GetOk("cluster_name")
-	if ok {
-		clusterName = v.(string)
+	// clusterName := *managedApp.Name
+	// v, ok := d.GetOk("cluster_name")
+	// if ok {
+	// 	clusterName = v.(string)
+	// }
+
+	// // Fetch the cluster managed resource
+	// cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
+	// if err != nil {
+	// 	return diag.Errorf("unable to fetch HCS cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %v",
+	// 		managedAppID,
+	// 		clusterName,
+	// 		meta.(*clients.Client).CorrelationRequestID,
+	// 		err,
+	// 	)
+	// }
+	update := &models.HashicorpCloudConsulamaAmaClusterUpdate{}
+
+	auditLoggingChanged := d.HasChange("audit_logging_enabled")
+	auditLoggingURLChanged := d.HasChange("audit_log_storage_container_url")
+
+	if auditLoggingChanged || auditLoggingURLChanged {
+		_, ok := d.GetOk("audit_log_storage_container_url")
+		if !ok && d.Get("audit_logging_enabled").(bool) {
+			return diag.Errorf("audit_log_storage_container_url must be set if audit_logging_enabled is true")
+		}
+		auditLoggingValue := toModelBoolean(d.Get("audit_logging_enabled").(bool))
+		auditLoggingURLValue := d.Get("audit_log_storage_container_url").(string)
+		update.AuditLogging = &models.HashicorpCloudConsulamaAmaAuditLoggingUpdate{
+			Enabled:             auditLoggingValue,
+			StorageContainerURL: auditLoggingURLValue,
+		}
 	}
-
-	// Fetch the cluster managed resource
-	cluster, err := meta.(*clients.Client).CustomResourceProvider.FetchConsulCluster(ctx, *managedApp.ManagedResourceGroupID, clusterName)
-	if err != nil {
-		return diag.Errorf("unable to fetch HCS cluster (Managed Application ID %q) (Cluster Name %q) (Correlation ID %q): %v",
-			managedAppID,
-			clusterName,
-			meta.(*clients.Client).CorrelationRequestID,
-			err,
-		)
-	}
-
-	curAuditLoggingEnabled := cluster.Properties.AuditLoggingEnabled == models.HashicorpCloudConsulamaAmaBooleanTRUE
-	v, ok = d.GetOk("audit_logging_enabled")
-	targetAuditLoggingEnabled := v.(bool)
-	hasAuditLoggingEnabledChanged := ok && targetAuditLoggingEnabled != curAuditLoggingEnabled
-
-	curAuditLoggingURL := cluster.Properties.AuditLogStorageContainerURL
-	v, ok = d.GetOk("audit_log_storage_container_url")
-	targetAuditLoggingURL := v.(string)
-	hasAuditLoggingURLChanged := ok && curAuditLoggingURL != targetAuditLoggingURL
 
 	// If the min_consul_version differs from the current version, attempt to upgrade the cluster
+	versionChange := d.HasChange("min_consul_version")
+	if versionChange {
+		update.ConsulVersion = d.Get("min_consul_version").(string)
+	}
 
-	curClusterVersion := cluster.Properties.ConsulCurrentVersion
-	v, ok = d.GetOk("min_consul_version")
-	targetClusterVersion := v.(string)
-	hasConsulVersionChanged := ok && targetClusterVersion != curClusterVersion
-
-	if hasAuditLoggingEnabledChanged || hasAuditLoggingURLChanged || hasConsulVersionChanged {
-		enabled := models.HashicorpCloudConsulamaAmaBooleanFALSE
-		if targetAuditLoggingEnabled {
-			enabled = models.HashicorpCloudConsulamaAmaBooleanTRUE
-		}
-
-		update := &models.HashicorpCloudConsulamaAmaClusterUpdate{
-			AuditLogging: &models.HashicorpCloudConsulamaAmaAuditLoggingUpdate{
-				Enabled:             enabled,
-				StorageContainerURL: targetAuditLoggingURL,
-			},
-			ConsulVersion: targetClusterVersion,
-		}
-
-		clusterUpgradeDiag := upgradeClusterVersion(ctx, meta, managedApp, update)
+	if versionChange || auditLoggingChanged || auditLoggingURLChanged {
+		clusterUpgradeDiag := upgradeCluster(ctx, d, managedApp, update)
 		if clusterUpgradeDiag != nil {
 			return clusterUpgradeDiag
 		}
 	}
 
 	// If we are updating due to modified tags OR removing existing tags, attempt to update the Managed App
-	_, ok = d.GetOk("tags")
+	_, ok := d.GetOk("tags")
 	if ok || (!ok && len(managedApp.Tags) > 0) {
 		managedAppUpdateDiag := updateManagedApplicationTags(ctx, d, meta, managedApp)
 		if managedAppUpdateDiag != nil {
@@ -681,35 +681,34 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 }
 
 // upgradeClusterVersion updates a cluster's Consul version to a valid upgrade version
-func upgradeClusterVersion(ctx context.Context, meta interface{}, managedApp managedapplications.Application, update *models.HashicorpCloudConsulamaAmaClusterUpdate) diag.Diagnostics {
-	// Retrieve the valid upgrade versions
-	upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
-	if err != nil {
-		return diag.Errorf("unable to retrieve upgrade versions for HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
-			*managedApp.ID,
-			meta.(*clients.Client).CorrelationRequestID,
-			err,
-		)
-	}
+func upgradeCluster(ctx context.Context, meta interface{}, managedApp managedapplications.Application, update *models.HashicorpCloudConsulamaAmaClusterUpdate) diag.Diagnostics {
+	if update.ConsulVersion != "" {
+		// Retrieve the valid upgrade versions
+		upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
+		if err != nil {
+			return diag.Errorf("unable to retrieve upgrade versions for HCS cluster (Managed Application ID %q) (Correlation ID %q): %v",
+				*managedApp.ID,
+				meta.(*clients.Client).CorrelationRequestID,
+				err,
+			)
+		}
 
-	if update.ConsulVersion == "" {
-		return diag.Errorf("min_consul_version is required in order to upgrade the cluster")
-	}
-	newConsulVersion := consul.NormalizeVersion(update.ConsulVersion)
+		newConsulVersion := consul.NormalizeVersion(update.ConsulVersion)
 
-	if upgradeVersionsResponse.Versions == nil {
-		return diag.Errorf("no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS")
-	}
+		if upgradeVersionsResponse.Versions == nil {
+			return diag.Errorf("no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS")
+		}
 
-	if !consul.IsValidVersion(newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions)) {
-		return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions))
+		if !consul.IsValidVersion(newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions)) {
+			return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions))
+		}
 	}
 
 	updateResponse, err := meta.(*clients.Client).CustomResourceProvider.UpdateCluster(ctx, *managedApp.ManagedResourceGroupID, update)
 	if err != nil {
 		return diag.Errorf("unable to update HCS cluster (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %v",
 			*managedApp.ID,
-			newConsulVersion,
+			update.ConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
 		)
@@ -719,7 +718,7 @@ func upgradeClusterVersion(ctx context.Context, meta interface{}, managedApp man
 	if err != nil {
 		return diag.Errorf("unable to poll update cluster operation (Managed Application ID %q) (Consul Version %s) (Correlation ID %q): %v",
 			*managedApp.ID,
-			newConsulVersion,
+			update.ConsulVersion,
 			meta.(*clients.Client).CorrelationRequestID,
 			err,
 		)
@@ -1049,6 +1048,17 @@ func setClusterData(d *schema.ResourceData, managedApp managedapplications.Appli
 	}
 
 	err = d.Set("consul_cluster_id", cluster.Properties.ConsulClusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	auditLoggingEnabled := cluster.Properties.AuditLoggingEnabled == models.HashicorpCloudConsulamaAmaBooleanTRUE
+	err = d.Set("audit_logging_enabled", auditLoggingEnabled)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("audit_log_storage_container_url", cluster.Properties.AuditLogStorageContainerURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}

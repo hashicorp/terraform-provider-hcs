@@ -8,9 +8,8 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
@@ -20,6 +19,7 @@ import (
 //  - RUNNING: RUNNING means the federation is in a healthy state.
 //  - PRIMARY_DATACENTER_MISSING: PRIMARY_DATACENTER_MISSING means the federation's primary cluster has been deleted.
 // Any remaining secondary clusters can still communicate, but new clusters cannot be added to the federation.
+//
 // swagger:model hashicorp.cloud.consulama.ama.GetFederationResponse.FederationState
 type HashicorpCloudConsulamaAmaGetFederationResponseFederationState string
 
@@ -49,7 +49,7 @@ func init() {
 }
 
 func (m HashicorpCloudConsulamaAmaGetFederationResponseFederationState) validateHashicorpCloudConsulamaAmaGetFederationResponseFederationStateEnum(path, location string, value HashicorpCloudConsulamaAmaGetFederationResponseFederationState) error {
-	if err := validate.Enum(path, location, value, hashicorpCloudConsulamaAmaGetFederationResponseFederationStateEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, hashicorpCloudConsulamaAmaGetFederationResponseFederationStateEnum, true); err != nil {
 		return err
 	}
 	return nil

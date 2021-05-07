@@ -6,14 +6,14 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaBillingSettings BillingSettings is the representation of the billing settings of a managed
 // app that is exposed to users.
+//
 // swagger:model hashicorp.cloud.consulama.ama.BillingSettings
 type HashicorpCloudConsulamaAmaBillingSettings struct {
 

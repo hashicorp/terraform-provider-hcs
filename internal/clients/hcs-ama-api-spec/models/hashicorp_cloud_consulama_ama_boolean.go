@@ -8,15 +8,15 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
 // HashicorpCloudConsulamaAmaBoolean Boolean is an enum for handling true/false values as Azure swagger validation doesn't
 // like bools:
 // https://github.com/Azure/azure-rest-api-specs/blob/master/documentation/openapi-authoring-automated-guidelines.md#r3018
+//
 // swagger:model hashicorp.cloud.consulama.ama.Boolean
 type HashicorpCloudConsulamaAmaBoolean string
 
@@ -43,7 +43,7 @@ func init() {
 }
 
 func (m HashicorpCloudConsulamaAmaBoolean) validateHashicorpCloudConsulamaAmaBooleanEnum(path, location string, value HashicorpCloudConsulamaAmaBoolean) error {
-	if err := validate.Enum(path, location, value, hashicorpCloudConsulamaAmaBooleanEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, hashicorpCloudConsulamaAmaBooleanEnum, true); err != nil {
 		return err
 	}
 	return nil

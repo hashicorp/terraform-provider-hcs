@@ -178,6 +178,22 @@ func resourceCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"audit_logging_enabled": {
+				Description: "Enables Consul audit logging for the cluster resource.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
+			"audit_log_storage_container_url": {
+				Description: "The url of the Azure blob storage container to write audit logs to if `audit_logging_enabled` is `true`.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+			"managed_identity_name": {
+				Description: "The name of the managed identity used for writing audit logs if `audit_logging_enable` is `true`.",
+				Type:        schema.TypeString,
+				Computed:    true,
+			},
 			// Computed outputs
 			"vnet_id": {
 				Description: "The ID of the cluster's managed VNet.",

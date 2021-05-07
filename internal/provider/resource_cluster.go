@@ -407,6 +407,21 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		federationToken = v.(string)
 	}
 
+	var auditLogBucketURL string
+	v, ok = d.GetOk("audit_log_storage_container_url")
+	if ok {
+		auditLogBucketURL = v.(string)
+	}
+
+	auditLoggingEnabled := "disabled"
+	if d.Get("audit_logging_enabled").(bool) {
+		if auditLogBucketURL == "" {
+			return diag.Errorf("audit_log_storage_container_url must be set when audit_logging_enabled is true")
+		}
+
+		auditLoggingEnabled = "enabled"
+	}
+
 	hcsAMAParams := map[string]managedAppParamValue{
 		"clusterMode": {
 			Value: strings.ToUpper(d.Get("cluster_mode").(string)),
@@ -431,6 +446,12 @@ func resourceClusterCreate(ctx context.Context, d *schema.ResourceData, meta int
 		},
 		"sourceChannel": {
 			Value: meta.(*clients.Client).Config.SourceChannel,
+		},
+		"auditLoggingEnabled": {
+			Value: auditLoggingEnabled,
+		},
+		"auditLogStorageContainerURL": {
+			Value: auditLogBucketURL,
 		},
 	}
 

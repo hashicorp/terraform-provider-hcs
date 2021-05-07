@@ -1014,5 +1014,22 @@ func setClusterData(d *schema.ResourceData, managedApp managedapplications.Appli
 		return diag.FromErr(err)
 	}
 
+	auditLoggingEnabled := cluster.Properties.AuditLoggingEnabled == models.HashicorpCloudConsulamaAmaBooleanTRUE
+	err = d.Set("audit_logging_enabled", auditLoggingEnabled)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("audit_log_storage_container_url", cluster.Properties.AuditLogStorageContainerURL)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	managedIdentityName := helper.ParseResourceNameFromID(cluster.Properties.ManagedIdentity)
+	err = d.Set("managed_identity_name", managedIdentityName)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }

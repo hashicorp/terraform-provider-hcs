@@ -42,3 +42,12 @@ func Test_ParseResourceGroupNameFromID(t *testing.T) {
 		})
 	}
 }
+
+func Test_ParseResourceNameFromID(t *testing.T) {
+	id := "/subscriptions/111111/resourceGroups/some-resource-group/providers/Microsoft.ManagedIdentity/userAssignedIdentities/my-name"
+
+	name := ParseResourceNameFromID(id)
+
+	require.Equal(t, "my-name", name)
+
+}

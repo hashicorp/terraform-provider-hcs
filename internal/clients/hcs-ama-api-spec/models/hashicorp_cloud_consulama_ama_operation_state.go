@@ -8,9 +8,8 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
@@ -19,6 +18,7 @@ import (
 // The states are purposely coarse grained to make it easy to understand the operation
 // state machine: pending => running => done. No other state transitions are possible.
 // Success/failure can be determined based on the result oneof.
+//
 // swagger:model hashicorp.cloud.consulama.ama.Operation.State
 type HashicorpCloudConsulamaAmaOperationState string
 
@@ -48,7 +48,7 @@ func init() {
 }
 
 func (m HashicorpCloudConsulamaAmaOperationState) validateHashicorpCloudConsulamaAmaOperationStateEnum(path, location string, value HashicorpCloudConsulamaAmaOperationState) error {
-	if err := validate.Enum(path, location, value, hashicorpCloudConsulamaAmaOperationStateEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, hashicorpCloudConsulamaAmaOperationStateEnum, true); err != nil {
 		return err
 	}
 	return nil

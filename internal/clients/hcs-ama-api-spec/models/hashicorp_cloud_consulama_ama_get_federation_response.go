@@ -8,14 +8,14 @@ package models
 import (
 	"strconv"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaGetFederationResponse GetFederationResponse contains the primary cluster and all secondary
 // clusters.
+//
 // swagger:model hashicorp.cloud.consulama.ama.GetFederationResponse
 type HashicorpCloudConsulamaAmaGetFederationResponse struct {
 

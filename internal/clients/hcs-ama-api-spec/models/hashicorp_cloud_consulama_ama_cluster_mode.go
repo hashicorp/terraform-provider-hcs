@@ -8,9 +8,8 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
@@ -18,6 +17,7 @@ import (
 // Some modes will have different billing and options than others.
 // PRODUCTION is the default value for this property, that's why it's
 // set to be value 0 of the enum.
+//
 // swagger:model hashicorp.cloud.consulama.ama.ClusterMode
 type HashicorpCloudConsulamaAmaClusterMode string
 
@@ -44,7 +44,7 @@ func init() {
 }
 
 func (m HashicorpCloudConsulamaAmaClusterMode) validateHashicorpCloudConsulamaAmaClusterModeEnum(path, location string, value HashicorpCloudConsulamaAmaClusterMode) error {
-	if err := validate.Enum(path, location, value, hashicorpCloudConsulamaAmaClusterModeEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, hashicorpCloudConsulamaAmaClusterModeEnum, true); err != nil {
 		return err
 	}
 	return nil

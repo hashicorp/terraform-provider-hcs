@@ -6,14 +6,14 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaResourceNotificationRequestError Error represents an error that happened in Azure when
 // interacting with a managed app instance. It is optionally included in a
 // ResourceNotificationRequest.
+//
 // swagger:model hashicorp.cloud.consulama.ama.ResourceNotificationRequest.Error
 type HashicorpCloudConsulamaAmaResourceNotificationRequestError struct {
 

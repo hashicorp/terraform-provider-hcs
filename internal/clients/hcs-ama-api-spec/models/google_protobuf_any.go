@@ -6,9 +6,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
-	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
@@ -91,6 +89,7 @@ import (
 //       "@type": "type.googleapis.com/google.protobuf.Duration",
 //       "value": "1.212s"
 //     }
+//
 // swagger:model google.protobuf.Any
 type GoogleProtobufAny struct {
 
@@ -130,26 +129,6 @@ type GoogleProtobufAny struct {
 
 // Validate validates this google protobuf any
 func (m *GoogleProtobufAny) Validate(formats strfmt.Registry) error {
-	var res []error
-
-	if err := m.validateValue(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if len(res) > 0 {
-		return errors.CompositeValidationError(res...)
-	}
-	return nil
-}
-
-func (m *GoogleProtobufAny) validateValue(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Value) { // not required
-		return nil
-	}
-
-	// Format "byte" (base64 string) is already validated when unmarshalled
-
 	return nil
 }
 

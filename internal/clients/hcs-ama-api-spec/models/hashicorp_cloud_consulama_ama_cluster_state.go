@@ -8,9 +8,8 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-openapi/strfmt"
-
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/validate"
 )
 
@@ -22,6 +21,7 @@ import (
 // by our persistence layer. When the consul-ama service has to produce a cluster
 // state to respond to a request from Azure, it reads the state from the consul-service
 // and then translates the state value to one compatible with this enum.
+//
 // swagger:model hashicorp.cloud.consulama.ama.ClusterState
 type HashicorpCloudConsulamaAmaClusterState string
 
@@ -60,7 +60,7 @@ func init() {
 }
 
 func (m HashicorpCloudConsulamaAmaClusterState) validateHashicorpCloudConsulamaAmaClusterStateEnum(path, location string, value HashicorpCloudConsulamaAmaClusterState) error {
-	if err := validate.Enum(path, location, value, hashicorpCloudConsulamaAmaClusterStateEnum); err != nil {
+	if err := validate.EnumCase(path, location, value, hashicorpCloudConsulamaAmaClusterStateEnum, true); err != nil {
 		return err
 	}
 	return nil

@@ -6,14 +6,14 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	strfmt "github.com/go-openapi/strfmt"
-
+	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 )
 
 // HashicorpCloudConsulamaAmaGetFederationRequest GetFederationRequest gets a complete federation view for the sole
 // cluster found using the subscription ID and managed resource group. This can
 // target a primary or secondary clusters.
+//
 // swagger:model hashicorp.cloud.consulama.ama.GetFederationRequest
 type HashicorpCloudConsulamaAmaGetFederationRequest struct {
 

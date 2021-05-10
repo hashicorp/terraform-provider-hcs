@@ -1,5 +1,9 @@
 ## 0.3.0 (Unreleased)
 
+IMPROVEMENTS:
+* `hcs_cluster` resource: Added `audit_logging_enabled` and `audit_log_storage_container_url` to configure Consul audit logging to an Azure storage container. 
+* `hcs_cluster` resource: Added `managed_identity_name` to schema for easy setup of the role assignment on the storage container for writing Consul audit logs.
+
 BUG FIXES:
 * Pass `cluster_mode` as a property when creating the `hcs_cluster` resource.
 

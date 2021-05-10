@@ -676,6 +676,9 @@ func resourceClusterUpdate(ctx context.Context, d *schema.ResourceData, meta int
 // upgradeClusterVersion updates a cluster's Consul version to a valid upgrade version
 func upgradeCluster(ctx context.Context, meta interface{}, managedApp managedapplications.Application, update *models.HashicorpCloudConsulamaAmaClusterUpdate) diag.Diagnostics {
 	if update.ConsulVersion != "" {
+		// Add the 'v' prefix if missing (1.9.5 -> v1.9.5 for example)
+		update.ConsulVersion = consul.NormalizeVersion(update.ConsulVersion)
+
 		// Retrieve the valid upgrade versions
 		upgradeVersionsResponse, err := meta.(*clients.Client).CustomResourceProvider.ListUpgradeVersions(ctx, *managedApp.ManagedResourceGroupID)
 		if err != nil {
@@ -686,14 +689,12 @@ func upgradeCluster(ctx context.Context, meta interface{}, managedApp managedapp
 			)
 		}
 
-		newConsulVersion := consul.NormalizeVersion(update.ConsulVersion)
-
 		if upgradeVersionsResponse.Versions == nil {
 			return diag.Errorf("no upgrade versions of Consul are available for this cluster; you may already be on the latest Consul version supported by HCS")
 		}
 
-		if !consul.IsValidVersion(newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions)) {
-			return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", newConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions))
+		if !consul.IsValidVersion(update.ConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions)) {
+			return diag.Errorf("specified Consul version (%s) is unavailable; must be one of: %+v", update.ConsulVersion, consul.FromAMAVersions(upgradeVersionsResponse.Versions))
 		}
 	}
 

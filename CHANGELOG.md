@@ -1,4 +1,4 @@
-## 0.3.0 (Unreleased)
+## 0.3.0 (June 02, 2021)
 
 IMPROVEMENTS:
 * `hcs_cluster` resource: Added `audit_logging_enabled` and `audit_log_storage_container_url` to configure Consul audit logging to an Azure storage container. 

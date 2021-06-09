@@ -14,7 +14,7 @@ require (
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.2
 	github.com/google/uuid v1.1.2 // indirect
-	github.com/hashicorp/go-azure-helpers v0.14.0
+	github.com/hashicorp/go-azure-helpers v0.16.5
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/go-uuid v1.0.2

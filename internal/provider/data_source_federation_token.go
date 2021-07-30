@@ -65,22 +65,27 @@ func dataSourceFederationTokenRead(ctx context.Context, d *schema.ResourceData, 
 		)
 	}
 
-	federationTokenResponse, err := meta.(*clients.Client).CustomResourceProvider.CreateFederationToken(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
-	if err != nil {
-		return diag.Errorf("unable to fetch a federation token for primary cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
-			managedAppName,
-			resourceGroupName,
-			meta.(*clients.Client).CorrelationRequestID,
-			err,
-		)
-	}
+	// An error here denotes that the cluster is not part of a federation
+	federationResponse, err := meta.(*clients.Client).CustomResourceProvider.GetFederation(ctx, *managedApp.ManagedResourceGroupID, d.Get("resource_group_name").(string))
+	// Ensure the cluster is the primary in the federation
+	if err == nil && isClusterPrimaryInFederation(*managedApp.Name, resourceGroupName, federationResponse) {
+		federationTokenResponse, err := meta.(*clients.Client).CustomResourceProvider.CreateFederationToken(ctx, *managedApp.ManagedResourceGroupID, resourceGroupName)
+		if err != nil {
+			return diag.Errorf("unable to fetch a federation token for primary cluster (Managed Application %q) (Resource Group %q) (Correlation ID %q): %v",
+				managedAppName,
+				resourceGroupName,
+				meta.(*clients.Client).CorrelationRequestID,
+				err,
+			)
+		}
 
-	err = d.Set("token", federationTokenResponse.FederationToken)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+		err = d.Set("token", federationTokenResponse.FederationToken)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-	d.SetId(*managedApp.ID + "/federation-token")
+		d.SetId(*managedApp.ID + "/federation-token")
+	}
 
 	return nil
 }

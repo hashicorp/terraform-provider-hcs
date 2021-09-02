@@ -9,6 +9,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2020-05-01/network"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-07-01/managedapplications"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -110,9 +111,17 @@ func resourceCluster() *schema.Resource {
 				Optional:         true,
 				ValidateDiagFunc: validateSemVer,
 				DiffSuppressFunc: func(_, old, new string, _ *schema.ResourceData) bool {
-					// Suppress diff is normalized versions match OR min_consul_version is removed from the resource
-					// since min_consul_version is required in order to upgrade the cluster to a new Consul version.
-					return consul.NormalizeVersion(old) == consul.NormalizeVersion(new) || new == ""
+					// Suppress diff for non specified value
+					if new == "" || old == "" {
+						return true
+					}
+
+					actualConsulVersion := version.Must(version.NewVersion(old))
+					currentTFVersion := version.Must(version.NewVersion(new))
+					log.Printf("[DEBUG] Actual Consul Version %v", old)
+					log.Printf("[DEBUG] Current TF Version %v", new)
+					// suppres diff if the specified min_consul_version is <= to the actual consul version
+					return currentTFVersion.LessThanOrEqual(actualConsulVersion)
 				},
 			},
 			"consul_datacenter": {
@@ -937,6 +946,11 @@ func setClusterData(d *schema.ResourceData, managedApp managedapplications.Appli
 	}
 
 	err = d.Set("consul_version", cluster.Properties.ConsulCurrentVersion)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	err = d.Set("min_consul_version", cluster.Properties.ConsulCurrentVersion)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -1,3 +1,8 @@
+## 0.4.0 (Unreleased)
+
+IMPROVEMENTS:
+* `hcs_cluster` resource: Modified diff suppression of the `consul_version` field to ignore the field when the specified version is less than or equal to the clusters actual version.
+
 ## 0.3.0 (June 02, 2021)
 
 IMPROVEMENTS:

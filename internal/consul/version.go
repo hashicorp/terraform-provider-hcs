@@ -7,13 +7,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
-
+	cc_models "github.com/hashicorp/hcp-sdk-go/clients/cloud-consul-service/preview/2021-02-04/models"
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
+	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
 
-// HCPConsulAPIVersion is the version of the HCP Consul API we are using to retrieve versions.
-const HCPConsulAPIVersion = "2020-08-26"
+// hcpConsulAPIVersion is the version of the HCP Consul API we are using to retrieve versions.
+const hcpConsulAPIVersion = "2021-02-04"
+
+// platform_type is used by the request for versions to determine the subset of versions for HCS
+var platform_type = string(cc_models.HashicorpCloudConsul20210204PlatformTypeHCS)
 
 // Version represents a Consul version and the status of that version in regards to availability on HCP.
 type Version struct {
@@ -35,7 +38,8 @@ func GetAvailableHCPConsulVersions(ctx context.Context, hcpApiDomain string) ([]
 	apiDomain := strings.TrimPrefix(hcpApiDomain, "https://")
 	apiDomain = strings.TrimSuffix(hcpApiDomain, "/")
 
-	url := fmt.Sprintf("https://%s/consul/%s/versions", apiDomain, HCPConsulAPIVersion)
+	url := fmt.Sprintf("https://%s/consul/%s/versions?platform_type=%s", apiDomain, hcpConsulAPIVersion, platform_type)
+
 	client := http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,

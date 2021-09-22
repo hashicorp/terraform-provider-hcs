@@ -1,3 +1,8 @@
+## 0.5.0 (September 22, 2021)
+
+IMPROVEMENTS:
+* Add PlatformType to ListVersions call for `hcs_public_versions` datasource.
+
 ## 0.4.0 (September 08, 2021)
 
 IMPROVEMENTS:

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	cc_models "github.com/hashicorp/hcp-sdk-go/clients/cloud-consul-service/preview/2021-02-04/models"
+	cs "github.com/hashicorp/hcp-sdk-go/clients/cloud-consul-service/preview/2021-02-04/models"
 	"github.com/hashicorp/terraform-provider-hcs/internal/clients/hcs-ama-api-spec/models"
 	"github.com/hashicorp/terraform-provider-hcs/internal/helper"
 )
@@ -16,7 +16,7 @@ import (
 const hcpConsulAPIVersion = "2021-02-04"
 
 // platform_type is used by the request for versions to determine the subset of versions for HCS
-var platform_type = string(cc_models.HashicorpCloudConsul20210204PlatformTypeHCS)
+var platform_type = string(cs.HashicorpCloudConsul20210204PlatformTypeHCS)
 
 // Version represents a Consul version and the status of that version in regards to availability on HCP.
 type Version struct {

@@ -1,3 +1,8 @@
+## 0.5.1 (Unreleased)
+
+BUG FIXES:
+* Do not suppress `min_consul_version` on creation.
+
 ## 0.5.0 (September 22, 2021)
 
 IMPROVEMENTS:

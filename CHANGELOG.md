@@ -1,4 +1,4 @@
-## 0.5.1 (Unreleased)
+## 0.5.1 (March 01, 2022)
 
 BUG FIXES:
 * Do not suppress `min_consul_version` on creation.

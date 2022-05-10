@@ -49,10 +49,9 @@ publishers:
     env:
       - HC_RELEASES_HOST={{ .Env.HC_RELEASES_HOST }}
       - HC_RELEASES_KEY={{ .Env.HC_RELEASES_KEY }}
-    # Below section awaiting future releases update, commented out for now.
-    # extra_files:
-    #   - glob: 'terraform-registry-manifest.json'
-    #     name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+     extra_files:
+       - glob: 'terraform-registry-manifest.json'
+         name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
     name: upload
     signature: true
 release:

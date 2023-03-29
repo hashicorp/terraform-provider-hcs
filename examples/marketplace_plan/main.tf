@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 data "hcs_plan_defaults" "example" {}
 
 resource "azurerm_marketplace_agreement" "example" {

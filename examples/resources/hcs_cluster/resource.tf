@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 data "hcs_consul_versions" "default" {}
 
 data "hcs_plan_defaults" "default" {}

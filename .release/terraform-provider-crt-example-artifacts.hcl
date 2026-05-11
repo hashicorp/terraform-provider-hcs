@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2020, 2026
+
 schema = 1
 artifacts {
   # This should match the `matrix` in .github/workflows/build.yml

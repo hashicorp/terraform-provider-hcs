@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2020, 2026
+
 // Reference: https://github.com/hashicorp/crt-core-helloworld/blob/main/.release/ci.hcl (private repository)
 //
 // One way to validate this file, with a local build of the orchestrator (an internal repo):

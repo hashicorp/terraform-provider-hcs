@@ -1,3 +1,5 @@
+# Copyright IBM Corp. 2020, 2026
+
 # Reference: https://github.com/hashicorp/security-scanner/blob/main/CONFIG.md#binary (private repository)
 
 binary {

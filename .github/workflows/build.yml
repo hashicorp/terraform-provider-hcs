@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Set variables
         id: set-product-version
-        uses: hashicorp/actions-set-product-version@2ec1b51402b3070bccf7ca95306afbd039e574ff
+        uses: hashicorp/actions-set-product-version@d9be602dfa87e201c79a3937c038f19391c9a430
 
   # Creates metadata.json file containing build metadata for consumption by CRT workflows.
   #

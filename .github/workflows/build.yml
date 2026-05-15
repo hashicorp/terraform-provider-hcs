@@ -145,7 +145,7 @@ jobs:
     name: Go ${{ needs.get-go-version.outputs.go-version }} ${{ matrix.goos }} ${{ matrix.goarch }} build
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: hashicorp/actions-go-build@d2504eb37c72b06b618352881e3f1d7b563517c5
+      - uses: hashicorp/actions-go-build@dd7ca5a30c402c933e1fe61e0ff7165e5c4ee9e4
         env:
           CGO_ENABLED: 0
           BASE_VERSION: ${{ needs.set-product-version.outputs.product-base-version }}

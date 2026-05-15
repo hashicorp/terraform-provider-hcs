@@ -6,7 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go v51.2.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.18
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/go-openapi/errors v0.20.0
+	github.com/go-openapi/errors v0.22.7
 	github.com/go-openapi/strfmt v0.20.1
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.2
